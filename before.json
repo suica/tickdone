@@ -1,0 +1,22 @@
+{
+  "load.firstRow": 755.7,
+  "load.longTasks": 1037,
+  "load.rowsInDom": 1118,
+  "switchView.max": 720,
+  "switchView.mean": 365.3,
+  "switchView.longTasks": 1681,
+  "scroll.fps": 53.8,
+  "scroll.p95": 34.2,
+  "scroll.over50ms": 0,
+  "quickAdd.keyMax": 80,
+  "quickAdd.keyMean": 48.9,
+  "complete.first": 432,
+  "complete.click": 128,
+  "complete.longTasks": 460,
+  "detail.max": 120,
+  "search.keyMax": 1888,
+  "search.keyMean": 500,
+  "search.longTasks": 2685,
+  "calendar.open": 152,
+  "stats.open": 168
+}

@@ -9,8 +9,9 @@ import { TaskListPane } from './components/TaskListPane'
 import { closeDetail, TaskDetail } from './components/TaskDetail'
 import { t as tr, useT, type MessageKey } from './i18n'
 import { GITHUB_URL } from './links'
-import { clearSelection, getData, getSelection, getUI, setUI, toast, undoToast, useData, useUI, type Module } from './store'
+import { clearSelection, getData, getSelection, getUI, setUI, toast, useData, useUI, type Module } from './store'
 import { escapeSelection } from './components/batchActions'
+import { undoWithMotion } from './components/taskMotion'
 import { isBatch } from './selection'
 import { taskIdFromHash, viewOfTask } from './taskLink'
 import { usePhone } from './viewport'
@@ -92,7 +93,7 @@ export default function App() {
       const mod = e.metaKey || e.ctrlKey
       if (mod && e.key.toLowerCase() === 'z' && !typing && getToastUndo()) {
         e.preventDefault()
-        undoToast()
+        undoWithMotion()
         return
       }
       if (typing) return
@@ -177,7 +178,7 @@ export default function App() {
       {ui.toast && (
         <div className="toast" key={ui.toast.id} role="status">
           <span>{ui.toast.text}</span>
-          {(ui.toast.undo || ui.toast.undoFn) && <button onClick={undoToast}>{t('common.undo')}</button>}
+          {(ui.toast.undo || ui.toast.undoFn) && <button onClick={undoWithMotion}>{t('common.undo')}</button>}
         </div>
       )}
     </div>

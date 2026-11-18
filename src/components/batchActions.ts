@@ -6,7 +6,7 @@ import { clearSelection, getData, getSelection, getUI, playDing, runBatch, setSe
 import { after, clickSelect, enterMode, inOrder, selectedIds, type ClickMods } from '../selection'
 import type { Priority, Task } from '../types'
 import { PRIORITY_LEVEL } from './taskDnd'
-import { toggleWithMotion } from './taskMotion'
+import { batchWithMotion, toggleWithMotion } from './taskMotion'
 
 // What the batch panel, the phone action bar, the keyboard and multi-row drags do to the selected tasks.
 // Every change is one setData call and one toast, so a single undo puts all the tasks back.
@@ -103,10 +103,11 @@ export function completeSelected(ids: string[]) {
   if (ts.length === 1 && !getUI().selectMode && getUI().selectedIds.length < 2) return toggleWithMotion(ts[0].id)
   const order = visibleOrder()
   if (ts.every((x) => x.status !== 0)) {
-    runBatch(t('tasks.batch.reopened', count(ids)), (x) => reopenMany(x, ids))
+    batchWithMotion(ids, 'uncheck', () => runBatch(t('tasks.batch.reopened', count(ids)), (x) => reopenMany(x, ids)))
     return
   }
-  if (runBatch(t('tasks.batch.completed', { count: ts.filter((x) => x.status === 0).length }), (x) => completeMany(x, ids))) {
+  const open = ts.filter((x) => x.status === 0).map((x) => x.id)
+  if (batchWithMotion(open, 'check', () => runBatch(t('tasks.batch.completed', { count: open.length }), (x) => completeMany(x, ids)))) {
     playDing()
     if (!d.settings.showCompleted) leave(ids, order)
   }

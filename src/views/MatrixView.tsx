@@ -15,6 +15,7 @@ import { beginDrag, useTouchGuard } from './calDnd'
 import { dur, easing, flyFrom, glide, measure } from './calMotion'
 import { isTyping } from './calUtil'
 import './matrix.css'
+import { useLinger, withLinger } from '../components/taskMotion'
 
 type Range = 'today' | 'week' | 'all'
 type Sort = 'date' | 'custom'
@@ -99,7 +100,10 @@ interface DragState {
 }
 
 export default function MatrixView() {
-  const data = useData()
+  const raw = useData()
+  const linger = useLinger()
+  // tasks whose completion is still animating keep their place for a moment
+  const data = useMemo(() => withLinger(raw, linger), [raw, linger])
   const ui = useUI()
   const t = useT()
   const phone = usePhone()
@@ -291,7 +295,7 @@ export default function MatrixView() {
                     <Icon name="more" size={16} />
                   </button>
                 </header>
-                <div className="matrix-body">
+                <div className="matrix-body" data-motion-host>
                   {tasks.length === 0 ? (
                     <div className="matrix-empty">{t('calendar.noTasks')}</div>
                   ) : (
@@ -300,6 +304,7 @@ export default function MatrixView() {
                         key={t.id}
                         className={'matrix-item' + (drag?.id === t.id ? ' cal-src' : '')}
                         data-id={t.id}
+                        data-motion={'t:' + t.id}
                         onPointerDownCapture={(e) => {
                           if (e.pointerType === 'mouse' && isTyping(e.target)) return
                           e.stopPropagation()

@@ -527,6 +527,7 @@
   text-overflow: ellipsis;
   user-select: text;
   -webkit-user-select: text;
+  transition: color var(--dur) var(--ease-out);
 }
 span.task-title {
   display: block;
@@ -574,7 +575,7 @@ span.task-title.empty {
   transform-origin: left center;
 }
 .task-row.is-checking .task-strike > span::after {
-  animation: td-strike var(--dur) var(--ease-out) 60ms both;
+  animation: td-strike var(--dur-slow) var(--ease-in-out) 40ms both;
 }
 .task-row.is-unchecking .task-strike > span::after {
   animation: td-strike var(--dur) var(--ease-in-out) reverse both;
@@ -650,9 +651,16 @@ span.task-title.empty {
   border-width: 1.5px;
 }
 
-/* checkbox: completing fills it with the priority colour, strokes the tick and bounces; un-completing reverses it */
+/* checkbox: it presses in under the pointer; completing fills it with the priority colour, strokes the tick, pops
+   and sends out a small burst; un-completing reverses it. Only transform and opacity move. */
 .checkbox.cb {
   position: relative;
+  transition:
+    background 0.15s,
+    transform var(--dur-fast) var(--ease-out);
+}
+.checkbox.cb:active {
+  transform: scale(0.82);
 }
 .cb .cb-tick {
   position: relative;
@@ -667,30 +675,39 @@ span.task-title.empty {
 .checkbox.cb-checking {
   border-color: var(--cb, var(--p-none));
   background: transparent;
-  animation: td-cb-pop var(--dur-slow) var(--ease-spring);
+  animation: td-cb-pop var(--dur-slow) var(--ease-out);
 }
 .cb-checking .cb-fill {
-  animation: td-cb-fill var(--dur-fast) var(--ease-out) both;
+  animation: td-cb-fill var(--dur) var(--ease-spring) both;
 }
 .cb-checking .cb-tick path {
   stroke-dasharray: 1;
-  animation: td-tick var(--dur) var(--ease-out) 60ms both;
+  animation: td-tick var(--dur) var(--ease-out) 50ms both;
 }
 .checkbox.cb-unchecking {
   border-color: var(--cb, var(--p-none));
   background: transparent;
+  animation: td-cb-unpop var(--dur) var(--ease-out);
 }
 .cb-unchecking .cb-fill {
-  background: var(--p-none);
   animation: td-cb-fill var(--dur) var(--ease-in-out) reverse both;
 }
 .cb-unchecking .cb-tick path {
   stroke-dasharray: 1;
   animation: td-tick var(--dur-fast) var(--ease-in-out) reverse both;
 }
+/* a row that just moved into the completed group: its priority colour fades out over the grey box */
+.cb-fill.cb-landing {
+  animation: td-fade-out var(--dur-slow) var(--ease-in-out) both;
+}
+@keyframes td-fade-out {
+  to {
+    opacity: 0;
+  }
+}
 @keyframes td-cb-fill {
   from {
-    transform: scale(0.3);
+    transform: scale(0.2);
     opacity: 0;
   }
   to {
@@ -707,12 +724,128 @@ span.task-title.empty {
   }
 }
 @keyframes td-cb-pop {
-  from {
-    transform: scale(0.8);
+  0% {
+    transform: scale(0.82);
   }
-  to {
+  45% {
+    transform: scale(1.2);
+  }
+  75% {
+    transform: scale(0.96);
+  }
+  100% {
     transform: scale(1);
   }
+}
+.checkbox.cb-checking.cb-light {
+  animation-name: td-cb-pop-light;
+}
+@keyframes td-cb-pop-light {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes td-cb-unpop {
+  50% {
+    transform: scale(0.86);
+  }
+}
+/* the burst: a ring that ripples out and six sparks */
+.cb-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.cb-burst::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--cb, var(--p-none));
+  opacity: 0;
+  animation: td-ring var(--dur-slow) var(--ease-out) 40ms;
+}
+.cb-burst i {
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--cb, var(--p-none));
+  opacity: 0;
+  animation: td-spark var(--dur-slow) var(--ease-out) 60ms;
+}
+.cb-burst i:nth-child(even) {
+  width: 3px;
+  height: 3px;
+  left: -1.5px;
+  top: -1.5px;
+}
+@keyframes td-ring {
+  from {
+    transform: scale(0.7);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+@keyframes td-spark {
+  from {
+    transform: rotate(var(--a)) translateY(-10px) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: rotate(var(--a)) translateY(-19px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* rows moving to another place (FLIP): they pass over the rows in between */
+.motion-unclip {
+  overflow: visible !important;
+}
+.motion-lift-host {
+  position: relative;
+  z-index: 2;
+}
+/* an opaque backing (also under the gutter the row hangs into), so a tinted row does not show the text it passes */
+.motion-lift {
+  position: relative;
+  z-index: 2;
+  border-radius: 6px;
+  background: var(--bg);
+  box-shadow:
+    calc(-1 * var(--gutter, 18px)) 0 0 var(--bg),
+    0 3px 12px rgba(0, 0, 0, 0.1);
+}
+[data-motion-host] {
+  position: relative;
+}
+.motion-ghost,
+.motion-ghost * {
+  animation: none !important;
+}
+.motion-ghost *::before,
+.motion-ghost *::after {
+  animation: none !important;
+}
+.motion-ghost .cb-burst {
+  display: none;
 }
 
 /* kanban */
@@ -1121,6 +1254,20 @@ body.dnd-active * {
     /* rows sliding sideways, their list bars and swipe buttons stay inside the rounded card */
     position: relative;
     overflow: clip;
+  }
+  /* the card is drawn by a layer of its own, so it can grow and shrink with a transform while rows move */
+  .list-content > .group {
+    background: none;
+    isolation: isolate;
+  }
+  .list-content > .group::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--bg-card);
+    transform-origin: top;
   }
   .list-content > .trash-hint {
     padding: 14px 16px;

@@ -82,7 +82,6 @@ function NoteField({ value, onChange, placeholder, readOnly }: { value: string; 
             })
           }}
         />
-        {editing && <div className="detail-md-hint">{t('shell.detail.markdownHint')}</div>}
       </div>
     )
   }

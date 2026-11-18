@@ -515,12 +515,6 @@ body.col-resizing * {
     opacity: 0.6;
   }
 }
-.detail-md-hint {
-  font-size: 11px;
-  color: var(--text-3);
-  margin-top: 4px;
-  overflow-wrap: anywhere;
-}
 .md > :first-child {
   margin-top: 0;
 }

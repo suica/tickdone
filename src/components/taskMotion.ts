@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
-import { getData, setData, setUI, toggleTask } from '../store'
+import { getData, getUI, setData, setUI, toggleTask, undoToast } from '../store'
 import type { AppData, Task } from '../types'
 
 // Motion helpers for the task list: tokens, FLIP, row collapse/expand, the completion hold,
@@ -143,7 +143,7 @@ export function useExitAnimations(contextKey: string) {
         if (!g.parent.isConnected) continue
         const copy = g.el.cloneNode(true) as HTMLElement
         for (const x of [copy, ...copy.querySelectorAll<HTMLElement>('*')]) {
-          for (const attr of ['data-exit', 'data-flip', 'data-dnd-row', 'data-dnd-card', 'data-linger-node', 'data-task-id', 'id']) x.removeAttribute(attr)
+          for (const attr of ['data-exit', 'data-motion', 'data-flip', 'data-dnd-row', 'data-dnd-card', 'data-task-id', 'id']) x.removeAttribute(attr)
         }
         copy.setAttribute('aria-hidden', 'true')
         copy.setAttribute('inert', '')
@@ -160,11 +160,161 @@ export function useExitAnimations(contextKey: string) {
   }, [])
 }
 
+// ---------------- moving rows with FLIP ----------------
+// Elements marked `data-motion="<key>"` (task rows `t:<id>`, groups `g:<key>`, group headers `h:<key>`) are measured before a
+// change and slide from where they were to where they are after it. Elements that appear fade in; elements that
+// disappear leave a copy behind that slides sideways and fades while the rows below move up into its place.
+// Only transform and opacity are animated; all reads happen before all writes.
+
+type Seen = { el: HTMLElement; rect: DOMRect; host: HTMLElement | null }
+const running = new WeakMap<HTMLElement, Animation>()
+const motionKey = (el: HTMLElement) => el.getAttribute('data-motion')!
+const visible = (r: DOMRect) => r.bottom > 0 && r.top < innerHeight && (r.width > 0 || r.height > 0)
+
+function snapshot(): Map<string, Seen> {
+  const m = new Map<string, Seen>()
+  document.querySelectorAll<HTMLElement>('[data-motion]').forEach((el) => {
+    if (el.closest('[inert],[data-collapsed]')) return
+    m.set(motionKey(el), { el, rect: el.getBoundingClientRect(), host: el.closest<HTMLElement>('[data-motion-host]') })
+  })
+  return m
+}
+
+/** Lets rows move outside the clipping box of their group (or card) while they slide; groups clip so they can fold. */
+function unclip(els: HTMLElement[], ms: number) {
+  const boxes = new Set<HTMLElement>()
+  for (const el of els)
+    for (let p = el.parentElement; p && !p.hasAttribute('data-motion-host'); p = p.parentElement)
+      if (p.classList.contains('group-inner') || p.classList.contains('task-children-inner') || p.classList.contains('group')) boxes.add(p)
+  boxes.forEach((b) => b.classList.add('motion-unclip'))
+  window.setTimeout(() => boxes.forEach((b) => b.classList.remove('motion-unclip')), ms + 50)
+}
+
+/** A row that changes groups travels above the others (and its group above the other groups). */
+function lift(el: HTMLElement, a: Animation) {
+  const sec = el.parentElement?.closest<HTMLElement>('.group')
+  el.classList.add('motion-lift')
+  sec?.classList.add('motion-lift-host')
+  settle(a).then(() => {
+    el.classList.remove('motion-lift')
+    sec?.classList.remove('motion-lift-host')
+  })
+}
+
+/** A group card that changed height: its background layer (::before) shrinks or grows from the old height. */
+function resizeCard(el: HTMLElement, from: DOMRect, to: DOMRect, ms: number, ease: string, delay: number) {
+  if (!to.height || Math.abs(from.height - to.height) < 0.5) return
+  el.animate([{ transform: `scaleY(${from.height / to.height})` }, { transform: 'none' }], { duration: ms, easing: ease, delay, fill: 'backwards', pseudoElement: '::before' })
+  el.classList.add('motion-unclip')
+  window.setTimeout(() => el.classList.remove('motion-unclip'), ms + delay + 50)
+}
+
+/** A copy of a removed element, left where it was, sliding out sideways. */
+function ghost(s: Seen, ms: number, ease: string) {
+  const host = s.host
+  if (!host?.isConnected || !visible(s.rect)) return
+  const copy = s.el.cloneNode(true) as HTMLElement
+  for (const x of [copy, ...copy.querySelectorAll<HTMLElement>('*')]) {
+    for (const attr of ['data-motion', 'data-exit', 'data-flip', 'data-dnd-row', 'data-dnd-card', 'data-task-id', 'id']) x.removeAttribute(attr)
+  }
+  copy.classList.add('motion-ghost')
+  copy.setAttribute('aria-hidden', 'true')
+  copy.setAttribute('inert', '')
+  const h = host.getBoundingClientRect()
+  Object.assign(copy.style, {
+    position: 'absolute',
+    left: s.rect.left - h.left - host.clientLeft + host.scrollLeft + 'px',
+    top: s.rect.top - h.top - host.clientTop + host.scrollTop + 'px',
+    width: s.rect.width + 'px',
+    height: s.rect.height + 'px',
+    margin: '0',
+    pointerEvents: 'none',
+  })
+  host.appendChild(copy)
+  const a = copy.animate(
+    [
+      { transform: 'translateX(0)', opacity: 1 },
+      { transform: 'translateX(28px)', opacity: 0 },
+    ],
+    { duration: ms * 0.6, easing: ease, fill: 'forwards' },
+  )
+  settle(a).then(() => copy.remove())
+}
+
+/**
+ * Runs `change` (which updates React state; it is flushed at once) and animates the rows from where they were to
+ * where they end up. With reduced motion it just runs the change.
+ */
+export function flipChange(change: () => void) {
+  const ms = dur('--dur-slow')
+  if (!ms) return change()
+  const before = snapshot()
+  quietExits(ms)
+  flushSync(change)
+  const ease = easing('--ease-out')
+  // write: drop the transforms of moves still running, so the new layout can be read without them
+  const now = [...document.querySelectorAll<HTMLElement>('[data-motion]')].filter((el) => !el.closest('[inert],[data-collapsed]'))
+  for (const el of now) running.get(el)?.cancel()
+  // read
+  const after = now.map((el) => ({ el, key: motionKey(el), rect: el.getBoundingClientRect() }))
+  const keys = new Set(after.map((x) => x.key))
+  // when a row slides out, the rows below wait a beat so the two do not cross while both are clear
+  const delay = [...before.keys()].some((k) => k.startsWith('t:') && !keys.has(k)) ? ms * 0.15 : 0
+  // write
+  const shift = new Map<HTMLElement, [number, number] | 'new'>()
+  const moved: HTMLElement[] = []
+  for (const { el, key, rect } of after) {
+    const parent = el.parentElement?.closest<HTMLElement>('[data-motion]')
+    const ps = parent ? shift.get(parent) : undefined
+    const b = before.get(key)
+    if (!b && key.startsWith('g:')) {
+      // a new group: its card grows in; its header and rows come in on their own
+      shift.set(el, [0, 0])
+      if (visible(rect)) el.animate([{ transform: 'scaleY(0.5)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: ms, easing: ease, fill: 'backwards', pseudoElement: '::before' })
+      continue
+    }
+    if (!b) {
+      shift.set(el, 'new')
+      if (ps === 'new' || !visible(rect)) continue // it comes in with its parent
+      // rows come in from the side, headers drop in
+      const side = key.startsWith('t:')
+      const a = el.animate([{ transform: side ? 'translateX(28px)' : 'translateY(-6px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: ms, easing: ease, delay: side ? ms * 0.25 : 0, fill: 'backwards' })
+      running.set(el, a)
+      moved.push(el)
+      continue
+    }
+    const base = ps && ps !== 'new' ? ps : [0, 0]
+    const dx = b.rect.left - rect.left - base[0]
+    const dy = b.rect.top - rect.top - base[1]
+    shift.set(el, [dx + base[0], dy + base[1]])
+    if (key.startsWith('g:') && (visible(rect) || visible(b.rect))) resizeCard(el, b.rect, rect, ms, ease, delay)
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) continue
+    if (!visible(rect) && !visible(b.rect)) continue
+    const a = el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: ms, easing: ease, delay, fill: 'backwards' })
+    running.set(el, a)
+    moved.push(el)
+    if (b.el !== el && key.startsWith('t:')) lift(el, a)
+  }
+  unclip(moved, ms)
+  // rows that are gone leave a copy that slides out
+  for (const [key, s] of before) {
+    if (keys.has(key) || s.el.isConnected) continue
+    const parent = s.el.parentElement?.closest('[data-motion]')
+    if (parent && !parent.isConnected && parent !== s.el) {
+      // inside a removed element that is copied as a whole
+      const pk = (parent as HTMLElement).getAttribute('data-motion')
+      if (pk && before.has(pk) && !keys.has(pk)) continue
+    }
+    ghost(s, ms, ease)
+  }
+}
+
 // ---------------- completing a task ----------------
 // The data changes at once (toast, sound, undo all work immediately), but the list keeps showing the task where it
-// was for a moment: the checkbox fills and ticks, the title gets struck through, then the row collapses and the task
-// shows up in its new place.
-export type Linger = { snapshot: Task; phase: 'check' | 'uncheck'; before: AppData }
+// was for a moment: the checkbox fills with the priority colour, the tick strokes in, a small burst goes off and a
+// line is drawn through the title. Then the row moves (FLIP) to its new place, or slides out when completed tasks
+// are hidden. Un-completing (a second click, or undo) plays it backwards.
+export type Linger = { snapshot: Task; phase: 'check' | 'uncheck'; before: AppData; light?: boolean }
 let lingering: ReadonlyMap<string, Linger> = new Map()
 const lingerSubs = new Set<() => void>()
 const timers = new Map<string, number>()
@@ -178,13 +328,44 @@ const lingerSubscribe = (f: () => void) => {
 }
 export const useLinger = () => useSyncExternalStore(lingerSubscribe, () => lingering, () => lingering)
 
-/** The data as the task list should draw it: tasks still animating their completion keep their old state. */
+/** The data as the task lists should draw it: tasks still animating their completion keep their old state. */
 export function withLinger(d: AppData, l: ReadonlyMap<string, Linger>): AppData {
   if (!l.size) return d
   return { ...d, tasks: d.tasks.map((t) => l.get(t.id)?.snapshot ?? t) }
 }
 
-const HOLD = { check: 300, uncheck: 220 }
+/** How long a row stays in place so the tick can be seen, in ms (the move after it takes --dur-slow). */
+export const HOLD = { check: 400, uncheck: 260, light: 300 }
+
+// Rows that just landed in the completed group: their checkbox fades from the priority colour to grey.
+const landed = new Map<string, number>()
+export const justLanded = (id: string) => (landed.get(id) ?? 0) > performance.now()
+
+function linger(entries: [string, Linger][], hold: number) {
+  const m = new Map(lingering)
+  for (const [id, e] of entries) {
+    clearTimeout(timers.get(id))
+    m.set(id, e)
+  }
+  setLingering(m)
+  const ids = entries.map(([id]) => id)
+  const timer = window.setTimeout(() => settleLinger(ids), hold)
+  for (const id of ids) timers.set(id, timer)
+}
+
+/** Ends the hold: the rows move to where the data puts them. */
+function settleLinger(ids: string[]) {
+  const live = ids.filter((id) => lingering.has(id) && timers.has(id))
+  if (!live.length) return
+  const m = new Map(lingering)
+  const until = performance.now() + 1000
+  for (const id of live) {
+    timers.delete(id)
+    if (m.get(id)?.phase === 'check') landed.set(id, until)
+    m.delete(id)
+  }
+  flipChange(() => setLingering(m))
+}
 
 /** Toggle a task's completion with the check / uncheck animation. */
 export function toggleWithMotion(id: string) {
@@ -205,38 +386,55 @@ export function toggleWithMotion(id: string) {
   if (!dur()) return toggleTask(id)
   const before = getData()
   const phase = t.status === 0 ? 'check' : 'uncheck'
+  linger([[id, { snapshot: t, phase, before }]], HOLD[phase])
   toggleTask(id)
-  setLingering(new Map(lingering).set(id, { snapshot: t, phase, before }))
-  timers.set(
-    id,
-    window.setTimeout(() => void finishLinger(id), HOLD[phase]),
-  )
 }
 
-async function finishLinger(id: string) {
-  timers.delete(id)
-  const entry = lingering.get(id)
-  if (!entry) return
-  const now = getData().tasks.find((x) => x.id === id)
-  // Undone from the toast in the meantime: just stop animating.
-  const undone = !now || (now.status === entry.snapshot.status && now.dueDate === entry.snapshot.dueDate)
-  const anims: Animation[] = []
-  if (!undone) {
-    for (const el of document.querySelectorAll<HTMLElement>(`[data-linger-node="${CSS.escape(id)}"]`)) {
-      // the last task of a group takes its group header with it
-      const top = el.parentElement?.classList.contains('group-inner')
-      const sec = top ? el.closest<HTMLElement>('[data-group]') : null
-      const alone = !!sec && !sec.hasAttribute('data-keep') && sec.querySelectorAll(':scope .group-inner > .task-node').length === 1
-      const a = collapseEl(alone && sec ? sec : el)
-      if (a) anims.push(a)
+/**
+ * Completes or reopens several tasks at once (`apply` changes the data and returns whether anything changed):
+ * the same feel as one checkbox, a little lighter (no burst), then the rows leave together.
+ */
+export function batchWithMotion(ids: string[], phase: Linger['phase'], apply: () => boolean): boolean {
+  const d = getData()
+  const ts = ids.map((id) => lingering.get(id)?.snapshot ?? d.tasks.find((x) => x.id === id)).filter((x): x is Task => !!x && !x.deleted)
+  if (!dur() || !ts.length || ts.length > 100) return apply()
+  linger(ts.map((t) => [t.id, { snapshot: t, phase, before: d, light: true }]), HOLD.light)
+  const ok = apply()
+  if (!ok) {
+    const m = new Map(lingering)
+    for (const t of ts) {
+      clearTimeout(timers.get(t.id))
+      timers.delete(t.id)
+      m.delete(t.id)
     }
-    await Promise.all(anims.map(settle))
+    setLingering(m)
   }
-  if (!lingering.has(id)) return
-  quietExits(120)
-  const m = new Map(lingering)
-  m.delete(id)
-  flushSync(() => setLingering(m))
-  anims.forEach((a) => a.cancel())
-  if (!undone) document.querySelectorAll<HTMLElement>(`[data-linger-node="${CSS.escape(id)}"]`).forEach((el) => expandEl(el))
+  return ok
+}
+
+/**
+ * Undo from the toast. Tasks it takes back from done to open play the uncheck animation where they are, then move
+ * back to their place; rows that come back from hidden slide in.
+ */
+export function undoWithMotion() {
+  const snap = getUI().toast?.undo
+  const cur = getData()
+  if (!snap || !dur()) return undoToast()
+  const reopen = snap.tasks.filter((t) => {
+    const c = cur.tasks.find((x) => x.id === t.id)
+    return t.status === 0 && !t.deleted && c && c.status !== 0
+  })
+  if (!reopen.length) return undoToast()
+  const shown = reopen.filter((t) => document.querySelector(`[data-motion="t:${CSS.escape(t.id)}"]`))
+  const light = reopen.length > 1
+  const entries: [string, Linger][] = shown.map((t) => {
+    const was = lingering.get(t.id)?.snapshot ?? cur.tasks.find((x) => x.id === t.id)!
+    return [t.id, { snapshot: was, phase: 'uncheck', before: cur, light }]
+  })
+  const run = () => {
+    if (entries.length) linger(entries, HOLD.uncheck)
+    undoToast()
+  }
+  if (shown.length < reopen.length) flipChange(run)
+  else run()
 }

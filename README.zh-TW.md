@@ -1,12 +1,20 @@
-<p align="center"><img src="public/favicon.svg" width="72" height="72" alt="TickDone"></p>
+<div align="center">
 
-<h1 align="center">TickDone</h1>
+<a href="https://tickdone.pages.dev"><img src="public/favicon.svg" width="88" height="88" alt="TickDone 標誌"></a>
 
-<p align="center">在瀏覽器中執行的待辦清單與時間管理工具：任務、行事曆、四象限、番茄專注和習慣打卡。</p>
+<h1>TickDone</h1>
 
-<p align="center"><a href="https://tickdone.pages.dev"><b>開啟 TickDone → tickdone.pages.dev</b></a></p>
+<p><b>規劃每一天，專注要事，養成好習慣。打開瀏覽器就能用。</b></p>
 
-<p align="center">
+<p>
+  <a href="https://github.com/suica/tickdone/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/suica/tickdone/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="LICENSE"><img alt="MIT 授權" src="https://img.shields.io/badge/授權-MIT-4772fa?style=flat-square"></a>
+  <a href="https://tickdone.pages.dev"><img alt="線上體驗" src="https://img.shields.io/badge/線上體驗-tickdone.pages.dev-4772fa?style=flat-square"></a>
+  <a href="#-語言"><img alt="10 種語言" src="https://img.shields.io/badge/多語言-10_種語言-7c5cff?style=flat-square"></a>
+  <a href="#-參與貢獻"><img alt="歡迎 PR" src="https://img.shields.io/badge/PR-歡迎-2fbf71?style=flat-square"></a>
+</p>
+
+<p>
   <a href="README.md">English</a> ·
   <a href="README.zh-CN.md">简体中文</a> ·
   <b>繁體中文</b> ·
@@ -19,28 +27,88 @@
   <a href="README.ru.md">Русский</a>
 </p>
 
-![展開詳細資訊面板的任務列表](docs/screenshots/desktop-tasks.png)
+<a href="https://tickdone.pages.dev"><img src="docs/hero/hero.zh-TW.png" width="100%" alt="TickDone 在電腦和手機上的版面示意圖：任務列表、任務詳情和月曆"></a>
 
-| 行事曆 | 四象限 |
-|---|---|
-| ![行事曆](docs/screenshots/desktop-calendar.png) | ![四象限](docs/screenshots/desktop-matrix.png) |
-| **番茄專注** | **習慣打卡** |
-| ![番茄專注](docs/screenshots/desktop-pomo.png) | ![習慣打卡](docs/screenshots/desktop-habit.png) |
+<p>
+  <a href="https://tickdone.pages.dev"><b>開啟應用程式</b></a> ·
+  <a href="#-功能"><b>功能</b></a> ·
+  <a href="#-截圖"><b>截圖</b></a> ·
+  <a href="#-快速開始"><b>快速開始</b></a> ·
+  <a href="#️-路線圖"><b>路線圖</b></a> ·
+  <a href="#-參與貢獻"><b>參與貢獻</b></a>
+</p>
 
-## 功能
+</div>
 
-- **任務**：收件匣、今天、明天、未來 7 天、全部、已完成、已放棄和垃圾桶；自訂清單、資料夾和標籤；子任務、備註、優先順序、截止日期與時間、提醒和重複規則；置頂；每個任務都有右鍵選單；完成或刪除後可以復原。
-- **快速新增**：能理解你輸入的內容並標示出來，一行 `call mom tomorrow 3pm !high #family ~Personal` 就能設定好日期、時間、優先順序、標籤和清單；也支援簡體中文輸入，例如 `明天下午3点 开周会 !高 #重要`。
-- **列表與看板檢視**，可分組和排序。
-- **行事曆**：月、週、日三種檢視。
-- **四象限**：依緊急程度和重要性為任務分類。
-- **番茄專注**：番茄鐘和碼錶兩種模式，並保留過往的專注紀錄。
-- **習慣打卡**：打卡、連續打卡天數和統計。
-- **搜尋**、鍵盤快速鍵和深色主題。
+TickDone 是一款免費、開源的待辦清單與時間管理工具，直接在瀏覽器中執行。用一句話記下任務，在行事曆上安排時間，依緊急程度和重要性為任務分類，開個番茄鐘專心完成，再持續每天的習慣打卡，全都在同一個地方。
 
-資料只會儲存在你的瀏覽器裡（localStorage）。不需要帳號，也不會把任何資料傳送到伺服器。
+> [!NOTE]
+> **資料只屬於你。** 所有內容都儲存在瀏覽器的本機儲存空間（localStorage）：沒有帳號，不必註冊，也沒有伺服器，你輸入的內容不會離開你的裝置。隨時可以在「設定」中匯出備份檔。
 
-### 鍵盤快速鍵
+## ✨ 功能
+
+- ✅ **任務與清單**：今天、明天、未來 7 天、收件匣，以及已完成、已放棄和垃圾桶；自訂清單、資料夾和標籤；子任務、備註、優先順序、截止日期與時間、提醒和重複規則；置頂，每個任務都有右鍵選單。
+- ⚡ **智慧快速新增**：輸入 `call mom tomorrow 3pm !high #family ~Personal`，TickDone 就會設定好日期、時間、優先順序、標籤和清單，輸入時還會標示出辨識到的部分；也支援簡體中文輸入，例如 `明天下午3点 开周会 !高 #重要`。
+- 🗂️ **列表與看板檢視**，可分組和排序。
+- 📅 **行事曆**：月、週、日和列表檢視。把任務拖到另一天或另一個時間，或拖曳時間區塊的下緣來調整時長。
+- 🧭 **四象限**：依緊急程度和重要性為任務分類，在象限之間拖曳任務即可變更優先順序。
+- 🍅 **番茄專注**：番茄鐘和碼錶兩種模式，並保留過往的專注紀錄。
+- 🔥 **習慣打卡**：打卡、連續天數和統計。
+- 🔍 **搜尋**任務、標籤和清單。
+- ↩️ **復原**：完成、刪除或移動任務後，可以在提示訊息中復原。
+- ⌨️ **鍵盤快速鍵**和 🌙 **深色主題**。
+- 💾 **備份與還原**：把全部資料匯出成 JSON 檔，隨時再匯入。
+
+## 📸 截圖
+
+目前介面為簡體中文，繁體中文介面會隨 [#14](https://github.com/suica/tickdone/issues/14) 推出，所以上方的橫幅是版面示意圖。以下是目前的介面：
+
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/zh-CN/desktop-tasks.png" alt="任務列表和任務詳情"></td>
+  </tr>
+  <tr>
+    <th>行事曆</th>
+    <th>四象限</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/zh-CN/desktop-calendar.png" alt="行事曆月檢視"></td>
+    <td><img src="docs/screenshots/zh-CN/desktop-matrix.png" alt="四象限"></td>
+  </tr>
+  <tr>
+    <th>番茄專注</th>
+    <th>習慣打卡</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/zh-CN/desktop-focus.png" alt="番茄專注"></td>
+    <td><img src="docs/screenshots/zh-CN/desktop-habits.png" alt="習慣打卡和統計"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/zh-CN/phone-tasks.png" alt="手機上的任務列表"></td>
+    <td><img src="docs/screenshots/zh-CN/phone-calendar.png" alt="手機上的行事曆"></td>
+    <td><img src="docs/screenshots/zh-CN/phone-matrix.png" alt="手機上的四象限"></td>
+    <td><img src="docs/screenshots/zh-CN/phone-focus.png" alt="手機上的番茄專注"></td>
+    <td><img src="docs/screenshots/zh-CN/phone-habits.png" alt="手機上的習慣打卡"></td>
+  </tr>
+</table>
+
+## 🚀 快速開始
+
+**線上使用**：開啟 [tickdone.pages.dev](https://tickdone.pages.dev)，不必安裝任何東西。
+
+**在本機執行**（需要 Node.js 24）：
+
+```sh
+git clone https://github.com/suica/tickdone.git
+cd tickdone
+npm install
+npm run dev        # http://localhost:5173
+```
+
+## ⌨️ 鍵盤快速鍵
 
 | 按鍵 | 動作 |
 |---|---|
@@ -48,10 +116,16 @@
 | `Ctrl/⌘ F` | 搜尋 |
 | `Alt 1`–`Alt 6` | 切換模組 |
 | `Ctrl/⌘ Z` | 復原（復原提示顯示期間） |
-| `Esc` | 關閉任務詳細資訊 |
+| `Esc` | 關閉任務詳情 |
 | `?` | 顯示所有快速鍵 |
 
-## 路線圖
+## 🌍 語言
+
+本 README 提供 10 種語言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。應用程式內建支援同樣 10 種語言的翻譯層，把所有畫面移到翻譯層的工作在 [#14](https://github.com/suica/tickdone/issues/14) 中進行。在那之前介面為簡體中文；快速新增已經同時支援中文和英文輸入。
+
+發現翻譯不夠道地？英文是來源語言：直接修改 `src/i18n/` 或對應的 `README.<locale>.md`，再送出 Pull Request。
+
+## 🗺️ 路線圖
 
 每一項都連結到對應的 Issue。打勾的項目已在 [tickdone.pages.dev](https://tickdone.pages.dev) 上線。
 
@@ -79,9 +153,19 @@
 - [ ] 主題與強調色 ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] 行事曆：安排沒有日期的任務、議程檢視 ([#28](https://github.com/suica/tickdone/issues/28))
 
-## 開發
+## 🧰 技術架構
 
-需要 Node.js 24。
+| 部分 | 使用的技術 |
+|---|---|
+| ⚛️ 介面 | React 19 和 TypeScript |
+| 📆 日期 | date-fns，除了 React 之外唯一的執行階段相依套件 |
+| ⚡ 建置 | Vite |
+| 💾 儲存 | 瀏覽器的 `localStorage`，沒有後端 |
+| 🧪 測試 | Vitest（單元測試）和 Playwright（端對端測試） |
+| 🧹 程式碼檢查 | oxlint |
+| ☁️ 託管 | Cloudflare Pages |
+
+## 🛠️ 開發
 
 ```sh
 npm install
@@ -93,21 +177,29 @@ npm run e2e        # end-to-end tests (Playwright)
 npm run build      # type check and production build into dist/
 ```
 
-使用 React 19、TypeScript、Vite 和 date-fns 開發。
+- 🖼️ README 裡的橫幅和截圖由正式版建置產生：先執行 `npm run build`，再執行 `node scripts/promo/render.mjs`（參數說明在[腳本](scripts/promo/render.mjs)開頭）。
+- 🗺️ `node scripts/roadmap.mjs done <issue>` 會在所有 README 中勾選對應的路線圖項目。
 
-## 部署
+## 🚢 部署
 
-正式網站架設在 Cloudflare Pages：
+正式網站部署在 Cloudflare Pages：
 
 ```sh
 npm run build
 npx wrangler pages deploy dist --project-name tickdone --branch main
 ```
 
-## 參與貢獻
+## 🤝 參與貢獻
 
-歡迎提出 Issue 和 Pull Request。請先閱讀 [AGENTS.md](AGENTS.md)，裡面列出了專案規則（以英文為工作語言、為每種支援的語言提供翻譯、響應式版面、動畫與拖放慣例，以及每個 PR 都必須通過的 CI）。
+歡迎提交 Issue 和 Pull Request！開始之前請先閱讀 [AGENTS.md](AGENTS.md)，裡面是寫給所有人（包括程式設計代理）的專案規則：
 
-## 授權條款
+- 💬 每項變更都從一個 Issue 開始，並透過引用該 Issue 的 Pull Request 合併；
+- 🌐 以英文為工作語言，每段面向使用者的文字都要翻譯成全部 10 種語言；
+- 📐 從 360 px 的手機到 2560 px 的螢幕，每種寬度的畫面都要正常，動畫和拖放遵循一致的規範；
+- ✅ CI（程式碼檢查、型別檢查與建置、單元測試和端對端測試）全部通過後才能合併。
 
-[MIT](LICENSE)
+如果 TickDone 幫你把事情做完，歡迎在 GitHub 上給個 ⭐，讓更多人發現它。
+
+## 📄 授權
+
+[MIT](LICENSE) © 2026 suica

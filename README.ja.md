@@ -1,12 +1,20 @@
-<p align="center"><img src="public/favicon.svg" width="72" height="72" alt="TickDone"></p>
+<div align="center">
 
-<h1 align="center">TickDone</h1>
+<a href="https://tickdone.pages.dev"><img src="public/favicon.svg" width="88" height="88" alt="TickDone のロゴ"></a>
 
-<p align="center">ブラウザで動く ToDo リスト＆時間管理ツール。タスク、カレンダー、アイゼンハワー・マトリクス、ポモドーロタイマー、習慣トラッカーを備えています。</p>
+<h1>TickDone</h1>
 
-<p align="center"><a href="https://tickdone.pages.dev"><b>TickDone を開く → tickdone.pages.dev</b></a></p>
+<p><b>1日の計画、大切なことへの集中、続く習慣づくりをブラウザひとつで。</b></p>
 
-<p align="center">
+<p>
+  <a href="https://github.com/suica/tickdone/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/suica/tickdone/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="LICENSE"><img alt="MIT ライセンス" src="https://img.shields.io/badge/ライセンス-MIT-4772fa?style=flat-square"></a>
+  <a href="https://tickdone.pages.dev"><img alt="デモ" src="https://img.shields.io/badge/デモ-tickdone.pages.dev-4772fa?style=flat-square"></a>
+  <a href="#-言語"><img alt="10 言語" src="https://img.shields.io/badge/多言語-10_言語-7c5cff?style=flat-square"></a>
+  <a href="#-コントリビュート"><img alt="PR 歓迎" src="https://img.shields.io/badge/PR-歓迎-2fbf71?style=flat-square"></a>
+</p>
+
+<p>
   <a href="README.md">English</a> ·
   <a href="README.zh-CN.md">简体中文</a> ·
   <a href="README.zh-TW.md">繁體中文</a> ·
@@ -19,28 +27,55 @@
   <a href="README.ru.md">Русский</a>
 </p>
 
-![詳細パネルを開いたタスク画面](docs/screenshots/desktop-tasks.png)
+<a href="https://tickdone.pages.dev"><img src="docs/hero/hero.ja.png" width="100%" alt="ノートパソコンとスマートフォンで表示した TickDone のレイアウト図：タスクリスト、タスクの詳細、月間カレンダー"></a>
 
-| カレンダー | アイゼンハワー・マトリクス |
-|---|---|
-| ![カレンダー](docs/screenshots/desktop-calendar.png) | ![アイゼンハワー・マトリクス](docs/screenshots/desktop-matrix.png) |
-| **ポモドーロタイマー** | **習慣トラッカー** |
-| ![ポモドーロタイマー](docs/screenshots/desktop-pomo.png) | ![習慣トラッカー](docs/screenshots/desktop-habit.png) |
+<p>
+  <a href="https://tickdone.pages.dev"><b>アプリを開く</b></a> ·
+  <a href="#-機能"><b>機能</b></a> ·
+  <a href="#-クイックスタート"><b>クイックスタート</b></a> ·
+  <a href="#️-ロードマップ"><b>ロードマップ</b></a> ·
+  <a href="#-コントリビュート"><b>コントリビュート</b></a>
+</p>
 
-## 機能
+</div>
 
-- **タスク**：インボックス、今日、明日、今後7日間、すべて、完了済み、やらない、ゴミ箱。自分で作れるリスト・フォルダ・タグ。サブタスク、メモ、優先度、期日と時刻、リマインダー、繰り返し設定。ピン留め、すべてのタスクで使えるコンテキストメニュー、完了・削除の取り消し。
-- **クイック追加**：入力した内容を読み取ってハイライト表示します。`call mom tomorrow 3pm !high #family ~Personal` と1行入力するだけで、日付・時刻・優先度・タグ・リストをまとめて設定できます。
-- **リスト表示とカンバン表示**：グループ化と並べ替えに対応。
-- **カレンダー**：月・週・日の表示に対応。
-- **アイゼンハワー・マトリクス**：緊急度と重要度でタスクを仕分けできます。
-- **ポモドーロタイマー**：ポモドーロとストップウォッチの2つのモードを備え、過去のセッションも記録します。
-- **習慣トラッカー**：チェックイン、連続達成日数、統計。
-- **検索**、キーボードショートカット、ダークテーマ。
+TickDone は、ブラウザで動く無料・オープンソースの ToDo リスト兼時間管理アプリです。思いついたタスクをそのまま書き留め、カレンダーで予定を立て、緊急度と重要度で仕分けし、ポモドーロタイマーで集中して片づけ、習慣も続けられます。すべてがひとつの場所で完結します。
 
-データはブラウザ内（localStorage）にだけ保存されます。アカウントは不要で、サーバーには何も送信されません。
+> [!NOTE]
+> **データはあなたの手元に。** すべてブラウザのローカルストレージ（localStorage）に保存されます。アカウントも登録もサーバーもなく、入力した内容が端末の外に出ることはありません。バックアップファイルは「設定」からいつでも書き出せます。
 
-### キーボードショートカット
+## ✨ 機能
+
+- ✅ **タスクとリスト**：今日、明日、今後7日間、インボックスに加えて、完了済み、やらない、ゴミ箱。自分で作れるリスト・フォルダ・タグ。サブタスク、メモ、優先度、期日と時刻、リマインダー、繰り返し設定。ピン留めと、すべてのタスクで使えるコンテキストメニュー。
+- ⚡ **スマートなクイック追加**：`call mom tomorrow 3pm !high #family ~Personal` と入力するだけで、日付・時刻・優先度・タグ・リストが設定され、読み取った部分は入力中にハイライト表示されます。中国語での入力にも対応しています。
+- 🗂️ **リスト表示とカンバン表示**：グループ化と並べ替えに対応。
+- 📅 **カレンダー**：月・週・日・リストの表示。タスクを別の日や時刻へドラッグしたり、ブロックの下端をドラッグして所要時間を変えたりできます。
+- 🧭 **アイゼンハワー・マトリクス**：緊急度と重要度でタスクを仕分け。象限をまたいでドラッグすると優先度が変わります。
+- 🍅 **ポモドーロタイマー**：ポモドーロとストップウォッチの2つのモードを備え、過去のセッションも記録します。
+- 🔥 **習慣トラッカー**：チェックイン、連続達成日数、統計。
+- 🔍 **検索**：タスク・タグ・リストをまとめて検索。
+- ↩️ **元に戻す**：タスクの完了・削除・移動のあと、通知から取り消せます。
+- ⌨️ **キーボードショートカット**と 🌙 **ダークテーマ**。
+- 💾 **バックアップと復元**：すべてのデータを JSON ファイルに書き出し、あとで読み込み直せます。
+
+## 📸 スクリーンショット
+
+日本語のスクリーンショットは、すべての画面を翻訳レイヤーに移す [#14](https://github.com/suica/tickdone/issues/14) とあわせて公開する予定です。それまでの UI は簡体字中国語のため、上のバナーはレイアウトのイメージ図になっています。実際の画面は[アプリを開いて](https://tickdone.pages.dev)ご覧ください。ワンクリックで、登録も要りません。
+
+## 🚀 クイックスタート
+
+**オンラインで使う**：[tickdone.pages.dev](https://tickdone.pages.dev) を開くだけ。インストールは不要です。
+
+**ローカルで動かす**（Node.js 24 が必要）：
+
+```sh
+git clone https://github.com/suica/tickdone.git
+cd tickdone
+npm install
+npm run dev        # http://localhost:5173
+```
+
+## ⌨️ キーボードショートカット
 
 | キー | 操作 |
 |---|---|
@@ -51,7 +86,13 @@
 | `Esc` | タスク詳細を閉じる |
 | `?` | ショートカット一覧を表示 |
 
-## ロードマップ
+## 🌍 言語
+
+この README は 10 言語で読めます：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский。アプリには同じ 10 言語に対応した翻訳レイヤーがあり、すべての画面をこのレイヤーに移す作業を [#14](https://github.com/suica/tickdone/issues/14) で進めています。それまでの UI は簡体字中国語ですが、クイック追加はすでに英語と中国語の入力を理解します。
+
+不自然な訳を見つけたら：原文は英語です。`src/i18n/` か該当する `README.<locale>.md` を直して、プルリクエストを送ってください。
+
+## 🗺️ ロードマップ
 
 各項目は対応する Issue にリンクしています。チェック済みの項目は [tickdone.pages.dev](https://tickdone.pages.dev) で公開中です。
 
@@ -79,9 +120,19 @@
 - [ ] テーマとアクセントカラー ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] カレンダー：日付のないタスクの計画、予定リスト表示 ([#28](https://github.com/suica/tickdone/issues/28))
 
-## 開発
+## 🧰 技術スタック
 
-Node.js 24 が必要です。
+| 部分 | 使用技術 |
+|---|---|
+| ⚛️ UI | React 19 と TypeScript |
+| 📆 日付 | date-fns（React 以外で唯一のランタイム依存） |
+| ⚡ ビルド | Vite |
+| 💾 保存先 | ブラウザの `localStorage`（バックエンドなし） |
+| 🧪 テスト | Vitest（単体テスト）と Playwright（E2E テスト） |
+| 🧹 静的解析 | oxlint |
+| ☁️ ホスティング | Cloudflare Pages |
+
+## 🛠️ 開発
 
 ```sh
 npm install
@@ -93,9 +144,10 @@ npm run e2e        # end-to-end tests (Playwright)
 npm run build      # type check and production build into dist/
 ```
 
-React 19、TypeScript、Vite、date-fns で作られています。
+- 🖼️ README のバナーとスクリーンショットは本番ビルドから生成します。`npm run build` のあとに `node scripts/promo/render.mjs` を実行してください（オプションは[スクリプト](scripts/promo/render.mjs)の冒頭にあります）。
+- 🗺️ `node scripts/roadmap.mjs done <issue>` を実行すると、すべての README でロードマップの項目にチェックが付きます。
 
-## デプロイ
+## 🚢 デプロイ
 
 本番サイトは Cloudflare Pages で公開しています。
 
@@ -104,10 +156,17 @@ npm run build
 npx wrangler pages deploy dist --project-name tickdone --branch main
 ```
 
-## コントリビュート
+## 🤝 コントリビュート
 
-Issue やプルリクエストを歓迎します。まず [AGENTS.md](AGENTS.md) をお読みください。プロジェクトのルール（作業言語は英語、サポートするすべての言語への翻訳、レスポンシブレイアウト、モーションとドラッグ＆ドロップの規約、すべての PR が通過しなければならない CI）がまとめてあります。
+Issue やプルリクエストを歓迎します！始める前に [AGENTS.md](AGENTS.md) をお読みください。人にもコーディングエージェントにも共通のプロジェクトのルールがまとめてあります。
 
-## ライセンス
+- 💬 変更はすべて Issue から始め、その Issue を参照するプルリクエストでマージします。
+- 🌐 作業言語は英語で、ユーザーの目に触れる文字列はすべて 10 言語に翻訳します。
+- 📐 360 px のスマートフォンから 2560 px のディスプレイまで、どの幅でも画面が崩れないようにし、モーションとドラッグ＆ドロップは共通の規約に従います。
+- ✅ CI（Lint、型チェックとビルド、単体テスト、E2E テスト）がすべて通ってからマージします。
 
-[MIT](LICENSE)
+TickDone が役に立ったら、GitHub で ⭐ を付けていただけると、ほかの人にも見つけてもらいやすくなります。
+
+## 📄 ライセンス
+
+[MIT](LICENSE) © 2026 suica

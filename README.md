@@ -1,12 +1,20 @@
-<p align="center"><img src="public/favicon.svg" width="72" height="72" alt="TickDone"></p>
+<div align="center">
 
-<h1 align="center">TickDone</h1>
+<a href="https://tickdone.pages.dev"><img src="public/favicon.svg" width="88" height="88" alt="TickDone logo"></a>
 
-<p align="center">A to-do list and time manager that runs in your browser: tasks, calendar, Eisenhower matrix, focus timer and habit tracker.</p>
+<h1>TickDone</h1>
 
-<p align="center"><a href="https://tickdone.pages.dev"><b>Open TickDone → tickdone.pages.dev</b></a></p>
+<p><b>Plan your day, focus on what matters and build habits that stick, right in your browser.</b></p>
 
-<p align="center">
+<p>
+  <a href="https://github.com/suica/tickdone/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/suica/tickdone/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4772fa?style=flat-square"></a>
+  <a href="https://tickdone.pages.dev"><img alt="Live demo" src="https://img.shields.io/badge/live_demo-tickdone.pages.dev-4772fa?style=flat-square"></a>
+  <a href="#-languages"><img alt="10 languages" src="https://img.shields.io/badge/i18n-10_languages-7c5cff?style=flat-square"></a>
+  <a href="#-contributing"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-2fbf71?style=flat-square"></a>
+</p>
+
+<p>
   <b>English</b> ·
   <a href="README.zh-CN.md">简体中文</a> ·
   <a href="README.zh-TW.md">繁體中文</a> ·
@@ -19,28 +27,55 @@
   <a href="README.ru.md">Русский</a>
 </p>
 
-![Tasks with the detail pane open](docs/screenshots/desktop-tasks.png)
+<a href="https://tickdone.pages.dev"><img src="docs/hero/hero.en.png" width="100%" alt="TickDone on a laptop and a phone: task lists, task details and a month calendar"></a>
 
-| Calendar | Eisenhower matrix |
-|---|---|
-| ![Calendar](docs/screenshots/desktop-calendar.png) | ![Eisenhower matrix](docs/screenshots/desktop-matrix.png) |
-| **Focus timer** | **Habit tracker** |
-| ![Focus timer](docs/screenshots/desktop-pomo.png) | ![Habit tracker](docs/screenshots/desktop-habit.png) |
+<p>
+  <a href="https://tickdone.pages.dev"><b>Open the app</b></a> ·
+  <a href="#-features"><b>Features</b></a> ·
+  <a href="#-quick-start"><b>Quick start</b></a> ·
+  <a href="#️-roadmap"><b>Roadmap</b></a> ·
+  <a href="#-contributing"><b>Contributing</b></a>
+</p>
 
-## Features
+</div>
 
-- **Tasks**: Inbox, Today, Tomorrow, Next 7 Days, All, Completed, Won't Do and Trash; your own lists, folders and tags; subtasks, notes, priorities, due dates and times, reminders and repeat rules; pinning; a context menu on every task; undo after completing or deleting.
-- **Quick add** that understands what you type and highlights it: `call mom tomorrow 3pm !high #family ~Personal` sets the date, time, priority, tag and list in one line.
-- **List and kanban views**, with grouping and sorting.
-- **Calendar** with month, week and day views.
-- **Eisenhower matrix** to sort tasks by urgency and importance.
-- **Focus timer** with Pomodoro and stopwatch modes and a record of past sessions.
-- **Habit tracker** with check-ins, streaks and statistics.
-- **Search**, keyboard shortcuts and a dark theme.
+TickDone is a free, open-source to-do list and time manager that runs in your browser. Jot tasks down in plain words, see them on a calendar, sort them by urgency and importance, work through them with a focus timer and keep your habits going, all in one place.
 
-Your data stays in your browser (localStorage). There is no account and nothing is sent to a server.
+> [!NOTE]
+> **Your data stays with you.** Everything is saved in your browser's local storage: there is no account, no sign-up and no server, and nothing you type leaves your device. You can export a backup file at any time from Settings.
 
-### Keyboard shortcuts
+## ✨ Features
+
+- ✅ **Tasks and lists**: Today, Tomorrow, Next 7 Days and Inbox, plus Completed, Won't Do and Trash; your own lists, folders and tags; subtasks, notes, priorities, due dates and times, reminders and repeat rules; pinning and a context menu on every task.
+- ⚡ **Smart quick add**: type `call mom tomorrow 3pm !high #family ~Personal` and TickDone sets the date, time, priority, tag and list, highlighting each part as you type.
+- 🗂️ **List and kanban views**, with grouping and sorting.
+- 📅 **Calendar** with month, week, day and list views. Drag a task to another day or time, or drag the bottom edge of a block to change how long it takes.
+- 🧭 **Eisenhower matrix**: sort tasks by urgency and importance, and drag them between quadrants to change their priority.
+- 🍅 **Focus timer** with Pomodoro and stopwatch modes and a record of past sessions.
+- 🔥 **Habit tracker** with check-ins, streaks and statistics.
+- 🔍 **Search** across tasks, tags and lists.
+- ↩️ **Undo** from the toast after completing, deleting or moving a task.
+- ⌨️ **Keyboard shortcuts** and a 🌙 **dark theme**.
+- 💾 **Backup and restore**: export everything to a JSON file and import it again.
+
+## 📸 Screenshots
+
+Screenshots in English are coming with [#14](https://github.com/suica/tickdone/issues/14), which moves every screen onto the translation layer; until then the interface is in Simplified Chinese, so the banner above shows the layout as an illustration. To see the real thing, [open the app](https://tickdone.pages.dev): it takes one click and no sign-up.
+
+## 🚀 Quick start
+
+**Use it online:** open [tickdone.pages.dev](https://tickdone.pages.dev). There is nothing to install.
+
+**Run it locally** (requires Node.js 24):
+
+```sh
+git clone https://github.com/suica/tickdone.git
+cd tickdone
+npm install
+npm run dev        # http://localhost:5173
+```
+
+## ⌨️ Keyboard shortcuts
 
 | Key | Action |
 |---|---|
@@ -51,7 +86,13 @@ Your data stays in your browser (localStorage). There is no account and nothing 
 | `Esc` | Close task details |
 | `?` | Show all shortcuts |
 
-## Roadmap
+## 🌍 Languages
+
+This README is available in 10 languages: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) and Русский. The app has a translation layer for the same 10 languages, and moving every screen onto it is tracked in [#14](https://github.com/suica/tickdone/issues/14). Until that lands the interface is in Simplified Chinese; quick add already understands both English and Chinese.
+
+Spotted a clumsy translation? English is the source: fix the text in `src/i18n/` or in `README.<locale>.md` and open a pull request.
+
+## 🗺️ Roadmap
 
 Each item links to its issue. Ticked items are live at [tickdone.pages.dev](https://tickdone.pages.dev).
 
@@ -79,9 +120,19 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [ ] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] Calendar: plan undated tasks, agenda view ([#28](https://github.com/suica/tickdone/issues/28))
 
-## Development
+## 🧰 Tech stack
 
-Requires Node.js 24.
+| Part | Built with |
+|---|---|
+| ⚛️ Interface | React 19 and TypeScript |
+| 📆 Dates | date-fns, the only runtime dependency besides React |
+| ⚡ Build | Vite |
+| 💾 Storage | `localStorage` in the browser, no backend |
+| 🧪 Tests | Vitest (unit) and Playwright (end-to-end) |
+| 🧹 Lint | oxlint |
+| ☁️ Hosting | Cloudflare Pages |
+
+## 🛠️ Development
 
 ```sh
 npm install
@@ -93,21 +144,29 @@ npm run e2e        # end-to-end tests (Playwright)
 npm run build      # type check and production build into dist/
 ```
 
-Built with React 19, TypeScript, Vite and date-fns.
+- 🖼️ The banner and screenshots in the READMEs come from a production build: `npm run build`, then `node scripts/promo/render.mjs` (options are at the top of [the script](scripts/promo/render.mjs)).
+- 🗺️ `node scripts/roadmap.mjs done <issue>` ticks a roadmap item in every README.
 
-## Deployment
+## 🚢 Deployment
 
-The live site is on Cloudflare Pages:
+The live site runs on Cloudflare Pages:
 
 ```sh
 npm run build
 npx wrangler pages deploy dist --project-name tickdone --branch main
 ```
 
-## Contributing
+## 🤝 Contributing
 
-Issues and pull requests are welcome. Please read [AGENTS.md](AGENTS.md) first: it has the project rules (English as the working language, translations for every supported language, responsive layouts, motion and drag-and-drop conventions, and the CI that every PR must pass).
+Issues and pull requests are welcome! Please read [AGENTS.md](AGENTS.md) first. It holds the project rules for people and coding agents alike:
 
-## License
+- 💬 every change starts from an issue and lands through a pull request that references it;
+- 🌐 English is the working language, and every user-facing string is translated into all 10 languages;
+- 📐 screens work at every width from a 360 px phone to a 2560 px display, with shared motion and drag-and-drop conventions;
+- ✅ CI (lint, type check and build, unit and end-to-end tests) is green before anything is merged.
 
-[MIT](LICENSE)
+If TickDone helps you get things done, a ⭐ on GitHub helps other people find it.
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 suica

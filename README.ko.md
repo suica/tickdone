@@ -1,12 +1,20 @@
-<p align="center"><img src="public/favicon.svg" width="72" height="72" alt="TickDone"></p>
+<div align="center">
 
-<h1 align="center">TickDone</h1>
+<a href="https://tickdone.pages.dev"><img src="public/favicon.svg" width="88" height="88" alt="TickDone 로고"></a>
 
-<p align="center">브라우저에서 실행되는 할 일 목록 겸 시간 관리 도구: 작업, 캘린더, 아이젠하워 매트릭스, 집중 타이머, 습관 트래커.</p>
+<h1>TickDone</h1>
 
-<p align="center"><a href="https://tickdone.pages.dev"><b>TickDone 열기 → tickdone.pages.dev</b></a></p>
+<p><b>하루를 계획하고, 중요한 일에 집중하고, 좋은 습관을 이어 가세요. 브라우저에서 바로 쓸 수 있습니다.</b></p>
 
-<p align="center">
+<p>
+  <a href="https://github.com/suica/tickdone/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/suica/tickdone/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="LICENSE"><img alt="MIT 라이선스" src="https://img.shields.io/badge/라이선스-MIT-4772fa?style=flat-square"></a>
+  <a href="https://tickdone.pages.dev"><img alt="데모" src="https://img.shields.io/badge/데모-tickdone.pages.dev-4772fa?style=flat-square"></a>
+  <a href="#-언어"><img alt="10개 언어" src="https://img.shields.io/badge/다국어-10개_언어-7c5cff?style=flat-square"></a>
+  <a href="#-기여하기"><img alt="PR 환영" src="https://img.shields.io/badge/PR-환영-2fbf71?style=flat-square"></a>
+</p>
+
+<p>
   <a href="README.md">English</a> ·
   <a href="README.zh-CN.md">简体中文</a> ·
   <a href="README.zh-TW.md">繁體中文</a> ·
@@ -19,39 +27,72 @@
   <a href="README.ru.md">Русский</a>
 </p>
 
-![세부 정보 창을 연 작업 화면](docs/screenshots/desktop-tasks.png)
+<a href="https://tickdone.pages.dev"><img src="docs/hero/hero.ko.png" width="100%" alt="노트북과 휴대폰에 표시한 TickDone 레이아웃 그림: 할 일 목록, 할 일 상세, 월간 캘린더"></a>
 
-| 캘린더 | 아이젠하워 매트릭스 |
-|---|---|
-| ![캘린더](docs/screenshots/desktop-calendar.png) | ![아이젠하워 매트릭스](docs/screenshots/desktop-matrix.png) |
-| **집중 타이머** | **습관 트래커** |
-| ![집중 타이머](docs/screenshots/desktop-pomo.png) | ![습관 트래커](docs/screenshots/desktop-habit.png) |
+<p>
+  <a href="https://tickdone.pages.dev"><b>앱 열기</b></a> ·
+  <a href="#-기능"><b>기능</b></a> ·
+  <a href="#-빠르게-시작하기"><b>빠르게 시작하기</b></a> ·
+  <a href="#️-로드맵"><b>로드맵</b></a> ·
+  <a href="#-기여하기"><b>기여하기</b></a>
+</p>
 
-## 기능
+</div>
 
-- **작업**: 수신함, 오늘, 내일, 다음 7일, 전체, 완료됨, 하지 않음, 휴지통; 직접 만드는 목록, 폴더, 태그; 하위 작업, 메모, 우선순위, 마감 날짜와 시간, 알림, 반복 규칙; 고정; 모든 작업의 컨텍스트 메뉴; 완료하거나 삭제한 뒤 실행 취소.
-- **빠른 추가**: 입력한 내용을 이해하고 강조 표시합니다. `call mom tomorrow 3pm !high #family ~Personal`처럼 한 줄만 입력하면 날짜, 시간, 우선순위, 태그, 목록이 한 번에 설정됩니다.
-- **목록 보기와 칸반 보기**: 그룹화와 정렬을 지원합니다.
-- **캘린더**: 월, 주, 일 보기를 제공합니다.
-- **아이젠하워 매트릭스**: 긴급도와 중요도에 따라 작업을 분류합니다.
-- **집중 타이머**: 뽀모도로와 스톱워치 모드, 지난 세션 기록을 제공합니다.
-- **습관 트래커**: 체크인, 연속 달성 기록, 통계를 제공합니다.
-- **검색**, 키보드 단축키, 다크 테마.
+TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록이자 시간 관리 도구입니다. 떠오른 할 일을 문장 그대로 적고, 캘린더에서 일정을 잡고, 긴급도와 중요도에 따라 분류하고, 집중 타이머로 하나씩 끝내고, 습관까지 꾸준히 이어 갈 수 있습니다. 모든 것이 한곳에 있습니다.
 
-데이터는 브라우저(localStorage)에만 저장됩니다. 계정이 필요 없고 서버로 전송되는 데이터도 없습니다.
+> [!NOTE]
+> **데이터는 내 기기에만 있습니다.** 모든 내용은 브라우저의 로컬 저장소(localStorage)에 저장됩니다. 계정도, 가입도, 서버도 없으며 입력한 내용은 기기 밖으로 나가지 않습니다. 백업 파일은 언제든 설정에서 내보낼 수 있습니다.
 
-### 키보드 단축키
+## ✨ 기능
+
+- ✅ **할 일과 목록**: 오늘, 내일, 다음 7일, 수신함, 그리고 완료됨, 하지 않음, 휴지통; 직접 만드는 목록, 폴더, 태그; 하위 작업, 메모, 우선순위, 마감 날짜와 시간, 알림, 반복 규칙; 고정과 모든 할 일의 컨텍스트 메뉴.
+- ⚡ **스마트 빠른 추가**: `call mom tomorrow 3pm !high #family ~Personal`처럼 입력하면 날짜, 시간, 우선순위, 태그, 목록이 한 번에 설정되고, 인식한 부분은 입력하는 동안 강조 표시됩니다. 중국어 입력도 지원합니다.
+- 🗂️ **목록 보기와 칸반 보기**: 그룹화와 정렬을 지원합니다.
+- 📅 **캘린더**: 월, 주, 일, 목록 보기. 할 일을 다른 날이나 시간으로 끌어 옮기거나, 블록의 아래쪽 가장자리를 끌어 걸리는 시간을 바꿀 수 있습니다.
+- 🧭 **아이젠하워 매트릭스**: 긴급도와 중요도에 따라 할 일을 분류하고, 사분면 사이로 끌어 옮기면 우선순위가 바뀝니다.
+- 🍅 **집중 타이머**: 뽀모도로와 스톱워치 모드, 지난 세션 기록을 제공합니다.
+- 🔥 **습관 트래커**: 체크인, 연속 달성 기록, 통계를 제공합니다.
+- 🔍 **검색**: 할 일, 태그, 목록을 한 번에 찾습니다.
+- ↩️ **실행 취소**: 할 일을 완료하거나 삭제하거나 옮긴 뒤 알림에서 되돌릴 수 있습니다.
+- ⌨️ **키보드 단축키**와 🌙 **다크 테마**.
+- 💾 **백업과 복원**: 모든 데이터를 JSON 파일로 내보내고 다시 가져올 수 있습니다.
+
+## 📸 스크린샷
+
+한국어 스크린샷은 모든 화면을 번역 레이어로 옮기는 [#14](https://github.com/suica/tickdone/issues/14)와 함께 공개할 예정입니다. 그전까지 인터페이스는 중국어 간체로 표시되므로, 위의 배너는 레이아웃을 그린 그림입니다. 실제 화면은 [앱을 열어](https://tickdone.pages.dev) 확인해 보세요. 클릭 한 번이면 되고 가입도 필요 없습니다.
+
+## 🚀 빠르게 시작하기
+
+**온라인에서 사용하기**: [tickdone.pages.dev](https://tickdone.pages.dev)를 열면 됩니다. 설치할 것이 없습니다.
+
+**로컬에서 실행하기**(Node.js 24 필요):
+
+```sh
+git clone https://github.com/suica/tickdone.git
+cd tickdone
+npm install
+npm run dev        # http://localhost:5173
+```
+
+## ⌨️ 키보드 단축키
 
 | 키 | 동작 |
 |---|---|
-| `N` | 새 작업 |
+| `N` | 새 할 일 |
 | `Ctrl/⌘ F` | 검색 |
 | `Alt 1`–`Alt 6` | 모듈 전환 |
 | `Ctrl/⌘ Z` | 실행 취소(실행 취소 알림이 떠 있는 동안) |
-| `Esc` | 작업 세부 정보 닫기 |
+| `Esc` | 할 일 상세 닫기 |
 | `?` | 모든 단축키 보기 |
 
-## 로드맵
+## 🌍 언어
+
+이 README는 10개 언어로 제공됩니다: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil), Русский. 앱에는 같은 10개 언어를 지원하는 번역 레이어가 있으며, 모든 화면을 이 레이어로 옮기는 작업은 [#14](https://github.com/suica/tickdone/issues/14)에서 진행 중입니다. 그전까지 인터페이스는 중국어 간체이지만, 빠른 추가는 이미 영어와 중국어 입력을 모두 이해합니다.
+
+어색한 번역을 발견했나요? 원문은 영어입니다. `src/i18n/` 또는 해당 `README.<locale>.md`를 고친 뒤 풀 리퀘스트를 보내 주세요.
+
+## 🗺️ 로드맵
 
 각 항목은 해당 이슈로 연결됩니다. 체크된 항목은 [tickdone.pages.dev](https://tickdone.pages.dev)에서 이미 사용할 수 있습니다.
 
@@ -79,9 +120,19 @@
 - [ ] 테마와 강조 색상 ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] 캘린더: 날짜 없는 작업 계획, 일정 목록 보기 ([#28](https://github.com/suica/tickdone/issues/28))
 
-## 개발
+## 🧰 기술 스택
 
-Node.js 24가 필요합니다.
+| 영역 | 사용 기술 |
+|---|---|
+| ⚛️ 인터페이스 | React 19, TypeScript |
+| 📆 날짜 | date-fns(React 외에 유일한 런타임 의존성) |
+| ⚡ 빌드 | Vite |
+| 💾 저장소 | 브라우저의 `localStorage`, 백엔드 없음 |
+| 🧪 테스트 | Vitest(단위 테스트), Playwright(엔드 투 엔드 테스트) |
+| 🧹 린트 | oxlint |
+| ☁️ 호스팅 | Cloudflare Pages |
+
+## 🛠️ 개발
 
 ```sh
 npm install
@@ -93,21 +144,29 @@ npm run e2e        # end-to-end tests (Playwright)
 npm run build      # type check and production build into dist/
 ```
 
-React 19, TypeScript, Vite, date-fns로 만들었습니다.
+- 🖼️ README의 배너와 스크린샷은 프로덕션 빌드에서 만듭니다. `npm run build` 다음에 `node scripts/promo/render.mjs`를 실행하세요(옵션은 [스크립트](scripts/promo/render.mjs) 맨 위에 있습니다).
+- 🗺️ `node scripts/roadmap.mjs done <issue>`를 실행하면 모든 README에서 해당 로드맵 항목이 체크됩니다.
 
-## 배포
+## 🚢 배포
 
-라이브 사이트는 Cloudflare Pages에서 호스팅됩니다.
+라이브 사이트는 Cloudflare Pages에서 운영합니다.
 
 ```sh
 npm run build
 npx wrangler pages deploy dist --project-name tickdone --branch main
 ```
 
-## 기여하기
+## 🤝 기여하기
 
-이슈와 풀 리퀘스트를 환영합니다. 먼저 [AGENTS.md](AGENTS.md)를 읽어 주세요. 프로젝트 규칙(작업 언어는 영어, 지원하는 모든 언어로의 번역, 반응형 레이아웃, 모션 및 드래그 앤 드롭 규칙, 모든 PR이 통과해야 하는 CI)이 정리되어 있습니다.
+이슈와 풀 리퀘스트를 환영합니다! 시작하기 전에 [AGENTS.md](AGENTS.md)를 먼저 읽어 주세요. 사람과 코딩 에이전트 모두에게 적용되는 프로젝트 규칙이 담겨 있습니다.
 
-## 라이선스
+- 💬 모든 변경은 이슈에서 시작하고, 그 이슈를 참조하는 풀 리퀘스트로 병합합니다.
+- 🌐 작업 언어는 영어이며, 사용자에게 보이는 모든 문구는 10개 언어로 번역합니다.
+- 📐 360 px 휴대폰부터 2560 px 디스플레이까지 어떤 너비에서도 화면이 제대로 보여야 하며, 모션과 드래그 앤 드롭은 공통 규칙을 따릅니다.
+- ✅ CI(린트, 타입 검사와 빌드, 단위 테스트, 엔드 투 엔드 테스트)를 모두 통과해야 병합합니다.
 
-[MIT](LICENSE)
+TickDone이 일을 끝내는 데 도움이 되었다면 GitHub에서 ⭐를 눌러 주세요. 다른 사람들이 이 프로젝트를 찾는 데 도움이 됩니다.
+
+## 📄 라이선스
+
+[MIT](LICENSE) © 2026 suica

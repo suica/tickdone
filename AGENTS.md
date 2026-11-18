@@ -27,6 +27,7 @@ These rules apply to everyone working on this repository, people and coding agen
 - Every change starts from an issue and lands through a pull request that references it.
 - CI (lint, type check and build, unit tests, end-to-end tests) must be green before merging.
 - Pull requests that change the UI include screenshots at phone and desktop sizes (before and after for changes to existing screens).
+- `README.md` and its translations carry the roadmap. Finishing an item ticks it in all of them, in the same pull request or right after merging; new planned work gets a line with its issue.
 - After merging to `main`, deploy: `npm run build && npx wrangler pages deploy dist --project-name tickdone --branch main`.
 
 ## Commands

@@ -51,6 +51,34 @@
 | `Esc` | タスク詳細を閉じる |
 | `?` | ショートカット一覧を表示 |
 
+## ロードマップ
+
+各項目は対応する Issue にリンクしています。チェック済みの項目は [tickdone.pages.dev](https://tickdone.pages.dev) で公開中です。
+
+- [x] タスク、リスト、タグ、クイック追加、カレンダー、アイゼンハワー・マトリクス、ポモドーロタイマー、習慣トラッカー
+- [x] 単体テストと E2E テストを備えた CI ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] オープンソース化：10 言語の README、MIT ライセンス、プロジェクトのルール ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] スマートフォン・タブレット・大画面向けのレイアウト ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] あらゆる場面でドラッグ＆ドロップ ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] モーション ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] アプリ内の GitHub リンクと「このアプリについて」 ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] UI の 10 言語対応 ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] 画面ごとの UI のブラッシュアップ ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] 複数選択と一括編集 ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] タスクリストのキーボード操作 ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] リマインダー通知 ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] アプリとしてインストールしてオフラインでも使用 ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] 保存済みフィルター ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] タスク・ポモドーロタイマー・習慣トラッカーの統計 ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] タスクのメモで Markdown に対応 ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] タイムライン表示 ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] 繰り返し設定の拡充 ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] リストのアーカイブ ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] アクセシビリティ ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] 数千件のタスクでも高速に動作 ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] テーマとアクセントカラー ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] カレンダー：日付のないタスクの計画、予定リスト表示 ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## 開発
 
 Node.js 24 が必要です。

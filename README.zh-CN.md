@@ -51,6 +51,34 @@
 | `Esc` | 关闭任务详情 |
 | `?` | 显示全部快捷键 |
 
+## 路线图
+
+每一项都链接到对应的 Issue。勾选的项目已在 [tickdone.pages.dev](https://tickdone.pages.dev) 上线。
+
+- [x] 任务、清单、标签、快速添加、日历、四象限、番茄专注和习惯打卡
+- [x] CI：单元测试与端到端测试 ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] 开源：10 种语言的 README、MIT 许可证、项目规则 ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] 适配手机、平板和大屏幕的布局 ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] 全面支持拖放 ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] 动效 ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] 应用内的 GitHub 链接和“关于”页面 ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] 界面支持 10 种语言 ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] 逐个页面打磨界面 ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] 多选和批量编辑 ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] 任务列表的键盘导航 ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] 提醒通知 ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] 可安装为应用并离线使用 ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] 可保存的筛选条件 ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] 任务、番茄专注和习惯打卡的统计 ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] 任务备注支持 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] 时间线视图 ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] 更多重复规则 ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] 归档清单 ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] 无障碍 ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] 上千个任务依然流畅 ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] 主题和强调色 ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] 日历：安排无日期的任务、日程视图 ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## 开发
 
 需要 Node.js 24。

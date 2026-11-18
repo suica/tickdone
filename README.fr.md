@@ -51,6 +51,34 @@ Vos données restent dans votre navigateur (localStorage). Pas de compte, et rie
 | `Esc` | Fermer les détails de la tâche |
 | `?` | Afficher tous les raccourcis |
 
+## Feuille de route
+
+Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en ligne sur [tickdone.pages.dev](https://tickdone.pages.dev).
+
+- [x] Tâches, listes, étiquettes, ajout rapide, calendrier, matrice d'Eisenhower, minuteur de concentration et suivi des habitudes
+- [x] CI avec tests unitaires et de bout en bout ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] Open source : README en 10 langues, licence MIT, règles du projet ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] Mises en page pour téléphones, tablettes et grands écrans ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] Glisser-déposer partout ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] Animations ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] Lien GitHub et section « À propos » dans l'app ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] Interface en 10 langues ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] Finitions de l'interface, écran par écran ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] Sélection multiple et modification groupée ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] Navigation au clavier dans les listes de tâches ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] Notifications de rappel ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] Installation comme application et utilisation hors ligne ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] Filtres enregistrés ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] Statistiques des tâches, du minuteur de concentration et du suivi des habitudes ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] Markdown dans les notes des tâches ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] Vue chronologique ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] Plus de règles de répétition ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## Développement
 
 Nécessite Node.js 24.

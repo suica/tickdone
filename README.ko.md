@@ -51,6 +51,34 @@
 | `Esc` | 작업 세부 정보 닫기 |
 | `?` | 모든 단축키 보기 |
 
+## 로드맵
+
+각 항목은 해당 이슈로 연결됩니다. 체크된 항목은 [tickdone.pages.dev](https://tickdone.pages.dev)에서 이미 사용할 수 있습니다.
+
+- [x] 작업, 목록, 태그, 빠른 추가, 캘린더, 아이젠하워 매트릭스, 집중 타이머, 습관 트래커
+- [x] 단위 테스트와 E2E 테스트를 갖춘 CI ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] 오픈 소스 공개: 10개 언어 README, MIT 라이선스, 프로젝트 규칙 ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] 휴대폰, 태블릿, 대형 화면용 레이아웃 ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] 어디서나 드래그 앤 드롭 ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] 모션 ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] 앱 내 GitHub 링크와 정보 화면 ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] 10개 언어 인터페이스 ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] 화면별 UI 다듬기 ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] 다중 선택과 일괄 편집 ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] 작업 목록 키보드 탐색 ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] 알림 시간에 맞춘 알림 표시 ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] 앱으로 설치하고 오프라인에서도 사용 ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] 저장된 필터 ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] 작업, 집중 타이머, 습관 트래커 통계 ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] 작업 메모에서 Markdown 지원 ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] 타임라인 보기 ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] 접근성 ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] 작업이 수천 개여도 빠르게 ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] 테마와 강조 색상 ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] 캘린더: 날짜 없는 작업 계획, 일정 목록 보기 ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## 개발
 
 Node.js 24가 필요합니다.

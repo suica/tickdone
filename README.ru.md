@@ -51,6 +51,34 @@
 | `Esc` | Закрыть подробности задачи |
 | `?` | Показать все горячие клавиши |
 
+## Дорожная карта
+
+Каждый пункт ссылается на свой issue. Отмеченные пункты уже работают на [tickdone.pages.dev](https://tickdone.pages.dev).
+
+- [x] Задачи, списки, теги, быстрое добавление, календарь, матрица Эйзенхауэра, таймер фокусировки и трекер привычек
+- [x] CI с модульными и сквозными тестами ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] Открытый исходный код: README на 10 языках, лицензия MIT, правила проекта ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] Вёрстка для телефонов, планшетов и больших экранов ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] Перетаскивание во всём приложении ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] Анимации ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] Ссылка на GitHub и раздел «О программе» в приложении ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] Интерфейс на 10 языках ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] Шлифовка интерфейса, экран за экраном ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] Множественный выбор и массовое редактирование ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] Навигация с клавиатуры в списках задач ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] Уведомления о напоминаниях ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] Установка в виде приложения и работа офлайн ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] Сохранённые фильтры ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] Статистика по задачам, таймеру фокусировки и трекеру привычек ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] Markdown в заметках к задачам ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] Вид временной шкалы ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] Больше правил повторения ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] Архивация списков ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] Доступность ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] Быстрая работа даже с тысячами задач ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] Темы и акцентные цвета ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] Календарь: планирование задач без даты, вид «Расписание» ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## Разработка
 
 Требуется Node.js 24.

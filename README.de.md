@@ -51,6 +51,34 @@ Deine Daten bleiben in deinem Browser (localStorage). Es gibt kein Konto, und ni
 | `Esc` | Aufgabendetails schließen |
 | `?` | Alle Tastenkürzel anzeigen |
 
+## Roadmap
+
+Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.dev](https://tickdone.pages.dev) bereits live.
+
+- [x] Aufgaben, Listen, Tags, Schnelleingabe, Kalender, Eisenhower-Matrix, Fokus-Timer und Gewohnheitstracker
+- [x] CI mit Unit- und End-to-End-Tests ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] Open Source: README in 10 Sprachen, MIT-Lizenz, Projektregeln ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] Layouts für Smartphones, Tablets und große Bildschirme ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] Drag-and-drop überall ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] Animationen ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] GitHub-Link und Info-Bereich in der App ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] Oberfläche in 10 Sprachen ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] UI-Feinschliff, Bildschirm für Bildschirm ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] Mehrfachauswahl und Stapelbearbeitung ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] Tastaturnavigation in Aufgabenlisten ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] Benachrichtigungen für Erinnerungen ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] Als App installieren und offline nutzen ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] Gespeicherte Filter ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] Statistiken zu Aufgaben, Fokus-Timer und Gewohnheitstracker ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] Markdown in Aufgabennotizen ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] Zeitleistenansicht ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] Mehr Wiederholungsregeln ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] Listen archivieren ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] Barrierefreiheit ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] Schnell auch bei Tausenden von Aufgaben ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] Kalender: Aufgaben ohne Datum einplanen, Agenda-Ansicht ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## Entwicklung
 
 Benötigt Node.js 24.

@@ -1,0 +1,325 @@
+:root {
+  --primary: #4772fa;
+  --primary-soft: rgba(71, 114, 250, 0.1);
+  --primary-soft2: rgba(71, 114, 250, 0.18);
+  --p-high: #d52b24;
+  --p-med: #faa80c;
+  --p-low: #4772fa;
+  --p-none: #b6b6b6;
+  --danger: #e03131;
+  --overdue: #e03131;
+
+  --bg: #ffffff;
+  --bg-rail: #f3f3f3;
+  --bg-side: #f9f9f9;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(71, 114, 250, 0.1);
+  --bg-input: #f5f5f5;
+  --bg-pop: #ffffff;
+  --border: #ececec;
+  --border-strong: #dcdcdc;
+  --text: #191919;
+  --text-2: #666;
+  --text-3: #999;
+  --text-4: #bbb;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --radius: 6px;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --primary: #5b82fb;
+  --primary-soft: rgba(91, 130, 251, 0.16);
+  --primary-soft2: rgba(91, 130, 251, 0.26);
+  --bg: #1e1e1e;
+  --bg-rail: #151515;
+  --bg-side: #1a1a1a;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-active: rgba(91, 130, 251, 0.18);
+  --bg-input: #2a2a2a;
+  --bg-pop: #2a2a2a;
+  --border: #2e2e2e;
+  --border-strong: #3a3a3a;
+  --text: #e8e8e8;
+  --text-2: #aaa;
+  --text-3: #777;
+  --text-4: #555;
+  --p-none: #666;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+::selection {
+  background: var(--primary-soft2);
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- 通用浮层/菜单 ---------- */
+.popover {
+  position: fixed;
+  z-index: 1000;
+  background: var(--bg-pop);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  animation: pop-in 0.12s ease-out;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.menu {
+  padding: 4px;
+  min-width: 168px;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.menu-item:hover {
+  background: var(--bg-hover);
+}
+.menu-item.danger {
+  color: var(--danger);
+}
+.menu-item.disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.menu-icon {
+  width: 16px;
+  display: inline-flex;
+  justify-content: center;
+  color: var(--text-2);
+}
+.menu-item.danger .menu-icon {
+  color: var(--danger);
+}
+.menu-label {
+  flex: 1;
+}
+.menu-hint {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.menu-check {
+  color: var(--primary);
+}
+.menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
+}
+
+/* ---------- 通用控件 ---------- */
+.btn {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+}
+.btn:hover {
+  background: var(--bg-hover);
+}
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary);
+  filter: brightness(1.06);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.input {
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  padding: 0 10px;
+  outline: none;
+  width: 100%;
+}
+.input:focus {
+  border-color: var(--primary);
+}
+
+/* 模态框 */
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade 0.15s;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.modal {
+  background: var(--bg-pop);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  overflow: auto;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.modal-body {
+  padding: 8px 20px 16px;
+}
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px 18px;
+}
+
+/* 复选框：颜色随优先级 */
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--cb, var(--p-none));
+  background: var(--cb-bg, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #fff;
+}
+.checkbox:hover {
+  background: color-mix(in srgb, var(--cb, var(--p-none)) 15%, transparent);
+}
+.checkbox.checked {
+  background: var(--p-none);
+  border-color: var(--p-none);
+}
+.checkbox.wontdo {
+  background: var(--p-none);
+  border-color: var(--p-none);
+}
+
+/* 撤销提示 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  z-index: 1100;
+  font-size: 13px;
+  box-shadow: var(--shadow);
+  animation: toast-in 0.2s;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+}
+.toast button {
+  color: #8eaaff;
+  font-weight: 500;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  gap: 8px;
+  padding: 60px 20px;
+  text-align: center;
+  font-size: 13px;
+}

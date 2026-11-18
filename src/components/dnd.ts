@@ -170,7 +170,7 @@ class Session {
     const from = src.querySelectorAll('input')
     copy.querySelectorAll('input').forEach((x, i) => (x.value = from[i]?.value ?? x.value))
     for (const x of [copy, ...copy.querySelectorAll<HTMLElement>('*')])
-      for (const attr of ['data-dnd-row', 'data-dnd-card', 'data-dnd-view', 'data-flip', 'data-flip-col', 'data-exit', 'data-linger-node', 'data-task-id', 'data-kanban-col', 'data-group', 'id'])
+      for (const attr of ['data-dnd-row', 'data-dnd-card', 'data-dnd-view', 'data-flip', 'data-flip-col', 'data-exit', 'data-motion', 'data-task-id', 'data-kanban-col', 'data-group', 'id'])
         x.removeAttribute(attr)
     copy.classList.add('dnd-copy')
     copy.classList.remove('selected', 'dnd-source')

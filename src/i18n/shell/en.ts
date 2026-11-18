@@ -45,5 +45,4 @@ export default {
   'shell.toast.linkCopied': 'Link copied',
   'shell.toast.taskNotFound': 'This task no longer exists',
   'shell.detail.editNotes': 'Edit notes',
-  'shell.detail.markdownHint': 'Markdown: **bold**, *italic*, `code`, - [ ] checklist, [link](https://…). Esc to finish',
 } as const

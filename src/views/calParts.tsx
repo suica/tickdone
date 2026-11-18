@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { toggleTask, setUI, useUI } from '../store'
 import type { Task } from '../types'
 import { Icon } from '../components/Icon'
@@ -27,6 +27,8 @@ export function CalTask({ task, color, showTime, block, range, className = '', o
   const ui = useUI()
   const t = useT()
   const done = task.status !== 0
+  // the box pops when it is ticked or unticked here
+  const [pop, setPop] = useState(false)
   let label = range
   if (!label && block && task.dueTime) {
     const s = toMin(task.dueTime)
@@ -47,11 +49,13 @@ export function CalTask({ task, color, showTime, block, range, className = '', o
       onDoubleClick={(e) => e.stopPropagation()}
     >
       <span
-        className={'cal-cb' + (done ? ' checked' : '')}
+        className={'cal-cb' + (done ? ' checked' : '') + (pop ? ' cal-cb-pop' : '')}
         onClick={(e) => {
           e.stopPropagation()
+          setPop(true)
           toggleTask(task.id)
         }}
+        onAnimationEnd={() => setPop(false)}
         title={done ? t('calendar.markUndone') : t('calendar.markDone')}
       >
         {done && <Icon name="check" size={9} stroke={3} />}

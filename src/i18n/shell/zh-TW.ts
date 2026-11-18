@@ -47,5 +47,4 @@ export default {
   'shell.toast.linkCopied': '已複製連結',
   'shell.toast.taskNotFound': '該任務已不存在',
   'shell.detail.editNotes': '編輯描述',
-  'shell.detail.markdownHint': '支援 Markdown：**粗體**、*斜體*、`程式碼`、- [ ] 清單、[連結](https://…)。按 Esc 完成',
 } satisfies Catalog<typeof en>

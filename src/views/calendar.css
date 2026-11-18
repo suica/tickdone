@@ -172,6 +172,36 @@
   background: var(--p-none);
   border-color: var(--p-none);
 }
+/* ticked or unticked on the chip: a short pop, the check mark scales in */
+.cal-cb {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.cal-cb:active {
+  transform: scale(0.8);
+}
+.cal-cb-pop {
+  animation: cal-cb-pop var(--dur-slow) var(--ease-out);
+}
+.cal-cb-pop.checked > svg {
+  animation: cal-cb-tick var(--dur) var(--ease-spring) both;
+}
+@keyframes cal-cb-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  45% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes cal-cb-tick {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
 
 /* Blocks in the time grid */
 .cal-task.block {

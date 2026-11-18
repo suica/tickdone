@@ -10,7 +10,7 @@ import { DatePicker } from './DatePicker'
 import { Icon } from './Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { useRowSwipe, type SwipeSide } from './rowSwipe'
-import { toggleWithMotion, useLinger } from './taskMotion'
+import { justLanded, toggleWithMotion, useLinger } from './taskMotion'
 import { moveTaskTo, TaskDragContext } from './taskDnd'
 import { clickRow } from './batchActions'
 
@@ -25,20 +25,35 @@ function Tick() {
   )
 }
 
+/** The burst around a checkbox that was just ticked: a ring and a few sparks in the checkbox colour. */
+const SPARKS = [0, 60, 120, 180, 240, 300]
+function Burst() {
+  return (
+    <span className="cb-burst" aria-hidden>
+      {SPARKS.map((a) => (
+        <i key={a} style={{ '--a': a + 'deg' } as CSSProperties} />
+      ))}
+    </span>
+  )
+}
+
 /**
- * The task checkbox. Completing fills it with the priority colour, strokes the tick in and bounces slightly;
- * un-completing plays it backwards.
+ * The task checkbox. It presses in under the pointer; completing fills it with the priority colour, strokes the
+ * tick in, pops and sends out a small burst; un-completing plays it backwards. Batch changes skip the burst.
  */
 export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void }) {
   const t = useT()
-  const phase = useLinger().get(task.id)?.phase
+  const lg = useLinger().get(task.id)
+  const phase = lg?.phase
   const color = priorityColor(task.priority)
   const cls = phase === 'check' ? ' cb-checking' : phase === 'uncheck' ? ' cb-unchecking' : task.status === 2 ? ' checked' : task.status === -1 ? ' wontdo' : ''
   const tinted = task.status === 0 || !!phase
+  // a row that just moved into the completed group fades its colour to grey
+  const landing = !phase && task.status === 2 && task.priority > 0 && justLanded(task.id)
   return (
     <span
-      className={'checkbox cb' + cls}
-      style={tinted ? ({ '--cb': color } as CSSProperties) : undefined}
+      className={'checkbox cb' + cls + (lg?.light ? ' cb-light' : '')}
+      style={tinted || landing ? ({ '--cb': color } as CSSProperties) : undefined}
       role="checkbox"
       title={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
       aria-label={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
@@ -50,8 +65,9 @@ export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void
         ;(onToggle ?? (() => toggleWithMotion(task.id)))()
       }}
     >
-      {phase && <span className="cb-fill" />}
+      {(phase || landing) && <span className={'cb-fill' + (landing ? ' cb-landing' : '')} />}
       {(phase || task.status === 2) && <Tick />}
+      {phase === 'check' && !lg?.light && <Burst />}
       {task.status === -1 && !phase && <Icon name="close" size={11} stroke={3} />}
     </span>
   )

@@ -267,7 +267,7 @@ export function TaskListPane() {
             }
           }}
         >
-          <div className="list-content" key={view}>
+          <div className="list-content" key={view} data-motion-host>
             {canAdd && !phone && (
               <div className="list-add">
                 <QuickAdd defaults={viewDefaults(view, data)} key={view} />
@@ -400,7 +400,7 @@ function TaskNode({ task, tree, depth, showList }: { task: Task; tree: TaskTree;
   const folded = !!ui.collapsed[key]
   useLayoutEffect(() => maybeEnter(task.id, ref.current), [task.id])
   return (
-    <div className="task-node" ref={ref} data-exit={task.id} data-linger-node={task.id}>
+    <div className="task-node" ref={ref} data-exit={task.id} data-motion={'t:' + task.id}>
       <TaskRow task={task} showList={showList} depth={depth} fold={kids?.length ? { folded, toggle: () => toggleCollapsed(key) } : undefined} />
       {kids && kids.length > 0 && <Children tasks={kids} tree={tree} depth={depth + 1} showList={showList} folded={folded} />}
     </div>
@@ -422,9 +422,9 @@ function Children({ tasks, tree, depth, showList, folded }: { tasks: Task[]; tre
 function GroupSection({ g, name, tree, listId, showList, collapsed, onToggle, keep }: { g: Group; name: string; tree: TaskTree; listId?: string; showList: boolean; collapsed: boolean; onToggle: () => void; keep: boolean }) {
   const t = useT()
   return (
-    <section className="group" data-group={g.key} data-exit={'group:' + g.key} data-keep={keep || undefined}>
+    <section className="group" data-group={g.key} data-exit={'group:' + g.key} data-motion={'g:' + g.key} data-keep={keep || undefined}>
       {name && (
-        <div className={'group-head' + (collapsed ? ' is-collapsed' : '')} data-group-head={g.key} onClick={onToggle} onContextMenu={(e) => sectionMenu(e, listId, g)}>
+        <div className={'group-head' + (collapsed ? ' is-collapsed' : '')} data-group-head={g.key} data-motion={'h:' + g.key} onClick={onToggle} onContextMenu={(e) => sectionMenu(e, listId, g)}>
           <Icon name="chevronDown" size={14} className="chev" />
           {g.pinned && <Icon name="pin" size={14} className="group-pin" />}
           <span className={g.overdue ? 'overdue' : ''}>{name}</span>
@@ -472,8 +472,8 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
     return (
       <>
         {[...byDay].map(([day, ts]) => (
-          <section className="group" key={day} data-group={'done:' + day} data-done data-exit={'done:' + day}>
-            <div className="group-head static">
+          <section className="group" key={day} data-group={'done:' + day} data-done data-exit={'done:' + day} data-motion={'g:done:' + day}>
+            <div className="group-head static" data-motion={'h:done:' + day}>
               <span>{day === format(new Date(), 'yyyy-MM-dd') ? t('common.today') : day === '—' ? t('common.noDate') : fmtMonthDay(parseISO(day))}</span>
               <span className="group-count">{ts.length}</span>
             </div>
@@ -488,8 +488,8 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
     )
   }
   return (
-    <section className="group group-done" data-group="__done" data-done data-exit="__done">
-      <div className={'group-head' + (isCollapsed ? ' is-collapsed' : '')} onClick={() => toggleCollapsed(key)}>
+    <section className="group group-done" data-group="__done" data-done data-exit="__done" data-motion="g:__done">
+      <div className={'group-head' + (isCollapsed ? ' is-collapsed' : '')} data-motion="h:__done" onClick={() => toggleCollapsed(key)}>
         <Icon name="chevronDown" size={14} className="chev" />
         <span>{t('common.list.completed')}</span>
         <span className="group-count">{tasks.length}</span>
@@ -573,7 +573,7 @@ function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskLis
               <div className="kanban-add">
                 <QuickAdd defaults={{ listId, sectionId: c.id }} placeholder={t('tasks.quickAdd.kanbanPlaceholder')} compact />
               </div>
-              <div className="kanban-cards">
+              <div className="kanban-cards" data-motion-host>
                 {ts.map((x) => (
                   <KanbanCard key={x.id} task={x} tree={tree} />
                 ))}
@@ -618,7 +618,7 @@ function KanbanCard({ task, tree }: { task: Task; tree: TaskTree }) {
   const folded = !!ui.collapsed[key]
   useLayoutEffect(() => maybeEnter(task.id, ref.current), [task.id])
   return (
-    <div className="kanban-card" ref={ref} data-dnd-card={task.id} data-flip={task.id} data-exit={task.id} data-linger-node={task.id}>
+    <div className="kanban-card" ref={ref} data-dnd-card={task.id} data-flip={task.id} data-exit={task.id} data-motion={'t:' + task.id}>
       <TaskRow task={task} fold={kids?.length ? { folded, toggle: () => toggleCollapsed(key) } : undefined} />
       {kids && kids.length > 0 && (
         <TaskDragContext.Provider value={null}>

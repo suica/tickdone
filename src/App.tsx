@@ -3,10 +3,13 @@ import './App.css'
 import { Icon } from './components/Icon'
 import { Dialogs } from './components/Dialogs'
 import { ContextMenu } from './components/ContextMenu'
+import { Drawer } from './components/Drawer'
 import { Sidebar } from './components/Sidebar'
 import { TaskListPane } from './components/TaskListPane'
-import { TaskDetail } from './components/TaskDetail'
-import { setUI, undoToast, useData, useUI, type Module } from './store'
+import { closeDetail, TaskDetail } from './components/TaskDetail'
+import { GITHUB_URL } from './links'
+import { getUI, setUI, undoToast, useData, useUI, type Module } from './store'
+import { usePhone } from './viewport'
 import CalendarView from './views/CalendarView'
 import MatrixView from './views/MatrixView'
 import PomoView from './views/PomoView'
@@ -21,14 +24,27 @@ const RAIL: { id: Module; icon: string; title: string }[] = [
   { id: 'habit', icon: 'habit', title: '习惯打卡' },
   { id: 'search', icon: 'search', title: '搜索' },
 ]
+/** Phone bottom bar: every module except search (search lives at the top of the drawer). */
+const TABS = RAIL.filter((r) => r.id !== 'search')
+
+const THEME_COLOR = { light: '#ffffff', dark: '#1e1e1e' }
+
+const openModule = (id: Module) => setUI({ module: id, selectedTaskId: undefined })
 
 export default function App() {
   const ui = useUI()
   const data = useData()
+  const phone = usePhone()
 
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.theme
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[data.settings.theme] ?? THEME_COLOR.light)
   }, [data.settings.theme])
+
+  // The drawer belongs to the phone layout; picking a list or another module closes it.
+  useEffect(() => {
+    if (getUI().drawerOpen) setUI({ drawerOpen: false })
+  }, [phone, ui.view, ui.module])
 
   // 全局快捷键
   useEffect(() => {
@@ -58,7 +74,7 @@ export default function App() {
         setUI({ module: 'tasks' })
         setTimeout(() => document.querySelector<HTMLInputElement>('.quick-add-input')?.focus(), 0)
       } else if (e.key === '?') setUI({ dialog: { kind: 'shortcuts' } })
-      else if (e.key === 'Escape' && ui.selectedTaskId) setUI({ selectedTaskId: undefined })
+      else if (e.key === 'Escape' && ui.selectedTaskId) closeDetail()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -66,36 +82,55 @@ export default function App() {
 
   return (
     <div className="app">
-      <nav className="rail">
-        <div className="rail-avatar" title="TickDone">T</div>
-        {RAIL.map((r) => (
-          <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} onClick={() => setUI({ module: r.id, selectedTaskId: undefined })}>
-            <Icon name={r.icon} size={22} />
+      {!phone && (
+        <nav className="rail">
+          <div className="rail-avatar" title="TickDone">T</div>
+          {RAIL.map((r) => (
+            <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} onClick={() => openModule(r.id)}>
+              <Icon name={r.icon} size={22} />
+            </button>
+          ))}
+          <div style={{ flex: 1 }} />
+          <a className="rail-btn" href={GITHUB_URL} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
+            <Icon name="github" size={20} />
+          </a>
+          <button className="rail-btn" title="设置" onClick={() => setUI({ dialog: { kind: 'settings' } })}>
+            <Icon name="settings" size={22} />
           </button>
-        ))}
-        <div style={{ flex: 1 }} />
-        <button className="rail-btn" title="设置" onClick={() => setUI({ dialog: { kind: 'settings' } })}>
-          <Icon name="settings" size={22} />
-        </button>
-      </nav>
-
-      {ui.module === 'tasks' && (
-        <>
-          {!ui.sidebarHidden && <Sidebar />}
-          <TaskListPane />
-          <TaskDetail />
-        </>
+        </nav>
       )}
-      {ui.module === 'calendar' && <CalendarView />}
-      {ui.module === 'matrix' && <MatrixView />}
-      {ui.module === 'pomo' && <PomoView />}
-      {ui.module === 'habit' && <HabitView />}
-      {ui.module === 'search' && <SearchView />}
+
+      {/* keyed by module so switching modules fades the new one in */}
+      <div className="app-main" key={ui.module}>
+        {ui.module === 'tasks' && (
+          <>
+            {!phone && !ui.sidebarHidden && <Sidebar />}
+            <TaskListPane />
+            <TaskDetail />
+          </>
+        )}
+        {ui.module === 'calendar' && <CalendarView />}
+        {ui.module === 'matrix' && <MatrixView />}
+        {ui.module === 'pomo' && <PomoView />}
+        {ui.module === 'habit' && <HabitView />}
+        {ui.module === 'search' && <SearchView />}
+      </div>
+
+      {phone && (
+        <nav className="tabbar">
+          {TABS.map((r) => (
+            <button key={r.id} className={'tabbar-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} aria-label={r.title} aria-current={ui.module === r.id ? 'page' : undefined} onClick={() => openModule(r.id)}>
+              <Icon name={r.icon} size={24} />
+            </button>
+          ))}
+        </nav>
+      )}
+      {phone && <Drawer />}
 
       <ContextMenu />
       <Dialogs />
       {ui.toast && (
-        <div className="toast" key={ui.toast.id}>
+        <div className="toast" key={ui.toast.id} role="status">
           <span>{ui.toast.text}</span>
           {ui.toast.undo && <button onClick={undoToast}>撤销</button>}
         </div>

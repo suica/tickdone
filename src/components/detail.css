@@ -1,5 +1,8 @@
 /* ---------- 详情 ---------- */
+/* Desktop: a column next to the list. Its width follows the screen until the user drags the
+   divider (TaskDetail then sets an inline flex-basis). */
 .detail {
+  position: relative;
   flex: 1 1 0;
   min-width: 320px;
   max-width: 560px;
@@ -9,6 +12,58 @@
   flex-direction: column;
   min-height: 0;
 }
+@media (min-width: 1920px) {
+  .detail {
+    max-width: clamp(560px, calc(560px + (100vw - 1920px) * 0.4), 840px);
+  }
+}
+.detail > .detail-inner {
+  animation: detail-swap var(--dur) var(--ease-out);
+}
+@keyframes detail-swap {
+  from {
+    opacity: 0;
+  }
+}
+.detail-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  width: 8px;
+  z-index: 3;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+.detail-divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: var(--primary);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+}
+.detail-divider:hover::after {
+  opacity: 1;
+  transition-delay: 0.15s;
+}
+.detail-divider.active::after,
+.detail-divider:focus-visible::after {
+  opacity: 1;
+  transition-delay: 0s;
+}
+body.col-resizing,
+body.col-resizing * {
+  cursor: col-resize !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Calendar/matrix/search on desktop, and every detail on tablets: a panel over the right edge. */
 .detail-float {
   position: fixed;
   top: 0;
@@ -22,12 +77,14 @@
   z-index: 500;
   display: flex;
   flex-direction: column;
-  animation: slide-in 0.18s ease-out;
+  animation: detail-in var(--dur-slow) var(--ease-out);
 }
-@keyframes slide-in {
+.detail-float.detail-overlay {
+  width: clamp(360px, 45vw, 480px);
+}
+@keyframes detail-in {
   from {
-    transform: translateX(30px);
-    opacity: 0;
+    transform: translateX(100%);
   }
 }
 .detail-float-close {
@@ -35,6 +92,76 @@
   top: 12px;
   right: 52px;
   z-index: 1;
+}
+
+/* Phones: a full-screen page above the bottom bar, with a back button; swipe right to go back. */
+.detail-page {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  animation: detail-in var(--dur-slow) var(--ease-out);
+  touch-action: pan-y;
+}
+.detail-nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 16px 0 4px;
+}
+.detail-back {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  -webkit-tap-highlight-color: transparent;
+}
+.detail-back:active {
+  background: var(--bg-hover);
+}
+.detail-nav-title {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail-page .detail-scroll {
+  touch-action: pan-y;
+  padding: 14px 16px;
+}
+.detail-page .detail-top {
+  padding: 4px 8px 6px 16px;
+}
+.detail-page .detail-top .icon-btn,
+.detail-page .detail-foot .icon-btn {
+  width: 40px;
+  height: 40px;
+}
+.detail-page .detail-date,
+.detail-page .detail-list,
+.detail-page .detail-addsub {
+  min-height: 40px;
+}
+.detail-page .detail-foot {
+  padding: 2px 6px 2px 8px;
+}
+.detail-page .subtask {
+  height: 44px;
+}
+.detail-page .detail-meta {
+  padding: 0 16px 8px;
 }
 .detail-inner {
   flex: 1;
@@ -114,15 +241,75 @@
   color: var(--text-4);
 }
 .subtasks {
+  position: relative;
   margin-top: 8px;
 }
 .subtask {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
   height: 34px;
   border-radius: 4px;
   padding-right: 4px;
+  background: var(--bg);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.subtask input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+/* Drag handle in the gutter left of the checkbox; shown on hover (always on touch screens). */
+.subtask-grip {
+  position: absolute;
+  left: -18px;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-4);
+  opacity: 0;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.subtask:hover .subtask-grip {
+  opacity: 1;
+}
+@media (hover: none) {
+  .subtask .subtask-grip {
+    opacity: 0.7;
+  }
+  .subtask .subtask-del {
+    opacity: 0.6;
+  }
+}
+.detail-page .subtask-grip {
+  left: -16px;
+  width: 16px;
+}
+.subtask.dragging {
+  z-index: 2;
+  box-shadow: var(--shadow);
+  cursor: grabbing;
+}
+.subtask.dragging .subtask-grip {
+  opacity: 1;
+}
+.subtask-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 1px;
+  background: var(--primary);
+  pointer-events: none;
+  z-index: 3;
 }
 .subtask input {
   flex: 1;

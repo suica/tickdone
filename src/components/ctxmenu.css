@@ -30,17 +30,33 @@
   color: var(--primary);
 }
 
-@media (max-width: 900px) {
-  .sidebar {
-    display: none;
-  }
-  .detail {
-    position: fixed;
-    inset: 0 0 0 56px;
-    max-width: none;
-    z-index: 400;
-  }
-  .detail:not(:has(.detail-inner)) {
-    display: none;
-  }
+/* Phone: the menu is a bottom sheet (see Popover) */
+.ctx-title {
+  padding: 0 8px 10px;
+  font-size: 13px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sheet .ctx {
+  min-width: 0;
+}
+.sheet .ctx-head {
+  padding: 0 12px;
+}
+.sheet .ctx-label {
+  padding: 0 8px 4px;
+}
+.sheet .ctx-btn {
+  height: 44px;
+}
+.sheet .ctx-btn:hover {
+  background: none;
+  color: var(--text-2);
+}
+.sheet .ctx-btn.on,
+.sheet .ctx-btn:active {
+  background: var(--bg-hover);
+  color: var(--primary);
 }

@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': '‘{title}’ 완료',
   'core.toast.completedNext': '완료했습니다. 다음: {date}',
+  'core.toast.skipped': '건너뛰었습니다. 다음: {date}',
   'core.toast.wontDo': '하지 않음으로 표시했습니다',
   'core.toast.deletedForever': '영구 삭제했습니다',
   'core.toast.deleted': '삭제했습니다. 휴지통에서 복원할 수 있습니다',

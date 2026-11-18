@@ -26,6 +26,8 @@ export const fmtMonthDay = (d: Date) => dtf({ month: 'short', day: 'numeric' }).
 export const fmtFullDate = (d: Date) => dtf({ year: 'numeric', month: 'short', day: 'numeric' }).format(d)
 /** "November 2026", "2026年11月" */
 export const fmtMonthYear = (d: Date) => dtf({ year: 'numeric', month: 'long' }).format(d)
+/** "November", "11月" — `month` is 1–12. */
+export const fmtMonthName = (month: number) => dtf({ month: 'long' }).format(new Date(2000, month - 1, 1))
 /** "Wed", "周三", "水" */
 export const fmtWeekday = (d: Date, width: 'narrow' | 'short' | 'long' = 'short') => dtf({ weekday: width }).format(d)
 /** "3:00 PM", "15:00" — `hhmm` is "HH:mm". */

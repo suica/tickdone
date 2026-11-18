@@ -19,6 +19,7 @@ export default {
   'shell.task.pin': 'Fixar',
   'shell.task.unpin': 'Desafixar',
   'shell.task.wontDo': 'Não farei',
+  'shell.task.skip': 'Pular esta ocorrência',
   'shell.task.reopen': 'Reabrir',
   'shell.task.tags': 'Etiquetas',
   'shell.task.startFocus': 'Iniciar foco',

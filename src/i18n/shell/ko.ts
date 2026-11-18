@@ -19,6 +19,7 @@ export default {
   'shell.task.pin': '고정',
   'shell.task.unpin': '고정 해제',
   'shell.task.wontDo': '하지 않음',
+  'shell.task.skip': '이번 회차 건너뛰기',
   'shell.task.reopen': '하지 않음 취소',
   'shell.task.tags': '태그',
   'shell.task.startFocus': '집중 시작',

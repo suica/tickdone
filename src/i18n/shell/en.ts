@@ -17,6 +17,7 @@ export default {
   'shell.task.pin': 'Pin',
   'shell.task.unpin': 'Unpin',
   'shell.task.wontDo': "Won't do",
+  'shell.task.skip': 'Skip this occurrence',
   'shell.task.reopen': 'Reopen',
   'shell.task.tags': 'Tags',
   'shell.task.startFocus': 'Start focus',

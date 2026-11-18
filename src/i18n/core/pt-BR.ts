@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': 'Concluída: “{title}”',
   'core.toast.completedNext': 'Concluída. Próxima: {date}',
+  'core.toast.skipped': 'Pulada. Próxima: {date}',
   'core.toast.wontDo': 'Marcada como não farei',
   'core.toast.deletedForever': 'Excluída para sempre',
   'core.toast.deleted': 'Excluída. Você pode restaurá-la da Lixeira',

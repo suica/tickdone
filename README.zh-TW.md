@@ -52,6 +52,7 @@ TickDone 是一款免費、開源的待辦清單與時間管理工具，直接�
 - 🗂️ **列表與看板檢視**，可分組和排序。
 - 🔎 **篩選器**：組合清單、標籤、優先順序、日期（已逾期、今天、本週、自訂範圍……）、關鍵字和已完成的任務，做成你自己的智慧清單，並在側欄顯示名稱、圖示和顏色。
 - 📝 **描述支援 Markdown**：標題、粗體、斜體、刪除線、程式碼、連結、清單、引用，以及可以直接勾選的待辦清單；點擊描述即可編輯原文。
+- 🔁 **重複規則**：每 N 天、週、月、年；指定星期幾；每月第 N 天、最後一天或第 N 個/最後一個星期幾；每年某一天；僅工作日。可在 N 次後或某天結束，從截止日期或完成日期起算，可跳過本次，快速新增時還能直接輸入「每2週」「每月最後一個週五」。
 - 📅 **行事曆**：月、週、日和列表檢視。把任務拖到另一天或另一個時間，或拖曳時間區塊的下緣來調整時長。
 - 🔔 **訂閱日曆**：訂閱任何提供 iCal 網址（.ics 或 webcal://）的日曆，例如工作、學校、團隊或節假日日曆，它們的行程會以唯讀方式、用各自的顏色顯示在行事曆裡。會自動更新，離線也能查看。
 - 🧭 **四象限**：依緊急程度和重要性為任務分類，在象限之間拖曳任務即可變更優先順序。
@@ -160,7 +161,7 @@ npm run dev        # http://localhost:5173
 - [ ] 任務、番茄專注和習慣打卡的統計 ([#20](https://github.com/suica/tickdone/issues/20))
 - [x] 任務備註支援 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 時間軸檢視 ([#22](https://github.com/suica/tickdone/issues/22))
-- [ ] 更多重複規則 ([#23](https://github.com/suica/tickdone/issues/23))
+- [x] 更多重複規則 ([#23](https://github.com/suica/tickdone/issues/23))
 - [ ] 封存清單 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 無障礙 ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] 上千個任務依然流暢 ([#26](https://github.com/suica/tickdone/issues/26))

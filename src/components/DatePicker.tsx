@@ -4,8 +4,9 @@ import type { RepeatRule } from '../types'
 import { fmt, todayStr } from '../dates'
 import { useData } from '../store'
 import { useT, type MessageKey } from '../i18n'
-import { fmtMonthDay, fmtMonthYear, fmtTime } from '../i18n/format'
-import { reminderText, repeatText, dayName } from './dateLabels'
+import { fmtMonthDay, fmtMonthName, fmtMonthYear, fmtTime } from '../i18n/format'
+import { daysInMonth, reanchor, sameRule, withDays } from '../repeat'
+import { reminderText, repeatText, dayName, nthName } from './dateLabels'
 import { Icon } from './Icon'
 import { Popover, anchorOf, type Anchor } from './Popover'
 import './datepicker.css'
@@ -42,8 +43,6 @@ function parseTime(s: string): string | null {
   return `${pad(h)}:${pad(m)}`
 }
 
-const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
-
 /* ---------- component ---------- */
 
 type Sub = { kind: 'time' | 'reminder' | 'repeat'; anchor: Anchor }
@@ -62,6 +61,8 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
   const patch = (p: Partial<DateValue>) =>
     setDraft((d) => {
       const n = { ...d, ...p }
+      // A rule that repeats the day of the date (weekly on its weekday, monthly on its day) follows a new date
+      if (p.dueDate && n.repeat && !('repeat' in p)) n.repeat = reanchor(n.repeat, d.dueDate, p.dueDate)
       // Setting a time, reminder or repeat without a date picks today
       if (!n.dueDate && (n.dueTime || n.reminder != null || n.repeat)) n.dueDate = today
       return n
@@ -265,7 +266,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
         </Popover>
       )}
       {sub?.kind === 'repeat' && (
-        <Popover anchor={sub.anchor} onClose={() => setSub(null)} width={240} className="dp-sub">
+        <Popover anchor={sub.anchor} onClose={() => setSub(null)} width={290} className="dp-sub">
           <RepeatPanel
             value={draft.repeat ?? null}
             date={draft.dueDate ?? today}
@@ -408,8 +409,10 @@ function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | und
   )
 }
 
-type Unit = 'daily' | 'weekly' | 'monthly' | 'yearly'
-const UNIT_LABEL: Record<Unit, MessageKey> = { daily: 'misc.repeat.unit.daily', weekly: 'misc.repeat.unit.weekly', monthly: 'misc.repeat.unit.monthly', yearly: 'misc.repeat.unit.yearly' }
+type Unit = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'weekdays'
+const UNIT_LABEL: Record<Exclude<Unit, 'weekdays'>, MessageKey> = { daily: 'misc.repeat.unit.daily', weekly: 'misc.repeat.unit.weekly', monthly: 'misc.repeat.unit.monthly', yearly: 'misc.repeat.unit.yearly' }
+const NTH = [1, 2, 3, 4, -1]
+const clampInt = (v: number, lo: number, hi: number, fb: number) => (Number.isFinite(v) ? Math.max(lo, Math.min(hi, Math.round(v))) : fb)
 
 function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule | null; date: string; weekStartsOn: 0 | 1; onPick: (r: RepeatRule | null) => void }) {
   const t = useT()
@@ -419,22 +422,18 @@ function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule 
     { label: t('core.repeat.none'), rule: null },
     { label: t('core.repeat.daily'), rule: { kind: 'daily', interval: 1 } },
     { label: t('core.repeat.weeklyOn', { days: dayName(dow, 'long') }), rule: { kind: 'weekly', interval: 1, days: [dow] } },
-    { label: t('misc.repeat.monthlyOn', { day: d.getDate() }), rule: { kind: 'monthly', interval: 1 } },
-    { label: t('misc.repeat.yearlyOn', { date: fmtMonthDay(d) }), rule: { kind: 'yearly', interval: 1 } },
+    { label: t('misc.repeat.monthlyOn', { day: d.getDate() }), rule: { kind: 'monthly', interval: 1, day: d.getDate() } },
+    { label: t('misc.repeat.yearlyOn', { date: fmtMonthDay(d) }), rule: { kind: 'yearly', interval: 1, month: d.getMonth() + 1, day: d.getDate() } },
     { label: t('core.repeat.weekdays'), rule: { kind: 'weekdays' } },
   ]
-  const isPreset = presets.some((p) => same(p.rule, value))
+  const isPreset = presets.some((p) => sameRule(p.rule, value))
   const [custom, setCustom] = useState(false)
-  const init = value && value.kind !== 'weekdays' ? value : null
-  const [interval, setIntv] = useState(init?.interval ?? 1)
-  const [unit, setUnit] = useState<Unit>((init?.kind as Unit) ?? 'weekly')
-  const [wdays, setWdays] = useState<number[]>(init?.kind === 'weekly' && init.days?.length ? init.days : [dow])
 
   if (!custom)
     return (
       <div className="menu">
         {presets.map((p) => {
-          const on = same(p.rule, value)
+          const on = sameRule(p.rule, value)
           return (
             <div key={p.label} className={'menu-item' + (on ? ' dp-checked' : '')} onClick={() => onPick(p.rule)}>
               <span className="menu-label">{p.label}</span>
@@ -443,52 +442,189 @@ function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule 
           )
         })}
         <div className="menu-divider" />
-        <div className={'menu-item' + (value && !isPreset ? ' dp-checked' : '')} onClick={() => setCustom(true)}>
+        <div className={'menu-item dp-rep-custom' + (value && !isPreset ? ' dp-checked' : '')} onClick={() => setCustom(true)}>
           <span className="menu-label">{t('misc.repeat.custom')}</span>
           {value && !isPreset && <span className="menu-hint">{repeatText(value, date)}</span>}
           <span className="menu-hint">›</span>
         </div>
       </div>
     )
+  return <RepeatEditor value={value} date={date} weekStartsOn={weekStartsOn} onBack={() => setCustom(false)} onPick={onPick} />
+}
+
+/** The custom repeat editor: frequency and interval, the days, how the series ends and where it counts from. */
+function RepeatEditor({ value, date, weekStartsOn, onBack, onPick }: { value: RepeatRule | null; date: string; weekStartsOn: 0 | 1; onBack: () => void; onPick: (r: RepeatRule) => void }) {
+  const t = useT()
+  const d = parseISO(date)
+  const dow = getDay(d)
+  const init = value ? withDays(value, date) : null
+  const [unit, setUnit] = useState<Unit>(init?.kind ?? 'weekly')
+  const [interval, setIntv] = useState(init && init.kind !== 'weekdays' ? init.interval : 1)
+  const [wdays, setWdays] = useState<number[]>(init?.kind === 'weekly' && init.days?.length ? init.days : [dow])
+  const m = init?.kind === 'monthly' ? init : null
+  const [monthMode, setMonthMode] = useState<'day' | 'nth'>(m?.nth != null ? 'nth' : 'day')
+  const [mday, setMday] = useState(m?.day ?? d.getDate())
+  const [nth, setNth] = useState(m?.nth ?? Math.min(4, Math.ceil(d.getDate() / 7)))
+  const [nthWd, setNthWd] = useState(m?.weekday ?? dow)
+  const y = init?.kind === 'yearly' ? init : null
+  const [ymonth, setYmonth] = useState(y?.month ?? d.getMonth() + 1)
+  const [yday, setYday] = useState(y?.day ?? d.getDate())
+  const [endMode, setEndMode] = useState<'never' | 'count' | 'until'>(value?.count ? 'count' : value?.until ? 'until' : 'never')
+  const [count, setCount] = useState(value?.count ?? 5)
+  const [until, setUntil] = useState(value?.until ?? fmt(addMonths(d, 3)))
+  const [from, setFrom] = useState<'due' | 'completion'>(value?.from ?? 'due')
 
   const order = Array.from({ length: 7 }, (_, i) => (i + weekStartsOn) % 7)
+  const n = clampInt(interval, 1, 999, 1)
+  const ydays = daysInMonth(2000, ymonth) // 2000 was a leap year: Feb 29 can be chosen
+
   const build = (): RepeatRule => {
-    const n = Math.max(1, Math.min(999, interval || 1))
-    if (unit === 'weekly') return { kind: 'weekly', interval: n, days: wdays.length ? [...wdays].sort() : [dow] }
-    return { kind: unit, interval: n }
+    const opts = {
+      ...(from === 'completion' ? { from } : {}),
+      ...(endMode === 'count' ? { count: clampInt(count, 1, 999, 1), ...(value?.done ? { done: value.done } : {}) } : {}),
+      ...(endMode === 'until' && until ? { until } : {}),
+    }
+    switch (unit) {
+      case 'weekdays':
+        return { kind: 'weekdays', ...opts }
+      case 'daily':
+        return { kind: 'daily', interval: n, ...opts }
+      case 'weekly':
+        return { kind: 'weekly', interval: n, days: wdays.length ? [...wdays].sort() : [dow], ...opts }
+      case 'monthly':
+        return monthMode === 'nth' ? { kind: 'monthly', interval: n, nth, weekday: nthWd, ...opts } : { kind: 'monthly', interval: n, day: mday, ...opts }
+      case 'yearly':
+        return { kind: 'yearly', interval: n, month: ymonth, day: Math.min(yday, ydays), ...opts }
+    }
   }
 
   return (
-    <div className="dp-custom">
+    <div className="dp-custom dp-rep">
       <div className="dp-custom-title">
-        <button className="dp-nav" onClick={() => setCustom(false)}>
+        <button className="dp-nav" onClick={onBack} aria-label={t('common.back')}>
           <Icon name="chevronLeft" size={14} />
         </button>
         {t('misc.repeat.customTitle')}
       </div>
+
       <div className="dp-custom-line">
-        <span>{t('misc.repeat.every')}</span>
-        <input className="input dp-custom-n" type="number" min={1} max={999} value={interval} onChange={(e) => setIntv(parseInt(e.target.value) || 1)} />
-        <select className="input dp-custom-u" value={unit} onChange={(e) => setUnit(e.target.value as Unit)}>
-          {(Object.keys(UNIT_LABEL) as Unit[]).map((u) => (
+        {unit !== 'weekdays' && (
+          <>
+            <span>{t('misc.repeat.every')}</span>
+            <input className="input dp-custom-n" type="number" min={1} max={999} value={interval} aria-label={t('misc.repeat.every')} onChange={(e) => setIntv(parseInt(e.target.value) || 1)} />
+          </>
+        )}
+        <select className="input dp-custom-u" value={unit} onChange={(e) => setUnit(e.target.value as Unit)} aria-label={t('misc.date.repeat')}>
+          {(Object.keys(UNIT_LABEL) as (keyof typeof UNIT_LABEL)[]).map((u) => (
             <option key={u} value={u}>
-              {t(UNIT_LABEL[u], { count: interval })}
+              {t(UNIT_LABEL[u], { count: n })}
             </option>
           ))}
+          <option value="weekdays">{t('misc.repeat.unit.weekdays')}</option>
         </select>
       </div>
+
       {unit === 'weekly' && (
-        <div className="dp-custom-week">
+        <div className="dp-custom-week" role="group" aria-label={t('misc.repeat.on')}>
           {order.map((i) => (
-            <button key={i} className={wdays.includes(i) ? 'on' : ''} onClick={() => setWdays((w) => (w.includes(i) ? w.filter((x) => x !== i) : [...w, i]))}>
-              {dayName(i)}
+            <button key={i} className={wdays.includes(i) ? 'on' : ''} aria-pressed={wdays.includes(i)} aria-label={dayName(i, 'long')} onClick={() => setWdays((w) => (w.includes(i) ? w.filter((x) => x !== i) : [...w, i]))}>
+              {dayName(i, 'narrow')}
             </button>
           ))}
         </div>
       )}
-      <div className="dp-custom-preview">{repeatText(build(), date)}</div>
+
+      {unit === 'monthly' && (
+        <div className="dp-rep-block" role="radiogroup">
+          <label className="dp-rep-opt">
+            <input type="radio" name="dp-month-mode" checked={monthMode === 'day'} onChange={() => setMonthMode('day')} />
+            <span className="dp-rep-k">{t('misc.repeat.onDay')}</span>
+            <select className="input dp-rep-sel dp-rep-mday" value={mday} onChange={(e) => (setMday(+e.target.value), setMonthMode('day'))}>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+              <option value={-1}>{t('misc.repeat.lastDay')}</option>
+            </select>
+          </label>
+          <label className="dp-rep-opt">
+            <input type="radio" name="dp-month-mode" checked={monthMode === 'nth'} onChange={() => setMonthMode('nth')} />
+            <span className="dp-rep-k">{t('misc.repeat.onThe')}</span>
+            <select className="input dp-rep-sel dp-rep-nth" value={nth} onChange={(e) => (setNth(+e.target.value), setMonthMode('nth'))}>
+              {NTH.map((x) => (
+                <option key={x} value={x}>
+                  {nthName(x)}
+                </option>
+              ))}
+            </select>
+            <select className="input dp-rep-sel dp-rep-nthwd" value={nthWd} onChange={(e) => (setNthWd(+e.target.value), setMonthMode('nth'))}>
+              {order.map((x) => (
+                <option key={x} value={x}>
+                  {dayName(x, 'long')}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
+
+      {unit === 'yearly' && (
+        <div className="dp-rep-block">
+          <div className="dp-rep-opt">
+            <span className="dp-rep-k">{t('misc.repeat.on')}</span>
+            <select className="input dp-rep-sel dp-rep-month" value={ymonth} onChange={(e) => setYmonth(+e.target.value)} aria-label={t('misc.repeat.on')}>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((x) => (
+                <option key={x} value={x}>
+                  {fmtMonthName(x)}
+                </option>
+              ))}
+            </select>
+            <select className="input dp-rep-sel dp-rep-yday" value={Math.min(yday, ydays)} onChange={(e) => setYday(+e.target.value)}>
+              {Array.from({ length: ydays }, (_, i) => i + 1).map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
+      <div className="dp-rep-block">
+        <div className="dp-rep-opt">
+          <span className="dp-rep-k">{t('misc.repeat.ends')}</span>
+          <select className="input dp-rep-sel dp-rep-end" value={endMode} onChange={(e) => setEndMode(e.target.value as typeof endMode)} aria-label={t('misc.repeat.ends')}>
+            <option value="never">{t('misc.repeat.end.never')}</option>
+            <option value="count">{t('misc.repeat.end.count')}</option>
+            <option value="until">{t('misc.repeat.end.until')}</option>
+          </select>
+        </div>
+        {endMode === 'count' && (
+          <div className="dp-rep-opt dp-rep-sub">
+            <input className="input dp-custom-n dp-rep-count" type="number" min={1} max={999} value={count} aria-label={t('misc.repeat.end.count')} onChange={(e) => setCount(parseInt(e.target.value) || 1)} />
+            <span>{t('misc.repeat.end.times', { count: clampInt(count, 1, 999, 1) })}</span>
+          </div>
+        )}
+        {endMode === 'until' && (
+          <div className="dp-rep-opt dp-rep-sub">
+            <input className="input dp-rep-until" type="date" min={date} value={until} aria-label={t('misc.repeat.end.until')} onChange={(e) => setUntil(e.target.value)} />
+          </div>
+        )}
+        <div className="dp-rep-opt">
+          <span className="dp-rep-k">{t('misc.repeat.from')}</span>
+          <select className="input dp-rep-sel dp-rep-from" value={from} onChange={(e) => setFrom(e.target.value as typeof from)} aria-label={t('misc.repeat.from')}>
+            <option value="due">{t('misc.repeat.from.due')}</option>
+            <option value="completion">{t('misc.repeat.from.completion')}</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="dp-custom-preview" aria-live="polite" aria-label={t('misc.repeat.summary')}>
+        {repeatText(build(), date)}
+      </div>
       <div className="dp-sub-foot">
-        <button className="btn" onClick={() => setCustom(false)}>
+        <button className="btn" onClick={onBack}>
           {t('common.cancel')}
         </button>
         <button className="btn btn-primary" onClick={() => onPick(build())}>

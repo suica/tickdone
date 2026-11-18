@@ -19,6 +19,7 @@ export default {
   'shell.task.pin': 'Закрепить',
   'shell.task.unpin': 'Открепить',
   'shell.task.wontDo': 'Отменить задачу',
+  'shell.task.skip': 'Пропустить этот раз',
   'shell.task.reopen': 'Возобновить',
   'shell.task.tags': 'Метки',
   'shell.task.startFocus': 'Начать фокус',

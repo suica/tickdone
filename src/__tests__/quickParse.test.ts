@@ -202,3 +202,57 @@ describe('quick-add words in every language', () => {
     })
   }
 })
+
+// Chinese fixtures below are what Chinese users type.
+describe('quickParse, repeat rules', () => {
+  it.each([
+    ['Standup every 2 weeks', 'Standup', { kind: 'weekly', interval: 2, days: [3] }, '2026-11-18'],
+    ['Water plants every other day', 'Water plants', { kind: 'daily', interval: 2 }, '2026-11-18'],
+    ['Gym every Mon and Fri', 'Gym', { kind: 'weekly', interval: 1, days: [1, 5] }, '2026-11-20'],
+    ['Gym every monday, wednesday', 'Gym', { kind: 'weekly', interval: 1, days: [1, 3] }, '2026-11-18'],
+    ['Report every last Friday', 'Report', { kind: 'monthly', interval: 1, nth: -1, weekday: 5 }, '2026-11-27'],
+    ['Book club every 2nd Tuesday of the month', 'Book club', { kind: 'monthly', interval: 1, nth: 2, weekday: 2 }, '2026-12-08'],
+    ['Rent every month on the 1st', 'Rent', { kind: 'monthly', interval: 1, day: 1 }, '2026-12-01'],
+    ['Invoices monthly on the last day', 'Invoices', { kind: 'monthly', interval: 1, day: -1 }, '2026-11-30'],
+    ['Check in every weekday', 'Check in', { kind: 'weekdays' }, '2026-11-18'],
+    ['Renew domain every year', 'Renew domain', { kind: 'yearly', interval: 1, month: 11, day: 18 }, '2026-11-18'],
+    ['每月最后一个周五 交周报', '交周报', { kind: 'monthly', interval: 1, nth: -1, weekday: 5 }, '2026-11-27'],
+    ['每月第二个星期一 例会', '例会', { kind: 'monthly', interval: 1, nth: 2, weekday: 1 }, '2026-12-14'],
+    ['每月最后一天 对账', '对账', { kind: 'monthly', interval: 1, day: -1 }, '2026-11-30'],
+    ['每月15号 还信用卡', '还信用卡', { kind: 'monthly', interval: 1, day: 15 }, '2026-12-15'],
+    ['每年3月8日 送花', '送花', { kind: 'yearly', interval: 1, month: 3, day: 8 }, '2027-03-08'],
+    ['每个工作日 打卡', '打卡', { kind: 'weekdays' }, '2026-11-18'],
+    ['每周一三五 跑步', '跑步', { kind: 'weekly', interval: 1, days: [1, 3, 5] }, '2026-11-18'],
+    ['每周五 周会', '周会', { kind: 'weekly', interval: 1, days: [5] }, '2026-11-20'],
+    ['每2周 复盘', '复盘', { kind: 'weekly', interval: 2, days: [3] }, '2026-11-18'],
+    ['每天 背单词', '背单词', { kind: 'daily', interval: 1 }, '2026-11-18'],
+    ['每三个月 体检', '体检', { kind: 'monthly', interval: 3, day: 18 }, '2026-11-18'],
+    // Traditional Chinese
+    ['每週二 開會', '開會', { kind: 'weekly', interval: 1, days: [2] }, '2026-11-24'],
+  ])('%s', (text, title, repeat, date) => {
+    const p = quickParse(text)
+    expect(p).toMatchObject({ title, dueDate: date })
+    expect(p.repeat).toEqual(repeat)
+  })
+
+  it('a date or time given with the rule is kept', () => {
+    expect(quickParse('每周五 下午3点 周会')).toMatchObject({ title: '周会', dueDate: '2026-11-20', dueTime: '15:00', repeat: { kind: 'weekly', days: [5] } })
+    expect(quickParse('Review every 2 weeks from Dec 4')).toMatchObject({ dueDate: '2026-12-04', repeat: { kind: 'weekly', interval: 2, days: [5] } })
+  })
+
+  it('words that only look like a rule stay in the title', () => {
+    expect(quickParse('Weekly report').repeat).toBeUndefined()
+    expect(quickParse('Weekly report').title).toBe('Weekly report')
+    expect(quickParse('Everyone meets on Monday')).toMatchObject({ title: 'Everyone meets', repeat: undefined, dueDate: '2026-11-23' })
+    expect(quickParse('every month planning').repeat).toEqual({ kind: 'monthly', interval: 1, day: 18 })
+  })
+
+  it('the rule is highlighted like a date', () => {
+    const text = 'Report every last Friday !high'
+    const p = quickParse(text)
+    expect(p.spans.map((s) => [s.kind, text.slice(s.start, s.end)])).toEqual([
+      ['date', 'every last Friday'],
+      ['priority', '!high'],
+    ])
+  })
+})

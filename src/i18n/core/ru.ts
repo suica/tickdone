@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': 'Выполнено: «{title}»',
   'core.toast.completedNext': 'Выполнено. Следующий раз: {date}',
+  'core.toast.skipped': 'Пропущено. Следующий раз: {date}',
   'core.toast.wontDo': 'Отмечено как отменённое',
   'core.toast.deletedForever': 'Удалено навсегда',
   'core.toast.deleted': 'Удалено. Можно восстановить из корзины',

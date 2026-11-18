@@ -64,6 +64,7 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
   const date: DateValue = manual ?? {
     dueDate: parsed.dueDate ?? defaults.dueDate,
     dueTime: parsed.dueTime ?? defaults.dueTime,
+    repeat: parsed.repeat,
   }
   const priority: Priority = prio ?? parsed.priority ?? defaults.priority ?? 0
 

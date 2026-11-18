@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': '已完成「{title}」',
   'core.toast.completedNext': '已完成，下次：{date}',
+  'core.toast.skipped': '已跳过，下次：{date}',
   'core.toast.wontDo': '已放弃',
   'core.toast.deletedForever': '已永久删除',
   'core.toast.deleted': '已删除，可在垃圾桶恢复',

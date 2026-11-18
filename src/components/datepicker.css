@@ -357,6 +357,74 @@
   font-size: 12px;
 }
 
+/* The custom repeat editor */
+.dp-rep {
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dp-rep-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 12px 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.dp-rep-block:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.dp-rep-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.dp-rep-opt input[type='radio'] {
+  flex: none;
+  margin: 0;
+  accent-color: var(--primary);
+}
+.dp-rep-k {
+  flex: none;
+  min-width: 64px;
+  color: var(--text-2);
+}
+.dp-rep-sel {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 30px;
+}
+.dp-rep-sub {
+  padding-left: 72px;
+}
+.dp-rep-until {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+}
+.dp-custom-week button {
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-spring);
+}
+.dp-custom-week button:active {
+  transform: scale(0.92);
+}
+.dp-rep .dp-custom-preview {
+  margin: 0 12px 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text);
+  line-height: 1.4;
+}
+.dp-rep-custom .menu-hint:first-of-type {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Touch screens: the clear button is always shown when there is something to clear */
 @media (hover: none) {
   .dp-row-x {
@@ -519,5 +587,27 @@
   .dp-custom-preview {
     padding: 0 16px 12px;
     font-size: 13px;
+  }
+  .dp-rep {
+    max-height: none;
+  }
+  .dp-rep-block {
+    margin: 0 16px 12px;
+    gap: 10px;
+  }
+  .dp-rep-sel,
+  .dp-rep-until {
+    height: 44px;
+    font-size: 16px;
+  }
+  .dp-rep-opt input[type='radio'] {
+    width: 22px;
+    height: 22px;
+  }
+  .dp-rep-sub {
+    padding-left: 0;
+  }
+  .dp-rep .dp-custom-preview {
+    margin: 0 16px 12px;
   }
 }

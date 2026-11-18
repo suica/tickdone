@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { addDays } from 'date-fns'
-import { dueLabel, fmt, nextOccurrence } from './dates'
+import { dueLabel, fmt, todayStr } from './dates'
+import { advance, migrateTask } from './repeat'
 import { t } from './i18n'
 import { EMPTY_SELECTION, type Selection } from './selection'
 import type { AppData, Habit, SavedFilter, Task, TaskList, ViewPrefs } from './types'
@@ -77,10 +78,22 @@ function seed(): AppData {
   }
 }
 
+/** Brings saved data up to date (repeat rules from before explicit days); returns the same object when nothing changed. */
+export function migrateData(d: AppData): AppData {
+  if (!Array.isArray(d.tasks)) return d
+  let changed = false
+  const tasks = d.tasks.map((x) => {
+    const m = migrateTask(x)
+    if (m !== x) changed = true
+    return m
+  })
+  return changed ? { ...d, tasks } : d
+}
+
 function load(): AppData {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as AppData
+    if (raw) return migrateData(JSON.parse(raw) as AppData)
   } catch {
     /* ignore */
   }
@@ -285,28 +298,46 @@ export function toggleTask(id: string) {
     return
   }
   let text: string
-  if (task.repeat && task.dueDate) {
+  const step = advance(task, todayStr(), data.settings.weekStartsOn)
+  if (step?.next) {
     // Repeating task: add a completed copy and move the task itself to its next date
     const done: Task = { ...task, id: uid(), status: 2, completedAt: Date.now(), repeat: null }
-    const next = nextOccurrence(task.dueDate, task.repeat)
+    const next = step.dueDate
     setData((d) => ({
       ...d,
       tasks: [
         ...d.tasks.map((x) =>
-          x.id === id ? { ...x, dueDate: next, subtasks: x.subtasks.map((s) => ({ ...s, done: false })), modifiedAt: Date.now() } : x,
+          x.id === id ? { ...x, dueDate: next, repeat: step.repeat, subtasks: x.subtasks.map((s) => ({ ...s, done: false })), modifiedAt: Date.now() } : x,
         ),
         done,
       ],
     }))
     text = t('core.toast.completedNext', { date: dueLabel({ dueDate: next }) })
   } else {
-    updateTask(id, { status: 2, completedAt: Date.now() })
+    // A plain task, or the last occurrence of a series (its count is reached or its end date passed)
+    updateTask(id, { status: 2, completedAt: Date.now(), ...(step ? { repeat: step.repeat } : {}) })
     text = t('core.toast.completed', { title: task.title || t('common.untitled') })
   }
   // The first ding creates the AudioContext, which can take seconds on a busy machine; start the
   // undo toast's countdown only after that.
   playDing()
   toast(text, snap)
+}
+
+/** Whether a task repeats and has an occurrence after the current one, so it can be skipped. */
+export function canSkip(task: Task): boolean {
+  return task.status === 0 && !task.deleted && !!advance(task, todayStr(), data.settings.weekStartsOn)?.next
+}
+
+/** Skips the current occurrence of a repeating task: it moves to its next date without a completed copy. */
+export function skipOccurrence(id: string) {
+  const task = data.tasks.find((x) => x.id === id)
+  if (!task || !canSkip(task)) return
+  const step = advance(task, todayStr(), data.settings.weekStartsOn)
+  if (!step?.next) return
+  const snap = data
+  updateTask(id, { dueDate: step.dueDate, repeat: step.repeat, subtasks: task.subtasks.map((s) => ({ ...s, done: false })) })
+  toast(t('core.toast.skipped', { date: dueLabel({ dueDate: step.dueDate }) }), snap)
 }
 
 export function wontDo(id: string) {

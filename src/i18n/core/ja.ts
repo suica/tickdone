@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': '「{title}」を完了しました',
   'core.toast.completedNext': '完了しました。次回：{date}',
+  'core.toast.skipped': 'スキップしました。次回：{date}',
   'core.toast.wontDo': 'やらないにしました',
   'core.toast.deletedForever': '完全に削除しました',
   'core.toast.deleted': '削除しました。ゴミ箱から復元できます',

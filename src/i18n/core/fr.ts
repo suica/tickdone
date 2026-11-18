@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': 'Terminée : « {title} »',
   'core.toast.completedNext': 'Terminée. Prochaine : {date}',
+  'core.toast.skipped': 'Ignorée. Prochaine : {date}',
   'core.toast.wontDo': 'Marquée comme abandonnée',
   'core.toast.deletedForever': 'Supprimée définitivement',
   'core.toast.deleted': 'Supprimée. Vous pouvez la restaurer depuis la Corbeille',

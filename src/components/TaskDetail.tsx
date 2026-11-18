@@ -7,7 +7,7 @@ import { fmtFullDate, fmtMonthDay, fmtTime } from '../i18n/format'
 import { cancelAnimations, dur, ease, play } from '../motion'
 import { startFocus } from '../pomo'
 import { isBatch } from '../selection'
-import { deleteTask, duplicateTask, getSelection, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
+import { canSkip, deleteTask, duplicateTask, skipOccurrence, getSelection, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
 import type { Priority, Subtask, Task } from '../types'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY, priorityColor } from '../views'
@@ -755,6 +755,7 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
                     { label: t('shell.detail.addSubtask'), icon: <Icon name="subtask" size={15} />, onClick: () => addSubAfter(task.subtasks.length - 1) },
                     { label: t(task.pinned ? 'shell.task.unpin' : 'shell.task.pin'), icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !task.pinned }) },
                     { label: t(task.status === -1 ? 'shell.task.reopen' : 'shell.task.wontDo'), icon: <Icon name="wontdo" size={15} />, onClick: () => (task.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(task.id)) },
+                    ...(canSkip(task) ? [{ label: t('shell.task.skip'), icon: <Icon name="repeat" size={15} />, onClick: () => skipOccurrence(task.id) }] : []),
                     { label: t('shell.task.startFocus'), icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(task.id); setUI({ module: 'pomo' }) } },
                     { label: t('shell.task.duplicate'), icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(task.id) },
                     { label: t(task.status === 2 ? 'shell.task.markNotDone' : 'shell.task.markDone'), icon: <Icon name="check" size={15} />, hint: phone ? undefined : 'Ctrl+Enter', onClick: () => toggleTask(task.id) },

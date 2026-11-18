@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { LIST_COLORS, addFilter, addList, deleteFilter, deleteList, deleteTag, renameTag, updateFilter, setData, setUI, toast, uid, updateList, useData, useUI, getData } from '../store'
+import { LIST_COLORS, addFilter, addList, deleteFilter, deleteList, deleteTag, renameTag, updateFilter, setData, setUI, toast, uid, updateList, useData, useUI, getData, migrateData } from '../store'
 import type { AppData, FilterDate, Priority, SavedFilter, Settings } from '../types'
 import { FILTER_DATES, FILTER_ICONS, FILTER_PREFIX, filterClock, filterMatcher, conditionCount } from '../filters'
 import { PRIORITY } from '../views'
@@ -991,7 +991,7 @@ function DataTab() {
         filters: Array.isArray(obj.filters) ? obj.filters : [],
         settings: { ...cur.settings, ...(obj.settings ?? {}) },
       }
-      setData(() => merged)
+      setData(() => migrateData(merged))
       setUI({ selectedTaskId: undefined, view: 'today' })
       toast(t('misc.data.imported'), snap)
     } catch {

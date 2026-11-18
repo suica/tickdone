@@ -61,19 +61,26 @@ function Floating({ anchor, onClose, children, className = '', width }: PopoverP
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    // layout size: getBoundingClientRect would include the scale of the entry animation
-    const r = { width: el.offsetWidth, height: el.offsetHeight }
-    let left = anchor.x
-    let top = anchor.y
-    if (left + r.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - r.width - 8)
-    if (top + r.height > window.innerHeight - 8) {
-      const up = anchor.y - (anchor.h ?? 0) - r.height
-      top = up > 8 ? up : Math.max(8, window.innerHeight - r.height - 8)
+    const place = () => {
+      // layout size: getBoundingClientRect would include the scale of the entry animation
+      const r = { width: el.offsetWidth, height: el.offsetHeight }
+      let left = anchor.x
+      let top = anchor.y
+      if (left + r.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - r.width - 8)
+      if (top + r.height > window.innerHeight - 8) {
+        const up = anchor.y - (anchor.h ?? 0) - r.height
+        top = up > 8 ? up : Math.max(8, window.innerHeight - r.height - 8)
+      }
+      // Scale in from the point the popover was opened from.
+      const ox = Math.min(Math.max(anchor.x - left, 0), r.width)
+      const oy = Math.min(Math.max(anchor.y - top, 0), r.height)
+      setPos((p) => (p.ready && p.left === left && p.top === top ? p : { left, top, origin: `${Math.round(ox)}px ${Math.round(oy)}px`, ready: true }))
     }
-    // Scale in from the point the popover was opened from.
-    const ox = Math.min(Math.max(anchor.x - left, 0), r.width)
-    const oy = Math.min(Math.max(anchor.y - top, 0), r.height)
-    setPos({ left, top, origin: `${Math.round(ox)}px ${Math.round(oy)}px`, ready: true })
+    place()
+    // Content that grows (a menu turning into an editor) is placed again so it stays in the viewport.
+    const ro = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(place)
+    ro?.observe(el)
+    return () => ro?.disconnect()
   }, [anchor.x, anchor.y, anchor.h])
 
   useEffect(() => {

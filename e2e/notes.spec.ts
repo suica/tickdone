@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { fixture, NOW } from './calHelpers'
 
-// Markdown in task notes: the notes show rendered, switch to their source on click or focus, Esc goes
-// back, checklist boxes tick in place, and the list's "Show details" preview is plain text.
-// The browser runs in zh-CN (playwright.config.ts).
+// Task notes are stored as Markdown and edited with their formatting shown in place: typing "**bold**",
+// "# " or "- [ ] " formats right away, without leaving the field first. The browser runs in zh-CN
+// (playwright.config.ts).
 
 type Data = ReturnType<typeof fixture>
 
@@ -19,66 +19,166 @@ async function openTask(page: Page, id: string, edit: (d: Data) => void = () => 
   }, data)
   await page.goto('/#task=' + id)
   await expect(page.locator('.detail-title')).toBeVisible()
+  await expect(page.locator('.note-editor')).toBeVisible()
+}
+
+const setNote = (id: string, content: string) => (d: Data) => {
+  d.tasks.find((t) => t.id === id)!.content = content
 }
 
 const storedContent = (page: Page, id: string) =>
   page.evaluate((id) => (JSON.parse(localStorage.getItem('tickdone:data:v1')!).tasks as { id: string; content: string }[]).find((t) => t.id === id)!.content, id)
 
-const NOTE = ['# Plan', 'Ship **the release** and *celebrate*', '', '- [ ] write notes', '- [x] run tests', '', 'See [the docs](https://example.com/docs)'].join('\n')
+const editor = (page: Page) => page.locator('.note-editor')
 
-test('write a note, see it rendered, tick a box in place, edit it again', async ({ page }) => {
+/** Reloads the page and opens the task again (the open task is not kept across reloads). */
+async function reloadAndOpen(page: Page, id: string) {
+  await page.reload()
+  await page.locator(`.list-pane .task-row[data-task-id="${id}"] .task-title`).click()
+  await expect(editor(page)).toBeVisible()
+}
+
+test('typing **bold**, "# " and "- [ ] " formats them right away, and the note is saved as Markdown', async ({ page }) => {
   await openTask(page, 'review')
-  const view = page.locator('.detail-md')
-  const editor = page.locator('textarea.detail-content')
+  const ed = editor(page)
+  await ed.click()
+  // the case from the bug report: no Esc, no click elsewhere, the formatting shows while typing
+  await page.keyboard.type('**akjshdkah**')
+  await expect(ed.locator('strong')).toHaveText('akjshdkah')
+  await expect(ed).not.toContainText('**')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('# Heading')
+  await expect(ed.locator('h1')).toHaveText('Heading')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('- [ ] write notes')
+  await expect(ed.locator('ul[data-type="taskList"] li > div')).toHaveText('write notes')
+  await expect(ed.locator('input[type="checkbox"]')).not.toBeChecked()
+  await expect(ed.locator('input[type="checkbox"]')).toHaveAttribute('aria-label', '清单项：write notes')
+  // Enter makes the next checklist item; typing its mark as well ticks it instead of showing the mark
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('- [x] run tests')
+  await expect(ed.locator('ul[data-type="taskList"] li > div')).toHaveText(['write notes', 'run tests'])
+  await expect(ed.locator('input[type="checkbox"]').nth(1)).toBeChecked()
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('Some *italic* and `code` and ~~gone~~')
+  await expect(ed.locator('em')).toHaveText('italic')
+  await expect(ed.locator('code')).toHaveText('code')
+  await expect(ed.locator('s')).toHaveText('gone')
+  // also inside Chinese text, where there is no space before the marks
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('现在**加粗**了，*斜体*也行')
+  await expect(ed.locator('strong').nth(1)).toHaveText('加粗')
+  await expect(ed.locator('em').nth(1)).toHaveText('斜体')
+  // the editor is still focused: nothing had to be left for the formatting to show
+  await expect(ed).toBeFocused()
+  await expect.poll(() => storedContent(page, 'review')).toBe('**akjshdkah**\n\n# Heading\n\n- [ ] write notes\n- [x] run tests\n\nSome *italic* and `code` and ~~gone~~\n\n现在**加粗**了，*斜体*也行')
 
-  // an empty note is a text field straight away
-  await expect(view).toHaveCount(0)
-  await editor.click()
-  await editor.fill(NOTE)
-  // Esc leaves the editor; the task stays open
-  await editor.press('Escape')
-  await expect(editor).toHaveCount(0)
+  // Esc leaves the editor; the task stays open and the note stays formatted
+  await page.keyboard.press('Escape')
+  await expect(ed).not.toBeFocused()
   await expect(page.locator('.detail-title')).toBeVisible()
+  await expect(ed.locator('strong').first()).toHaveText('akjshdkah')
 
-  await expect(view.locator('h1')).toHaveText('Plan')
-  await expect(view.locator('strong')).toHaveText('the release')
-  await expect(view.locator('em')).toHaveText('celebrate')
-  const link = view.getByRole('link', { name: 'the docs' })
+  // after a reload it is still formatted
+  await reloadAndOpen(page, 'review')
+  await expect(editor(page).locator('h1')).toHaveText('Heading')
+  await expect(editor(page).locator('strong').first()).toHaveText('akjshdkah')
+})
+
+test('"- " then "[x] " makes a ticked checklist item; bullets around it stay bullets', async ({ page }) => {
+  await openTask(page, 'review')
+  await editor(page).click()
+  await page.keyboard.type('- one')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('[x] two')
+  await expect(editor(page).locator('ul:not([data-type]) > li')).toHaveText('one')
+  await expect(editor(page).locator('ul[data-type="taskList"] input')).toBeChecked()
+  await expect.poll(() => storedContent(page, 'review')).toBe('- one\n\n- [x] two')
+})
+
+// Notes written before the editor: single line breaks, "*" bullets, numbered lists, quotes, code and boxes
+const OLD_NOTE = [
+  '# Plan',
+  'Ship **the release** and *celebrate*',
+  'second line of the paragraph',
+  '',
+  '- [ ] write notes',
+  '- [x] run tests',
+  '',
+  '* apples',
+  '* pears',
+  '',
+  '1) first',
+  '2) second',
+  '',
+  '> quoted',
+  '',
+  '```',
+  'const a = 1 // **not bold**',
+  '```',
+  '',
+  'See [the docs](https://example.com/docs)',
+].join('\n')
+
+test('a note saved by an earlier version opens formatted and is not rewritten by opening it', async ({ page }) => {
+  await openTask(page, 'mail', setNote('mail', OLD_NOTE))
+  const ed = editor(page)
+  await expect(ed.locator('h1')).toHaveText('Plan')
+  await expect(ed.locator('strong')).toHaveText('the release')
+  await expect(ed.locator('em')).toHaveText('celebrate')
+  // a single line break stays a line break
+  await expect(ed.locator('p').first().locator('br')).toHaveCount(1)
+  await expect(ed.locator('ul[data-type="taskList"] input')).toHaveCount(2)
+  await expect(ed.locator('ul[data-type="taskList"] input').nth(1)).toBeChecked()
+  await expect(ed.locator('ul:not([data-type]) li')).toHaveText(['apples', 'pears'])
+  await expect(ed.locator('ol li')).toHaveText(['first', 'second'])
+  await expect(ed.locator('blockquote')).toHaveText('quoted')
+  await expect(ed.locator('pre code')).toHaveText('const a = 1 // **not bold**')
+  const link = ed.getByRole('link', { name: 'the docs' })
   await expect(link).toHaveAttribute('href', 'https://example.com/docs')
   await expect(link).toHaveAttribute('target', '_blank')
   await expect(link).toHaveAttribute('rel', /noopener/)
-  const boxes = view.locator('input.md-check')
-  await expect(boxes).toHaveCount(2)
-  await expect(boxes.nth(0)).not.toBeChecked()
-  await expect(boxes.nth(1)).toBeChecked()
-  // the focus is back on the rendered note, not in a field
-  await expect(view).toBeFocused()
+  // opening, switching to another task and back, and reloading leave the stored text alone
+  await page.locator('.list-pane .task-row[data-task-id="plan"] .task-title').click()
+  await page.locator('.list-pane .task-row[data-task-id="mail"] .task-title').click()
+  await expect(editor(page).locator('h1')).toHaveText('Plan')
+  await reloadAndOpen(page, 'mail')
+  await expect(editor(page).locator('h1')).toHaveText('Plan')
+  expect(await storedContent(page, 'mail')).toBe(OLD_NOTE)
+})
 
-  // ticking a box changes that line of the note and stays in the rendered view
+test('checklist boxes tick in place and change only their line', async ({ page }) => {
+  await openTask(page, 'mail', setNote('mail', 'Before\n\n- [ ] milk\n- [x] bread'))
+  const boxes = editor(page).locator('ul[data-type="taskList"] input')
   await boxes.nth(0).click()
   await expect(boxes.nth(0)).toBeChecked()
-  await expect(editor).toHaveCount(0)
-  await expect.poll(() => storedContent(page, 'review')).toContain('- [x] write notes')
+  await expect.poll(() => storedContent(page, 'mail')).toBe('Before\n\n- [x] milk\n- [x] bread')
   await boxes.nth(1).click()
-  await expect(boxes.nth(1)).not.toBeChecked()
-  await expect.poll(() => storedContent(page, 'review')).toContain('- [ ] run tests')
+  await expect.poll(() => storedContent(page, 'mail')).toBe('Before\n\n- [x] milk\n- [ ] bread')
+})
 
-  // a click on the text opens the source, with the change from the boxes in it
-  await view.locator('h1').click()
-  await expect(editor).toBeFocused()
-  await expect(editor).toHaveValue(NOTE.replace('- [ ] write notes', '- [x] write notes').replace('- [x] run tests', '- [ ] run tests'))
-  await editor.fill(NOTE + '\n\n> quoted')
-  // leaving the field shows it rendered
-  await page.locator('.detail-title').click()
-  await expect(view.locator('blockquote')).toHaveText('quoted')
+test('pasted Markdown turns into formatting', async ({ page }) => {
+  await openTask(page, 'review')
+  await editor(page).click()
+  await editor(page).evaluate((el) => {
+    const dt = new DataTransfer()
+    dt.setData('text/plain', '## Pasted\n\n**strong** text\n\n- [ ] box')
+    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }))
+  })
+  await expect(editor(page).locator('h2')).toHaveText('Pasted')
+  await expect(editor(page).locator('strong')).toHaveText('strong')
+  await expect(editor(page).locator('ul[data-type="taskList"] input')).toHaveCount(1)
+})
 
-  // keyboard: Tab onto the note opens it for editing, Esc closes it again
-  await page.locator('.detail-title').focus()
-  await page.keyboard.press('Tab')
-  await expect(editor).toBeFocused()
-  await page.keyboard.press('Escape')
-  await expect(view).toBeVisible()
-  await expect(page.locator('.detail-title')).toBeVisible()
+test('a link opens in a new tab', async ({ page, context }) => {
+  await context.route('https://example.com/**', (r) => r.fulfill({ body: 'ok', contentType: 'text/plain' }))
+  await openTask(page, 'mail', setNote('mail', 'Read [the docs](https://example.com/docs)'))
+  const popup = context.waitForEvent('page')
+  await editor(page).getByRole('link', { name: 'the docs' }).click()
+  expect((await popup).url()).toBe('https://example.com/docs')
+  // the task is still open in the app
+  await expect(page.locator('.detail-title')).toHaveValue('Answer mail')
 })
 
 test('the "Show details" preview in the list is plain text', async ({ page }) => {
@@ -91,16 +191,86 @@ test('the "Show details" preview in the list is plain text', async ({ page }) =>
   await expect(preview.locator('a, strong, h2, input')).toHaveCount(0)
 })
 
-test('pasted HTML and script links show as text and never run', async ({ page }) => {
-  const evil = ['<img src=x onerror="window.__pwned=1">', '[click me](javascript:window.__pwned=2)', '<script>window.__pwned=3</script>', '[data](data:text/html,<script>window.__pwned=4</script>)'].join('\n\n')
-  await openTask(page, 'tidy', (d) => (d.tasks.find((t) => t.id === 'tidy')!.content = evil))
-  const view = page.locator('.detail-md')
-  await expect(view).toContainText('<img src=x onerror="window.__pwned=1">')
-  await expect(view).toContainText('<script>window.__pwned=3</script>')
-  await expect(view.locator('img, script, iframe')).toHaveCount(0)
-  // the links whose address is not http(s) or mailto are text
-  await expect(view.locator('a')).toHaveCount(0)
-  await expect(view).toContainText('click me')
-  await view.getByText('click me').click()
+const EVIL = [
+  '<script>window.__pwned=1</script>',
+  '<img src=x onerror="window.__pwned=2">',
+  '<a href="javascript:window.__pwned=3">x</a>',
+  '[click me](javascript:window.__pwned=4)',
+  '[click](JAVASCRIPT:window.__pwned=5)',
+  '[data](data:text/html,<script>window.__pwned=6</script>)',
+  '[vb](vbscript:msgbox)',
+  '<javascript:window.__pwned=7>',
+  '[x](https://ok.example "title" onmouseover="window.__pwned=8")',
+  '# <svg onload="window.__pwned=9">',
+  '- [ ] <iframe src="javascript:window.__pwned=10">',
+  '> <style>body{display:none}</style>',
+  '```\n</code></pre><script>window.__pwned=11</script>\n```',
+  '`<b onclick="window.__pwned=12">`',
+  '**<img src=x onerror="window.__pwned=13">**',
+  'https://ok.example/"><script>window.__pwned=14</script>',
+  '[a](https://ok.example/"onmouseover="window.__pwned=15)',
+]
+
+test('HTML and script links in a note show as text and never run', async ({ page }) => {
+  await openTask(page, 'tidy', setNote('tidy', EVIL.join('\n\n')))
+  const ed = editor(page)
+  await expect(ed).toContainText('<script>window.__pwned=1</script>')
+  await expect(ed).toContainText('<img src=x onerror="window.__pwned=2">')
+  const bad = await ed.evaluate((root) => {
+    const out: string[] = []
+    for (const el of root.querySelectorAll('*')) {
+      if (['SCRIPT', 'IMG', 'IFRAME', 'SVG', 'STYLE', 'OBJECT', 'EMBED'].includes(el.tagName.toUpperCase())) out.push('tag ' + el.tagName)
+      for (const a of el.attributes) {
+        if (/^on/i.test(a.name)) out.push('handler ' + a.name)
+        if ((a.name === 'href' || a.name === 'src') && !/^(https?:|mailto:)/i.test(a.value)) out.push(a.name + ' ' + a.value)
+      }
+    }
+    return out
+  })
+  expect(bad).toEqual([])
+  // the words of a link that is not allowed stay, without a link
+  await ed.getByText('click me', { exact: false }).click()
+  await page.keyboard.press('Escape')
   expect(await page.evaluate(() => (window as unknown as { __pwned?: number }).__pwned)).toBeUndefined()
+  // the note is not rewritten by showing it
+  expect(await storedContent(page, 'tidy')).toBe(EVIL.join('\n\n'))
+})
+
+test('subtasks and the note stay separate', async ({ page }) => {
+  await openTask(page, 'mail', (d) => {
+    const t = d.tasks.find((t) => t.id === 'mail')! as unknown as { subtasks: { id: string; title: string; done: boolean }[] }
+    t.subtasks = [{ id: 's1', title: '**not markdown**', done: false }]
+  })
+  await editor(page).click()
+  await page.keyboard.type('**bold**')
+  await expect(editor(page).locator('strong')).toHaveText('bold')
+  // a subtask title is plain text
+  await expect(page.locator('.subtask[data-sub-id="s1"] input')).toHaveValue('**not markdown**')
+})
+
+test.describe('phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+  test('the bottom sheet note formats as you type; Esc leaves the note, then closes the sheet', async ({ page }) => {
+    await openTask(page, 'review')
+    await expect(page.locator('.detail-sheet')).toBeVisible()
+    await editor(page).tap()
+    await page.keyboard.type('**akjshdkah**')
+    await expect(editor(page).locator('strong')).toHaveText('akjshdkah')
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('# Heading')
+    await expect(editor(page).locator('h1')).toHaveText('Heading')
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.detail-sheet')).toBeVisible()
+    await expect(editor(page)).not.toBeFocused()
+    await expect.poll(() => storedContent(page, 'review')).toBe('**akjshdkah**\n\n# Heading')
+  })
+
+  test('a checklist box is a 40 px target and ticks in place', async ({ page }) => {
+    await openTask(page, 'mail', setNote('mail', '- [ ] milk'))
+    const item = editor(page).locator('ul[data-type="taskList"] > li')
+    expect((await item.boundingBox())!.height).toBeGreaterThanOrEqual(40)
+    await editor(page).locator('ul[data-type="taskList"] label').tap()
+    await expect.poll(() => storedContent(page, 'mail')).toBe('- [x] milk')
+  })
 })

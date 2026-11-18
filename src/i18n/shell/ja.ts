@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': 'このタスクはゴミ箱にあります',
   'shell.detail.titlePlaceholder': '何をしますか？',
   'shell.detail.description': '説明',
+  'shell.detail.noteCheck': 'チェック項目：{text}',
   'shell.detail.addSubtask': 'サブタスクを追加',
   'shell.detail.created': '作成：{date}',
   'shell.detail.completedOn': '完了：{date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': '「{name}」をアーカイブしました',
   'shell.toast.listUnarchived': '「{name}」をリストに戻しました',
   'shell.toast.taskNotFound': 'このタスクはもう存在しません',
-  'shell.detail.editNotes': 'メモを編集',
 } satisfies Catalog<typeof en>

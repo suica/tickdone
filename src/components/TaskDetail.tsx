@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
 import { dueLabel, isOverdue } from '../dates'
@@ -17,8 +17,6 @@ import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { Subtasks } from './Subtasks'
 import { Checkbox } from './TaskRow'
 import { BatchPanel } from './BatchPanel'
-import { Markdown } from './Markdown'
-import { toggleTaskLine } from '../markdown'
 import './detail.css'
 
 /** Priority names from the shared vocabulary. */
@@ -43,73 +41,26 @@ function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, onBl
   return <textarea ref={ref} rows={1} className={className} value={value} placeholder={placeholder} autoFocus={autoFocus} readOnly={readOnly} onKeyDown={onKeyDown} onBlur={onBlur} onFocus={onFocus} onChange={(e) => onChange(e.target.value)} />
 }
 
+// The note editor (and the Markdown library it is built on) loads on demand, the first time a detail opens.
+const NoteEditor = lazy(() => import('./NoteEditor'))
+
 /**
- * The task's notes: Markdown shown rendered, and its source in a text field while editing. A click or
- * the keyboard focus on the rendered notes starts editing; leaving the field or Esc shows them rendered
- * again. Boxes of a checklist tick in place, and links open in a new tab, without starting to edit.
+ * The task's notes, stored as Markdown and edited with their formatting shown in place (see NoteEditor).
+ * Until the editor has loaded, the note shows as plain text at the same place.
  */
 function NoteField({ value, onChange, placeholder, readOnly }: { value: string; onChange: (v: string) => void; placeholder: string; readOnly?: boolean }) {
-  const t = useT()
-  const [editing, setEditing] = useState(false)
-  const view = useRef<HTMLDivElement>(null)
-  // set while Esc puts the focus back on the rendered notes, so that focus does not start editing again
-  const quiet = useRef(false)
-  const onToggle = useCallback((line: number) => onChange(toggleTaskLine(value, line)), [value, onChange])
-
-  if (editing || (!value.trim() && !readOnly)) {
-    return (
-      <div className="detail-note editing">
-        <AutoTextarea
-          className="detail-content"
-          value={value}
-          placeholder={placeholder}
-          autoFocus={editing}
-          readOnly={readOnly}
-          onChange={onChange}
-          // an empty note is a field from the start: typing in it is editing
-          onFocus={() => !readOnly && setEditing(true)}
-          onBlur={() => setEditing(false)}
-          onKeyDown={(e) => {
-            if (e.key !== 'Escape' || e.nativeEvent.isComposing) return
-            // Esc leaves the editor, not the task
-            e.preventDefault()
-            e.stopPropagation()
-            quiet.current = true
-            setEditing(false)
-            requestAnimationFrame(() => {
-              view.current?.focus({ preventScroll: true })
-              quiet.current = false
-            })
-          }}
-        />
-      </div>
-    )
-  }
-  const edit = () => !readOnly && setEditing(true)
   return (
-    <div
-      ref={view}
-      className="detail-content detail-md"
-      tabIndex={readOnly ? -1 : 0}
-      role={readOnly ? undefined : 'button'}
-      aria-label={readOnly ? undefined : t('shell.detail.editNotes')}
-      onFocus={(e) => {
-        if (e.target === e.currentTarget && !quiet.current) edit()
-      }}
-      onClick={(e) => {
-        const el = e.target as HTMLElement
-        // links, boxes and a text selection are not a request to edit
-        if (el.closest('a, input, label') || window.getSelection()?.toString()) return
-        edit()
-      }}
-      onKeyDown={(e) => {
-        if (e.target === e.currentTarget && e.key === 'Enter') {
-          e.preventDefault()
-          edit()
-        }
-      }}
-    >
-      <Markdown source={value} onToggle={readOnly ? undefined : onToggle} />
+    <Suspense fallback={<NotePlaceholder value={value} placeholder={placeholder} />}>
+      <NoteEditor value={value} onChange={onChange} placeholder={placeholder} readOnly={readOnly} />
+    </Suspense>
+  )
+}
+
+/** What the note shows while the editor loads: its text as it is. */
+function NotePlaceholder({ value, placeholder }: { value: string; placeholder: string }) {
+  return (
+    <div className="detail-note">
+      <div className={'detail-content md note-loading' + (value ? '' : ' empty')}>{value || placeholder}</div>
     </div>
   )
 }
@@ -580,7 +531,7 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
-                ;(document.querySelector('.detail-content') as HTMLTextAreaElement | null)?.focus()
+                document.querySelector<HTMLElement>('.detail-note .detail-content')?.focus()
               }
             }}
           />

@@ -7,6 +7,8 @@ import { dayName } from './dateLabels'
 import { Icon } from './Icon'
 import { usePresence } from './motion'
 import { SubscriptionsTab } from './Subscriptions'
+import { isStandalone, promptInstall, usePwa } from '../pwa'
+import { notificationPermission, setNotifications } from '../reminders'
 import './dialogs.css'
 
 const close = () => setUI({ dialog: undefined })
@@ -468,9 +470,10 @@ function ShortcutsDialog() {
 }
 
 // ---------------- settings ----------------
-type Tab = 'general' | 'feeds' | 'pomo' | 'data' | 'keys' | 'about'
+type Tab = 'general' | 'reminders' | 'feeds' | 'pomo' | 'data' | 'keys' | 'about'
 const TABS: { id: Tab; label: MessageKey; icon: string }[] = [
   { id: 'general', label: 'misc.settings.general', icon: 'settings' },
+  { id: 'reminders', label: 'pwa.settings.tab', icon: 'bell' },
   { id: 'feeds', label: 'misc.feeds.tab', icon: 'feed' },
   { id: 'pomo', label: 'common.module.focus', icon: 'pomo' },
   { id: 'data', label: 'misc.settings.data', icon: 'inbox' },
@@ -544,6 +547,7 @@ function SettingsDialog() {
             </div>
             <div className="dlg-set-body">
               {tab === 'general' && <GeneralTab />}
+              {tab === 'reminders' && <RemindersTab />}
               {tab === 'feeds' && <SubscriptionsTab />}
               {tab === 'pomo' && <PomoTab />}
               {tab === 'data' && <DataTab />}
@@ -639,6 +643,33 @@ function GeneralTab() {
       <Row label={t('misc.settings.showCompleted')} desc={t('misc.settings.showCompletedDesc')}>
         <Switch checked={s.showCompleted} onChange={(v) => setSettings({ showCompleted: v })} />
       </Row>
+    </>
+  )
+}
+
+function RemindersTab() {
+  const t = useT()
+  const s = useData().settings
+  const [permission, setPermission] = useState(notificationPermission)
+  const on = !!s.notifications && permission === 'granted'
+  const status =
+    permission === 'unsupported' ? t('pwa.settings.unsupported') : permission === 'denied' ? t('pwa.settings.blocked') : on ? t('pwa.settings.allowed') : t('pwa.settings.notificationsDesc')
+  return (
+    <>
+      <div className="dlg-sub">{t('pwa.settings.tab')}</div>
+      <Row label={t('pwa.settings.notifications')} desc={status}>
+        <Switch
+          checked={on}
+          onChange={async (v) => {
+            await setNotifications(v)
+            setPermission(notificationPermission())
+          }}
+        />
+      </Row>
+      <Row label={t('pwa.settings.sound')} desc={t('pwa.settings.soundDesc')}>
+        <Switch checked={s.reminderSound !== false} onChange={(v) => setSettings({ reminderSound: v })} />
+      </Row>
+      <p className="dlg-note">{t('pwa.settings.limits')}</p>
     </>
   )
 }
@@ -821,6 +852,22 @@ function ExternalGlyph() {
   )
 }
 
+/** Install button, while the browser offers installation; a note once TickDone runs as an installed app. */
+function InstallEntry() {
+  const t = useT()
+  const { canInstall } = usePwa()
+  if (isStandalone()) return <p className="dlg-install-note">{t('pwa.install.installed')}</p>
+  if (!canInstall) return null
+  return (
+    <div className="dlg-install">
+      <button className="btn btn-primary" onClick={() => promptInstall()}>
+        {t('pwa.install.button')}
+      </button>
+      <p className="muted">{t('pwa.install.desc')}</p>
+    </div>
+  )
+}
+
 function AboutTab() {
   const t = useT()
   return (
@@ -843,6 +890,7 @@ function AboutTab() {
           <ExternalGlyph />
         </a>
       </div>
+      <InstallEntry />
       <p className="muted">{t('misc.about.storage', { data: t('misc.settings.data') })}</p>
     </div>
   )

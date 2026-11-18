@@ -675,3 +675,33 @@
 .dlg-themes + .dlg-row {
   margin-top: 12px;
 }
+
+/* Reminders settings: what reminders can and cannot do without a server */
+.dlg-note {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+/* Install button in About */
+.dlg-install {
+  margin: 18px auto 0;
+  max-width: 380px;
+}
+.dlg-install .btn {
+  min-width: 180px;
+  height: 36px;
+}
+.dlg-install-note {
+  color: var(--text-3);
+  font-size: 12px;
+}
+@media (max-width: 767px) {
+  .dlg-install .btn {
+    height: 44px;
+    width: 100%;
+  }
+}

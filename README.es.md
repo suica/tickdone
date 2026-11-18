@@ -57,6 +57,8 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - 🔍 **Búsqueda** en tareas, etiquetas y listas.
 - ↩️ **Deshacer** desde el aviso después de completar, eliminar o mover una tarea.
 - ⌨️ **Atajos de teclado** y 🌙 **tema oscuro**.
+- ⏰ **Recordatorios**: a la hora del recordatorio de una tarea, TickDone muestra una tarjeta para completarla, posponerla (5 min, 15 min, 1 hora, mañana) o abrirla, y una notificación del sistema si la permites. TickDone no tiene servidor, así que los recordatorios suenan mientras está abierto en una pestaña o instalado y en ejecución; los que llegaron con la app cerrada aparecen al volver a abrirla.
+- 📲 **Instálalo como app**: añade TickDone a la pantalla de inicio o al dock desde Ajustes → Acerca de, y se abre sin conexión después de la primera visita. Cuando hay una versión nueva, un aviso ofrece recargar.
 - 💾 **Copia de seguridad y restauración**: exporta todo a un archivo JSON y vuelve a importarlo.
 
 ## 📸 Capturas de pantalla
@@ -149,8 +151,8 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Pulido de la interfaz, pantalla por pantalla ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] Selección múltiple y edición en lote ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] Navegación con el teclado en las listas de tareas ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] Notificaciones de recordatorios ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] Instalar como app y usar sin conexión ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] Notificaciones de recordatorios ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] Instalar como app y usar sin conexión ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Filtros guardados ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Estadísticas de tareas, del temporizador de concentración y del seguimiento de hábitos ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown en las notas de las tareas ([#21](https://github.com/suica/tickdone/issues/21))

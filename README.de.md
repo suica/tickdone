@@ -57,6 +57,8 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - 🔍 **Suche** in Aufgaben, Tags und Listen.
 - ↩️ **Rückgängig** über die Meldung, nachdem du eine Aufgabe erledigt, gelöscht oder verschoben hast.
 - ⌨️ **Tastenkürzel** und 🌙 **dunkles Design**.
+- ⏰ **Erinnerungen**: Zur Erinnerungszeit einer Aufgabe zeigt TickDone eine Karte zum Erledigen, Verschieben (5 Min., 15 Min., 1 Std., morgen) oder Öffnen und, wenn du es erlaubst, eine Systembenachrichtigung. TickDone hat keinen Server: Erinnerungen kommen, solange es in einem Tab geöffnet oder installiert ist und läuft; was fällig wurde, während es geschlossen war, erscheint beim nächsten Öffnen.
+- 📲 **Als App installieren**: Füge TickDone unter Einstellungen → Über zum Startbildschirm oder Dock hinzu; nach dem ersten Besuch startet es auch offline. Gibt es eine neue Version, bietet ein Hinweis das Neuladen an.
 - 💾 **Sichern und Wiederherstellen**: Exportiere alles als JSON-Datei und importiere sie später wieder.
 
 ## 📸 Screenshots
@@ -149,8 +151,8 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [x] UI-Feinschliff, Bildschirm für Bildschirm ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] Mehrfachauswahl und Stapelbearbeitung ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] Tastaturnavigation in Aufgabenlisten ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] Benachrichtigungen für Erinnerungen ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] Als App installieren und offline nutzen ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] Benachrichtigungen für Erinnerungen ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] Als App installieren und offline nutzen ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Gespeicherte Filter ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Statistiken zu Aufgaben, Fokus-Timer und Gewohnheitstracker ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown in Aufgabennotizen ([#21](https://github.com/suica/tickdone/issues/21))

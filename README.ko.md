@@ -57,6 +57,8 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 - 🔍 **검색**: 할 일, 태그, 목록을 한 번에 찾습니다.
 - ↩️ **실행 취소**: 할 일을 완료하거나 삭제하거나 옮긴 뒤 알림에서 되돌릴 수 있습니다.
 - ⌨️ **키보드 단축키**와 🌙 **다크 테마**.
+- ⏰ **알림**: 할 일의 알림 시간이 되면 완료, 다시 알림(5분, 15분, 1시간, 내일), 열기를 고를 수 있는 카드를 보여 주고, 허용하면 시스템 알림도 띄웁니다. TickDone에는 서버가 없어 알림은 탭에서 열려 있거나 설치되어 실행 중일 때만 울리며, 닫혀 있는 동안 시간이 된 알림은 다음에 열 때 표시됩니다.
+- 📲 **앱으로 설치**: 설정 → 정보에서 TickDone을 홈 화면이나 Dock에 추가할 수 있고, 한 번 방문하면 오프라인에서도 열립니다. 새 버전이 나오면 새로고침을 안내합니다.
 - 💾 **백업과 복원**: 모든 데이터를 JSON 파일로 내보내고 다시 가져올 수 있습니다.
 
 ## 📸 스크린샷
@@ -149,8 +151,8 @@ npm run dev        # http://localhost:5173
 - [x] 화면별 UI 다듬기 ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] 다중 선택과 일괄 편집 ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] 작업 목록 키보드 탐색 ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] 알림 시간에 맞춘 알림 표시 ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] 앱으로 설치하고 오프라인에서도 사용 ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] 알림 시간에 맞춘 알림 표시 ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] 앱으로 설치하고 오프라인에서도 사용 ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] 저장된 필터 ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] 작업, 집중 타이머, 습관 트래커 통계 ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] 작업 메모에서 Markdown 지원 ([#21](https://github.com/suica/tickdone/issues/21))

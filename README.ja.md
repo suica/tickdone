@@ -57,6 +57,8 @@ TickDone は、ブラウザで動く無料・オープンソースの ToDo リ�
 - 🔍 **検索**：タスク・タグ・リストをまとめて検索。
 - ↩️ **元に戻す**：タスクの完了・削除・移動のあと、通知から取り消せます。
 - ⌨️ **キーボードショートカット**と 🌙 **ダークテーマ**。
+- ⏰ **リマインダー**：タスクのリマインダー時刻になると、完了・スヌーズ（5 分、15 分、1 時間、明日）・開くを選べるカードを表示し、許可すればシステム通知も出します。TickDone にはサーバーがないため、リマインダーはタブで開いているか、インストールして起動している間に届きます。閉じている間に時刻になったものは、次に開いたときに表示されます。
+- 📲 **アプリとしてインストール**：「設定 → このアプリについて」から TickDone をホーム画面や Dock に追加でき、一度開けばオフラインでも起動します。新しいバージョンが出ると、再読み込みを案内します。
 - 💾 **バックアップと復元**：すべてのデータを JSON ファイルに書き出し、あとで読み込み直せます。
 
 ## 📸 スクリーンショット
@@ -149,8 +151,8 @@ npm run dev        # http://localhost:5173
 - [x] 画面ごとの UI のブラッシュアップ ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] 複数選択と一括編集 ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] タスクリストのキーボード操作 ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] リマインダー通知 ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] アプリとしてインストールしてオフラインでも使用 ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] リマインダー通知 ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] アプリとしてインストールしてオフラインでも使用 ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] 保存済みフィルター ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] タスク・ポモドーロタイマー・習慣トラッカーの統計 ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] タスクのメモで Markdown に対応 ([#21](https://github.com/suica/tickdone/issues/21))

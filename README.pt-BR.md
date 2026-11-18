@@ -57,6 +57,8 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
 - 🔍 **Busca** em tarefas, etiquetas e listas.
 - ↩️ **Desfazer** pelo aviso depois de concluir, excluir ou mover uma tarefa.
 - ⌨️ **Atalhos de teclado** e 🌙 **tema escuro**.
+- ⏰ **Lembretes**: na hora do lembrete de uma tarefa, o TickDone mostra um cartão para concluir, adiar (5 min, 15 min, 1 hora, amanhã) ou abrir a tarefa, e uma notificação do sistema se você permitir. O TickDone não tem servidor, então os lembretes tocam enquanto ele está aberto em uma aba ou instalado e em execução; os que venceram com ele fechado aparecem quando você o abre de novo.
+- 📲 **Instale como app**: adicione o TickDone à tela inicial ou ao Dock em Configurações → Sobre, e ele abre off-line depois da primeira visita. Quando sai uma versão nova, um aviso oferece recarregar.
 - 💾 **Backup e restauração**: exporte tudo para um arquivo JSON e importe de volta quando quiser.
 
 ## 📸 Capturas de tela
@@ -149,8 +151,8 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [x] Refinamento da interface, tela por tela ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] Seleção múltipla e edição em lote ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] Navegação pelo teclado nas listas de tarefas ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] Notificações de lembretes ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] Instalar como app e usar offline ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] Notificações de lembretes ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] Instalar como app e usar offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Filtros salvos ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Estatísticas de tarefas, do timer de foco e do rastreador de hábitos ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown nas notas das tarefas ([#21](https://github.com/suica/tickdone/issues/21))

@@ -15,6 +15,8 @@ export default defineConfig({
     timezoneId: 'Asia/Shanghai',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // The service worker would serve later requests from its cache and hide them from page.route; e2e/pwa.spec.ts turns it on
+    serviceWorkers: 'block',
     launchOptions: chromiumPath ? { executablePath: chromiumPath, args: ['--no-sandbox'] } : {},
   },
   projects: [

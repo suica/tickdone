@@ -88,16 +88,28 @@ const subscribe = (f: () => void) => {
   return () => subs.delete(f)
 }
 let saveTimer: number | undefined
+function save() {
+  saveTimer = undefined
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data))
+  } catch {
+    /* ignore */
+  }
+}
 function persist() {
   clearTimeout(saveTimer)
-  saveTimer = window.setTimeout(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(data))
-    } catch {
-      /* ignore */
-    }
-  }, 150)
+  saveTimer = window.setTimeout(save, 150)
 }
+/** 页面隐藏、刷新或关闭时立刻写入还没落盘的修改 */
+function flush() {
+  if (saveTimer === undefined) return
+  clearTimeout(saveTimer)
+  save()
+}
+window.addEventListener('pagehide', flush)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flush()
+})
 
 export const getData = () => data
 export function setData(fn: (d: AppData) => AppData) {

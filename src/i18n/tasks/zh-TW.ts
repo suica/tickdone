@@ -62,7 +62,7 @@ export default {
   'tasks.quickAdd.token.high': '高',
   'tasks.quickAdd.token.medium': '中',
   'tasks.quickAdd.token.low': '低',
-  'tasks.quickAdd.token.none': '无',
+  'tasks.quickAdd.token.none': '無',
   'tasks.dnd.movedTo': '已移至「{name}」',
   'tasks.dnd.priority': '優先順序：{name}',
   'tasks.dnd.tagAdded': '已新增標籤「{tag}」',

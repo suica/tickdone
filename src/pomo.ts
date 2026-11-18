@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from 'react'
+import { t } from './i18n'
 import { getData, playDing, setData, uid } from './store'
 import type { FocusRecord } from './types'
 
-/** 番茄专注计时器：模块级 store，切换模块时计时继续；状态存 localStorage，刷新可恢复 */
+/** Focus timer: a module-level store, so it keeps running when you switch modules; its state is in localStorage and survives a reload. */
 
 const KEY = 'tickdone:pomo'
 const MIN = 60000
@@ -14,30 +15,30 @@ interface PomoCore {
   mode: PomoMode
   phase: PomoPhase
   breakKind?: 'short' | 'long'
-  /** false = 已暂停（phase !== idle 时有意义） */
+  /** false = paused (meaningful when phase !== idle) */
   running: boolean
-  /** 本段运行开始的时间戳 */
+  /** When the current running segment started */
   segStart?: number
-  /** segStart 之前累计的毫秒 */
+  /** Milliseconds run before segStart */
   elapsed: number
-  /** 目标时长（番茄 / 休息），毫秒；正计时为 0 */
+  /** Target length (pomodoro or break) in ms; 0 for the stopwatch */
   duration: number
   taskId?: string
-  /** 本轮已完成番茄数（每 4 个长休息） */
+  /** Pomodoros finished in this round (a long break every 4) */
   count: number
 }
 
 export interface PomoSnapshot extends PomoCore {
   now: number
-  /** 已计时毫秒 */
+  /** Milliseconds timed */
   elapsedMs: number
-  /** 剩余毫秒（正计时为 0） */
+  /** Milliseconds left (0 for the stopwatch) */
   remaining: number
-  /** 0..1 进度 */
+  /** Progress, 0..1 */
   progress: number
-  /** 圆环中心显示的时间 mm:ss */
+  /** The mm:ss time in the middle of the ring */
   display: string
-  /** 是否有进行中（含暂停）的专注/休息 */
+  /** Whether a focus or break is under way (paused included) */
   active: boolean
 }
 
@@ -82,7 +83,7 @@ function elapsedOf(c: PomoCore, now: number) {
 }
 
 function derive(c: PomoCore, now: number): PomoSnapshot {
-  // 空闲时番茄时长跟随设置
+  // While idle, the pomodoro length follows the settings
   const duration = c.phase === 'idle' && c.mode === 'pomo' ? pomoMs() : c.duration
   const elapsedMs = elapsedOf(c, now)
   const countdown = c.phase === 'break' || c.mode === 'pomo'
@@ -111,8 +112,8 @@ function persist() {
 function updateTitle() {
   if (typeof document === 'undefined') return
   if (snap.active) {
-    const label = snap.phase === 'break' ? '休息' : snap.mode === 'stopwatch' ? '正计时' : '专注'
-    document.title = `${snap.display}${snap.running ? '' : ' 已暂停'} · ${label} - TickDone`
+    const phase = t(snap.phase === 'break' ? 'core.pomo.phase.break' : snap.mode === 'stopwatch' ? 'core.pomo.phase.stopwatch' : 'core.pomo.phase.focus')
+    document.title = t(snap.running ? 'core.pomo.title' : 'core.pomo.titlePaused', { time: snap.display, phase }) + ' - TickDone'
   } else {
     document.title = baseTitle
   }
@@ -157,7 +158,7 @@ function tick() {
   }
 }
 
-// ---------------- 提醒 ----------------
+// ---------------- Alerts ----------------
 function ring(times = 3) {
   for (let i = 0; i < times; i++) setTimeout(() => playDing(i % 2 ? 1175 : 880), i * 450)
 }
@@ -187,12 +188,12 @@ function addRecord(start: number, end: number, mode: FocusRecord['mode'], taskId
   setData((d) => ({ ...d, focus: [...(d.focus ?? []), r] }))
 }
 
-/** 到点：番茄完成 → 记录并进入休息；休息结束 → 回到空闲 */
+/** Time is up: a finished pomodoro is recorded and a break starts; a finished break goes back to idle. */
 function complete(now: number) {
   const c = core
-  // 结束时刻 = 本段开始 + 剩余所需（刷新恢复时可能早于 now）
+  // End time = segment start + what was left (earlier than now when restored after a reload)
   const end = c.segStart ? c.segStart + (c.duration - c.elapsed) : now
-  const late = now - end > MIN // 关闭页面期间已到点：不响铃
+  const late = now - end > MIN // it ran out while the page was closed: no sound
   if (c.phase === 'focus') {
     addRecord(end - c.duration, end, 'pomo', c.taskId)
     const count = c.count + 1
@@ -201,18 +202,21 @@ function complete(now: number) {
     const mins = Math.max(1, (long ? s.longBreak : s.shortBreak) || (long ? 15 : 5))
     if (!late) {
       ring(4)
-      const t = taskTitle(c.taskId)
-      notify('专注完成 🍅', `${t ? `「${t}」` : ''}已完成一个番茄，休息 ${mins} 分钟吧`)
+      const task = taskTitle(c.taskId)
+      notify(
+        t('core.pomo.focusDone.title'),
+        task ? t('core.pomo.focusDone.bodyTask', { task, count: mins }) : t('core.pomo.focusDone.body', { count: mins }),
+      )
     }
     const breakDur = mins * MIN
-    // 自动进入休息；若离线期间休息也已结束，直接回空闲
+    // Start the break; if the break also ran out while the page was closed, go straight back to idle
     if (late && now - end >= breakDur) set(idleCore('pomo', c.taskId, count))
     else set({ ...c, phase: 'break', breakKind: long ? 'long' : 'short', running: true, segStart: end, elapsed: 0, duration: breakDur, count })
     if (!late) doneSubs.forEach((f) => f('focus'))
   } else if (c.phase === 'break') {
     if (!late) {
       ring(3)
-      notify('休息结束', '开始下一个番茄吧')
+      notify(t('core.pomo.breakDone.title'), t('core.pomo.breakDone.body'))
     }
     set(idleCore('pomo', c.taskId, c.count))
     if (!late) doneSubs.forEach((f) => f('break'))
@@ -226,7 +230,7 @@ export function onPomoDone(f: (phase: 'focus' | 'break') => void) {
   }
 }
 
-// ---------------- 操作 ----------------
+// ---------------- Actions ----------------
 export function setPomoMode(mode: PomoMode) {
   if (core.phase !== 'idle') return
   set(idleCore(mode, core.taskId, core.count))
@@ -236,7 +240,7 @@ export function setPomoTask(taskId?: string) {
   set({ ...core, taskId })
 }
 
-/** 开始专注（可绑定任务）。已在专注中时仅切换绑定的任务 */
+/** Starts focusing (optionally on a task). While already focusing, only switches the task. */
 export function startFocus(taskId?: string) {
   ensurePermission()
   if (core.phase === 'focus') {
@@ -268,12 +272,12 @@ export function resumePomo() {
   set({ ...core, running: true, segStart: Date.now() })
 }
 
-/** 放弃：不记录 */
+/** Abandon: nothing is recorded */
 export function abandonPomo() {
   set(idleCore(core.mode, core.taskId, core.count))
 }
 
-/** 结束：≥1 分钟则记录（番茄提前结束记为自由专注，不计番茄数） */
+/** Finish: recorded if at least 1 minute (a pomodoro ended early counts as free focus, not as a pomodoro) */
 export function finishPomo() {
   const c = core
   if (c.phase === 'break') return skipBreak()
@@ -293,7 +297,7 @@ export function deleteFocusRecord(id: string) {
   setData((d) => ({ ...d, focus: (d.focus ?? []).filter((r) => r.id !== id) }))
 }
 
-// ---------------- 订阅 ----------------
+// ---------------- Subscriptions ----------------
 const subscribe = (f: () => void) => {
   subs.add(f)
   return () => subs.delete(f)
@@ -301,7 +305,7 @@ const subscribe = (f: () => void) => {
 export const getPomo = () => snap
 export const usePomo = () => useSyncExternalStore(subscribe, getPomo)
 
-// 启动：恢复计时，并处理关闭页面期间已到点的情况
+// On start: resume the timer and handle a timer that ran out while the page was closed
 if (typeof window !== 'undefined') {
   if (document.title.includes(' - TickDone') && /^\d/.test(document.title)) baseTitle = 'TickDone'
   syncTimer()
@@ -311,7 +315,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-/** 设置里番茄时长变化后刷新空闲显示（PomoView 调用） */
+/** Refreshes the idle display after the pomodoro length changes in Settings (called by PomoView) */
 export function refreshPomo() {
   if (core.phase === 'idle') emit()
 }

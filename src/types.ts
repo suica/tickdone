@@ -1,9 +1,9 @@
-// 优先级取值：0 无 / 1 低 / 3 中 / 5 高
+// Priority values: 0 none / 1 low / 3 medium / 5 high
 export type Priority = 0 | 1 | 3 | 5
 
 export type RepeatRule =
   | { kind: 'daily'; interval: number }
-  | { kind: 'weekly'; interval: number; days?: number[] } // 0=周日
+  | { kind: 'weekly'; interval: number; days?: number[] } // 0 = Sunday
   | { kind: 'weekdays' }
   | { kind: 'monthly'; interval: number }
   | { kind: 'yearly'; interval: number }
@@ -14,7 +14,7 @@ export interface Subtask {
   done: boolean
 }
 
-export type TaskStatus = 0 | 2 | -1 // 0 未完成, 2 已完成, -1 已放弃
+export type TaskStatus = 0 | 2 | -1 // 0 open, 2 completed, -1 won't do
 
 export interface Task {
   id: string
@@ -26,8 +26,8 @@ export interface Task {
   priority: Priority
   dueDate?: string // yyyy-MM-dd
   dueTime?: string // HH:mm
-  duration?: number // 分钟；日历里有时间的任务的时长，缺省按 30 分钟显示
-  reminder?: number | null // 提前分钟数；0 = 准时
+  duration?: number // minutes; how long a timed task is in the calendar (shown as 30 minutes when unset)
+  reminder?: number | null // minutes before; 0 = on time
   repeat?: RepeatRule | null
   status: TaskStatus
   completedAt?: number
@@ -76,23 +76,23 @@ export interface Habit {
   createdAt: number
   order: number
   archived?: boolean
-  /** 所属时段，缺省为「其他」 */
+  /** Time of day it belongs to; "other" when unset */
   section?: HabitSection
-  /** 目标天数（坚持 N 天） */
+  /** Goal in days (keep it up for N days) */
   goalDays?: number
-  /** 打卡频率，缺省为每天 */
+  /** How often to check in; daily when unset */
   frequency?: HabitFrequency
-  /** 提醒时间 HH:mm */
+  /** Reminder times, HH:mm */
   reminders?: string[]
-  /** 鼓励语 */
+  /** Words of encouragement */
   encouragement?: string
 }
 
 export type HabitSection = 'morning' | 'afternoon' | 'night' | 'other'
 export type HabitFrequency =
   | { kind: 'daily' }
-  | { kind: 'weekly'; times: number } // 每周 N 天
-  | { kind: 'days'; days: number[] } // 每周特定几天，0=周日
+  | { kind: 'weekly'; times: number } // N days a week
+  | { kind: 'days'; days: number[] } // given weekdays, 0 = Sunday
 
 export interface FocusRecord {
   id: string

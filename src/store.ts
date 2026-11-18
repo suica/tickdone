@@ -247,6 +247,7 @@ export function toggleTask(id: string) {
     updateTask(id, { status: 0, completedAt: undefined })
     return
   }
+  let text: string
   if (t.repeat && t.dueDate) {
     // 重复任务：生成一条已完成记录，原任务顺延到下一次
     const done: Task = { ...t, id: uid(), status: 2, completedAt: Date.now(), repeat: null }
@@ -260,12 +261,15 @@ export function toggleTask(id: string) {
         done,
       ],
     }))
-    toast(`已完成，下次：${next}`, snap)
+    text = `已完成，下次：${next}`
   } else {
     updateTask(id, { status: 2, completedAt: Date.now() })
-    toast(`已完成「${t.title || '无标题'}」`, snap)
+    text = `已完成「${t.title || '无标题'}」`
   }
+  // The first ding creates the AudioContext, which can take seconds on a busy machine; start the
+  // undo toast's countdown only after that.
   playDing()
+  toast(text, snap)
 }
 
 export function wontDo(id: string) {

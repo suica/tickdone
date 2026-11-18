@@ -17,7 +17,9 @@ async function openTaskWithSubtasks(page: Page, tap = false) {
     if (!localStorage.getItem('tickdone:ui:v1')) localStorage.setItem('tickdone:ui:v1', JSON.stringify({ module: 'tasks', view: 'tomorrow' }))
   })
   await page.goto('/')
-  const meta = page.locator('.task-row', { has: page.locator(`input[value="${TASK}"]`) }).locator('.task-meta')
+  // the title is an input with a mouse and plain text on touch screens
+  const title = page.locator(`input.task-title[value="${TASK}"]`).or(page.locator('span.task-title', { hasText: TASK }))
+  const meta = page.locator('.task-row', { has: title }).locator('.task-meta')
   await (tap ? meta.tap() : meta.click())
   await expect(page.locator('.subtask')).toHaveCount(2)
   await (tap ? page.locator('.detail-addsub').tap() : page.locator('.detail-addsub').click())

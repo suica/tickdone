@@ -6,6 +6,7 @@ import type { Priority, Task } from '../types'
 import { PRIORITY } from '../views'
 import { DatePicker, type DateValue } from './DatePicker'
 import { Flag, Icon } from './Icon'
+import { markEnter } from './taskMotion'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
   autoFocus?: boolean
   onAdded?: (t: Task) => void
   onCancel?: () => void
+  /** the phone bottom panel: tool buttons always shown, plus tags and a send button */
+  sheet?: boolean
 }
 
 interface Suggest {
@@ -23,21 +26,21 @@ interface Suggest {
   query: string
 }
 
-export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdded, onCancel }: Props) {
+export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdded, onCancel, sheet }: Props) {
   const data = useData()
   const [text, setText] = useState('')
   const [focused, setFocused] = useState(false)
   const [manual, setManual] = useState<DateValue | null>(null)
   const [prio, setPrio] = useState<Priority | null>(null)
-  const [pop, setPop] = useState<{ kind: 'date' | 'prio' | 'list'; anchor: Anchor } | null>(null)
+  const [pop, setPop] = useState<{ kind: 'date' | 'prio' | 'list' | 'tag'; anchor: Anchor } | null>(null)
   const [suggest, setSuggest] = useState<Suggest | null>(null)
   const [sIdx, setSIdx] = useState(0)
   const [listOverride, setListOverride] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
 
-  const listNames = data.lists.map((l) => l.name)
-  const parsed = useMemo(() => quickParse(text, listNames), [text, listNames.join('|')])
+  const listNames = useMemo(() => data.lists.map((l) => l.name), [data.lists])
+  const parsed = useMemo(() => quickParse(text, listNames), [text, listNames])
 
   const listId = listOverride ?? (parsed.listName ? data.lists.find((l) => l.name === parsed.listName)?.id : undefined) ?? defaults.listId ?? 'inbox'
   const listName = listId === 'inbox' ? '收件箱' : (data.lists.find((l) => l.id === listId)?.name ?? '收件箱')
@@ -106,6 +109,7 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
       repeat: date.repeat ?? defaults.repeat,
       tags: [...new Set([...(defaults.tags ?? []), ...parsed.tags])],
     })
+    markEnter(t.id)
     setText('')
     setManual(null)
     setPrio(null)
@@ -126,12 +130,17 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
     return out
   }, [parsed, text])
 
-  const active = focused || !!text || !!pop
+  const active = sheet || focused || !!text || !!pop
   const hasDate = !!date.dueDate
-  const ph = placeholder ?? `+ 添加任务至"${listName}"，回车即可保存`
+  const ph = placeholder ?? (sheet ? `添加任务至"${listName}"` : `+ 添加任务至"${listName}"，回车即可保存`)
+
+  const addTag = (name: string) => {
+    if (!parsed.tags.includes(name)) setText((v) => (v && !v.endsWith(' ') ? v + ' ' : v) + '#' + name + ' ')
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
   return (
-    <div className={'quick-add' + (active ? ' active' : '') + (compact ? ' compact' : '')}>
+    <div className={'quick-add' + (active ? ' active' : '') + (compact ? ' compact' : '') + (sheet ? ' sheet' : '')}>
       <div className="qa-field">
         <div className="qa-mirror" ref={mirrorRef} aria-hidden>
           {segments.map((x, i) => (
@@ -220,9 +229,22 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
           <button className="qa-tool" title="优先级" onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
             <Flag color={PRIORITY.find((p) => p.v === priority)!.color} size={15} />
           </button>
+          {sheet && (
+            <button className="qa-tool" title="标签" onClick={(e) => setPop({ kind: 'tag', anchor: anchorOf(e.currentTarget) })}>
+              <Icon name="tag" size={16} />
+            </button>
+          )}
           {!compact && (
             <button className="qa-tool" title="清单" onClick={(e) => setPop({ kind: 'list', anchor: anchorOf(e.currentTarget) })}>
               <Icon name="move" size={16} />
+              {sheet && <span>{listName}</span>}
+            </button>
+          )}
+          {sheet && (
+            <button className="qa-send" title="添加" aria-label="添加" disabled={!parsed.title.trim()} onClick={submit}>
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" />
+              </svg>
             </button>
           )}
         </div>
@@ -251,6 +273,23 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
                 inputRef.current?.focus()
               },
             }))}
+          />
+        </Popover>
+      )}
+      {pop?.kind === 'tag' && (
+        <Popover anchor={pop.anchor} onClose={() => setPop(null)}>
+          <MenuList
+            onClose={() => setPop(null)}
+            items={
+              data.tags.length
+                ? data.tags.map((t) => ({
+                    label: t.name,
+                    icon: <Icon name="tag" size={14} style={t.color ? { color: t.color } : undefined} />,
+                    checked: parsed.tags.includes(t.name),
+                    onClick: () => addTag(t.name),
+                  }))
+                : [{ label: '输入 # 加标签', disabled: true }]
+            }
           />
         </Popover>
       )}

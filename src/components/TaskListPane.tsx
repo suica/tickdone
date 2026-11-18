@@ -1,27 +1,48 @@
-import { useEffect, useMemo, useState, type DragEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 'react'
 import { format } from 'date-fns'
-import { deleteTask, getData, reorderTask, setData, setUI, toast, uid, updateList, updateTask, useData, useUI } from '../store'
-import type { GroupBy, SortBy, Task, ViewPrefs } from '../types'
+import { deleteTask, getData, setData, setUI, toast, uid, updateList, useData, useUI } from '../store'
+import type { AppData, GroupBy, SortBy, Task, TaskList, ViewPrefs } from '../types'
+import { usePhone } from '../viewport'
 import { defaultPrefs, groupTasks, sortTasks, tasksForView, viewDefaults, viewTitle, type Group } from '../views'
 import { Icon } from './Icon'
+import { maybeEnter, useExitAnimations, useLinger, withLinger } from './taskMotion'
 import { anchorOf, MenuList, Popover, type Anchor, type MenuItem } from './Popover'
 import { QuickAdd } from './QuickAdd'
+import { PhoneQuickAdd } from './QuickAddSheet'
+import { startCardDrag, startColumnDrag, startListDrag, TaskDragContext, type KanbanEnv, type ListEnv, type TaskDragApi } from './taskDnd'
+import { buildTree, countTree, type TaskTree } from './taskTree'
 import { TaskRow } from './TaskRow'
 import './tasks.css'
 
 const GROUP_NAMES: Record<GroupBy, string> = { date: '时间', list: '清单', priority: '优先级', tag: '标签', none: '无', section: '自定义分组' }
 const SORT_NAMES: Record<SortBy, string> = { date: '时间', title: '标题', priority: '优先级', custom: '自定义' }
+const NO_TREE: TaskTree = { roots: [], children: new Map() }
+
+function MenuIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" aria-hidden>
+      <path d="M4 6.5h16M4 12h16M4 17.5h16" />
+    </svg>
+  )
+}
+
+const toggleCollapsed = (key: string) => setUI((u) => ({ collapsed: { ...u.collapsed, [key]: !u.collapsed[key] } }))
 
 export function TaskListPane() {
   const ui = useUI()
-  const data = useData()
+  const raw = useData()
+  const linger = useLinger()
+  // tasks whose completion is still animating are drawn in their previous state
+  const data = useMemo(() => withLinger(raw, linger), [raw, linger])
+  const phone = usePhone()
   const view = ui.view
   const list = view.startsWith('list:') ? data.lists.find((l) => 'list:' + l.id === view) : undefined
   const prefs: ViewPrefs = ui.prefs[view] ?? defaultPrefs(view)
   const [menu, setMenu] = useState<Anchor | null>(null)
   const { open, done } = useMemo(() => tasksForView(view, data), [view, data])
   const groupBy: GroupBy = prefs.groupBy === 'section' && !list ? 'none' : prefs.groupBy
-  const groups = useMemo(() => groupTasks(sortTasks(open, prefs.sortBy), groupBy, data, view), [open, prefs.sortBy, groupBy, data, view])
+  const tree = useMemo(() => buildTree(sortTasks(open, prefs.sortBy)), [open, prefs.sortBy])
+  const groups = useMemo(() => groupTasks(tree.roots, groupBy, data, view), [tree, groupBy, data, view])
   const title = viewTitle(view, data)
   const isTrash = view === 'trash'
   const isDoneView = view === 'completed' || view === 'wontdo'
@@ -29,11 +50,23 @@ export function TaskListPane() {
   const showList = !view.startsWith('list:') && view !== 'inbox'
   const kanban = list?.view === 'kanban'
 
-  const setPrefs = (p: Partial<ViewPrefs>) => setUI((u) => ({ prefs: { ...u.prefs, [view]: { ...prefs, ...p } } }))
+  const setPrefs = (p: Partial<ViewPrefs>) => setUI((u) => ({ prefs: { ...u.prefs, [view]: { ...(u.prefs[view] ?? defaultPrefs(view)), ...p } } }))
   const collapsed = (k: string) => !!ui.collapsed[view + ':' + k]
-  const toggle = (k: string) => setUI((u) => ({ collapsed: { ...u.collapsed, [view + ':' + k]: !u.collapsed[view + ':' + k] } }))
 
-  // Delete 删除选中任务
+  // drag and drop: the controller reads the current grouping when the drag starts
+  const env = useRef<ListEnv>({ groupBy, sortBy: prefs.sortBy, setCustomSort: () => {}, groups: new Map() })
+  useLayoutEffect(() => {
+    env.current = {
+      groupBy,
+      sortBy: prefs.sortBy,
+      setCustomSort: () => setPrefs({ sortBy: 'custom' }),
+      groups: new Map(groups.map((g) => [g.key, { name: g.name, patch: g.patch }])),
+    }
+  })
+  const dnd = useMemo<TaskDragApi>(() => ({ start: (e, task, row) => startListDrag(e, task, row, env), flipRows: true }), [])
+  const exitRef = useExitAnimations([view, groupBy, prefs.sortBy, kanban ? 'k' : 'l', data.settings.showCompleted].join('|'))
+
+  // Delete / Backspace deletes the selected task
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement
@@ -85,24 +118,18 @@ export function TaskListPane() {
     ...(list ? [{ divider: true }, { label: '编辑清单', icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: list.id } }) }] : []),
   ]
 
-  const onReorder = (g: Group) => (dragId: string, targetId: string, after: boolean) => {
-    const patch = { ...(g.patch ?? {}) }
-    if (prefs.sortBy !== 'custom') setPrefs({ sortBy: 'custom' })
-    reorderTask(dragId, targetId, after, patch)
-  }
-  const dropOnGroup = (g: Group) => (e: DragEvent) => {
-    const id = e.dataTransfer.getData('text/task-id')
-    if (!id || !g.patch) return
-    e.preventDefault()
-    updateTask(id, g.patch)
-  }
-
   return (
     <main className="list-pane">
       <header className="list-head">
-        <button className="icon-btn" title={ui.sidebarHidden ? '展开侧边栏' : '收起侧边栏'} onClick={() => setUI({ sidebarHidden: !ui.sidebarHidden })}>
-          <Icon name="sidebar" size={18} />
-        </button>
+        {phone ? (
+          <button className="icon-btn list-head-btn" title="清单" aria-label="打开侧栏" onClick={() => setUI({ drawerOpen: true })}>
+            <MenuIcon />
+          </button>
+        ) : (
+          <button className="icon-btn list-head-btn" title={ui.sidebarHidden ? '展开侧边栏' : '收起侧边栏'} onClick={() => setUI({ sidebarHidden: !ui.sidebarHidden })}>
+            <Icon name="sidebar" size={18} />
+          </button>
+        )}
         <h1>{title}</h1>
         <div style={{ flex: 1 }} />
         {isTrash && open.length > 0 && (
@@ -120,7 +147,7 @@ export function TaskListPane() {
           </button>
         )}
         {!isTrash && !isDoneView && (
-          <button className="icon-btn" title="更多" onClick={(e) => setMenu(anchorOf(e.currentTarget))}>
+          <button className="icon-btn list-head-btn" title="更多" onClick={(e) => setMenu(anchorOf(e.currentTarget))}>
             <Icon name="more" size={20} stroke={2.6} />
           </button>
         )}
@@ -132,61 +159,113 @@ export function TaskListPane() {
       )}
 
       {kanban && list ? (
-        <Kanban listId={list.id} />
+        <Kanban list={list} data={data} sortBy={prefs.sortBy} setCustomSort={() => setPrefs({ sortBy: 'custom' })} boardRef={exitRef} />
       ) : (
-        <div className="list-body" onClick={(e) => e.target === e.currentTarget && setUI({ selectedTaskId: undefined })}>
-          {canAdd && (
-            <div className="list-add">
-              <QuickAdd defaults={viewDefaults(view)} key={view} />
-            </div>
-          )}
-          {groups.map((g) =>
-            g.tasks.length === 0 && groupBy !== 'section' ? null : (
-              <section key={g.key} className="group" onDragOver={(e) => g.patch && e.preventDefault()} onDrop={dropOnGroup(g)}>
-                {g.name && (
-                  <div className="group-head" onClick={() => toggle(g.key)} onContextMenu={(e) => sectionMenu(e, list?.id, g)}>
-                    <Icon name={collapsed(g.key) ? 'chevronRight' : 'chevronDown'} size={14} />
-                    <span className={g.overdue ? 'overdue' : ''}>{g.name}</span>
-                    <span className="group-count">{g.tasks.length}</span>
-                    {g.overdue && (
-                      <button
-                        className="group-action"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          const snap = getData()
-                          const today = format(new Date(), 'yyyy-MM-dd')
-                          setData((d) => ({ ...d, tasks: d.tasks.map((t) => (g.tasks.some((x) => x.id === t.id) ? { ...t, dueDate: today } : t)) }))
-                          toast('已顺延到今天', snap)
-                        }}
-                      >
-                        顺延
-                      </button>
-                    )}
-                  </div>
-                )}
-                {!collapsed(g.key) && g.tasks.map((t) => <TaskRow key={t.id} task={t} showList={showList} onReorder={onReorder(g)} />)}
-              </section>
-            ),
-          )}
-          {isTrash && open.length > 0 && <TrashHint />}
-          {(data.settings.showCompleted || isDoneView) && done.length > 0 && <DoneSection tasks={done} showList={showList || isDoneView} grouped={isDoneView} view={view} />}
-          {open.length === 0 && (done.length === 0 || (!data.settings.showCompleted && !isDoneView)) && <EmptyState view={view} />}
+        <div
+          className="list-body"
+          ref={exitRef}
+          onClick={(e) => {
+            const el = e.target as HTMLElement
+            if (el === e.currentTarget || el.classList.contains('list-content')) setUI({ selectedTaskId: undefined })
+          }}
+        >
+          <div className="list-content" key={view}>
+            {canAdd && !phone && (
+              <div className="list-add">
+                <QuickAdd defaults={viewDefaults(view)} key={view} />
+              </div>
+            )}
+            <TaskDragContext.Provider value={dnd}>
+              {groups.map((g) =>
+                g.tasks.length === 0 && groupBy !== 'section' ? null : (
+                  <GroupSection key={g.key} g={g} tree={tree} listId={list?.id} showList={showList} collapsed={collapsed(g.key)} onToggle={() => toggleCollapsed(view + ':' + g.key)} keep={groupBy === 'section' && !!g.patch?.sectionId} />
+                ),
+              )}
+            </TaskDragContext.Provider>
+            {isTrash && open.length > 0 && <TrashHint />}
+            {(data.settings.showCompleted || isDoneView) && done.length > 0 && <DoneSection tasks={done} showList={showList || isDoneView} grouped={isDoneView} view={view} />}
+            {open.length === 0 && (done.length === 0 || (!data.settings.showCompleted && !isDoneView)) && <EmptyState view={view} />}
+          </div>
         </div>
       )}
+      {phone && canAdd && <PhoneQuickAdd defaults={kanban && list ? { listId: list.id } : viewDefaults(view)} />}
     </main>
   )
 }
 
 const getUIId = () => {
-  // 仅当焦点不在输入框时，Delete 作用于选中任务
+  // the selected row (the key handler ignores keys typed into inputs)
   const sel = document.querySelector('.task-row.selected')
   return sel?.getAttribute('data-task-id') ?? undefined
 }
 
-function sectionMenu(e: React.MouseEvent, listId: string | undefined, g: Group) {
+function sectionMenu(e: React.MouseEvent, listId: string | undefined, g: Pick<Group, 'patch'>) {
   if (!listId || !g.patch?.sectionId) return
   e.preventDefault()
   setUI({ menu: { x: e.clientX, y: e.clientY, kind: 'section', id: listId + '/' + g.patch.sectionId } })
+}
+
+/** A task with its subtasks (indented below it, foldable). New tasks grow in from the top. */
+function TaskNode({ task, tree, depth, showList }: { task: Task; tree: TaskTree; depth: number; showList: boolean }) {
+  const ui = useUI()
+  const ref = useRef<HTMLDivElement>(null)
+  const kids = tree.children.get(task.id)
+  const key = 'task:' + task.id
+  const folded = !!ui.collapsed[key]
+  useLayoutEffect(() => maybeEnter(task.id, ref.current), [task.id])
+  return (
+    <div className="task-node" ref={ref} data-exit={task.id} data-linger-node={task.id}>
+      <TaskRow task={task} showList={showList} depth={depth} fold={kids?.length ? { folded, toggle: () => toggleCollapsed(key) } : undefined} />
+      {kids && kids.length > 0 && <Children tasks={kids} tree={tree} depth={depth + 1} showList={showList} folded={folded} />}
+    </div>
+  )
+}
+
+function Children({ tasks, tree, depth, showList, folded }: { tasks: Task[]; tree: TaskTree; depth: number; showList: boolean; folded: boolean }) {
+  return (
+    <div className={'task-children' + (folded ? ' collapsed' : '')} data-collapsed={folded || undefined}>
+      <div className="task-children-inner" inert={folded || undefined}>
+        {tasks.map((c) => (
+          <TaskNode key={c.id} task={c} tree={tree} depth={depth} showList={showList} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function GroupSection({ g, tree, listId, showList, collapsed, onToggle, keep }: { g: Group; tree: TaskTree; listId?: string; showList: boolean; collapsed: boolean; onToggle: () => void; keep: boolean }) {
+  return (
+    <section className="group" data-group={g.key} data-exit={'group:' + g.key} data-keep={keep || undefined}>
+      {g.name && (
+        <div className={'group-head' + (collapsed ? ' is-collapsed' : '')} data-group-head={g.key} onClick={onToggle} onContextMenu={(e) => sectionMenu(e, listId, g)}>
+          <Icon name="chevronDown" size={14} className="chev" />
+          <span className={g.overdue ? 'overdue' : ''}>{g.name}</span>
+          <span className="group-count">{countTree(g.tasks, tree.children)}</span>
+          {g.overdue && (
+            <button
+              className="group-action"
+              onClick={(e) => {
+                e.stopPropagation()
+                const snap = getData()
+                const today = format(new Date(), 'yyyy-MM-dd')
+                setData((d) => ({ ...d, tasks: d.tasks.map((t) => (g.tasks.some((x) => x.id === t.id) ? { ...t, dueDate: today } : t)) }))
+                toast('已顺延到今天', snap)
+              }}
+            >
+              顺延
+            </button>
+          )}
+        </div>
+      )}
+      <div className={'group-body' + (collapsed ? ' collapsed' : '')} data-collapsed={collapsed || undefined}>
+        <div className="group-inner" inert={collapsed || undefined}>
+          {g.tasks.map((t) => (
+            <TaskNode key={t.id} task={t} tree={tree} depth={0} showList={showList} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showList: boolean; grouped: boolean; view: string }) {
@@ -194,7 +273,7 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
   const key = view + ':__done'
   const isCollapsed = !!ui.collapsed[key]
   if (grouped) {
-    // 已完成 / 已放弃 视图按完成日期分组
+    // the completed / won't-do views group by completion day
     const byDay = new Map<string, Task[]>()
     for (const t of tasks) {
       const k = t.completedAt ? format(new Date(t.completedAt), 'yyyy-MM-dd') : '—'
@@ -204,27 +283,35 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
     return (
       <>
         {[...byDay].map(([day, ts]) => (
-          <section className="group" key={day}>
+          <section className="group" key={day} data-group={'done:' + day} data-done data-exit={'done:' + day}>
             <div className="group-head static">
               <span>{day === format(new Date(), 'yyyy-MM-dd') ? '今天' : format(new Date(day), 'M月d日')}</span>
               <span className="group-count">{ts.length}</span>
             </div>
-            {ts.map((t) => (
-              <TaskRow key={t.id} task={t} showList={showList} />
-            ))}
+            <div className="group-inner">
+              {ts.map((t) => (
+                <TaskNode key={t.id} task={t} tree={NO_TREE} depth={0} showList={showList} />
+              ))}
+            </div>
           </section>
         ))}
       </>
     )
   }
   return (
-    <section className="group group-done">
-      <div className="group-head" onClick={() => setUI((u) => ({ collapsed: { ...u.collapsed, [key]: !u.collapsed[key] } }))}>
-        <Icon name={isCollapsed ? 'chevronRight' : 'chevronDown'} size={14} />
+    <section className="group group-done" data-group="__done" data-done data-exit="__done">
+      <div className={'group-head' + (isCollapsed ? ' is-collapsed' : '')} onClick={() => toggleCollapsed(key)}>
+        <Icon name="chevronDown" size={14} className="chev" />
         <span>已完成</span>
         <span className="group-count">{tasks.length}</span>
       </div>
-      {!isCollapsed && tasks.map((t) => <TaskRow key={t.id} task={t} showList={showList} />)}
+      <div className={'group-body' + (isCollapsed ? ' collapsed' : '')} data-collapsed={isCollapsed || undefined}>
+        <div className="group-inner" inert={isCollapsed || undefined}>
+          {tasks.map((t) => (
+            <TaskNode key={t.id} task={t} tree={NO_TREE} depth={0} showList={showList} />
+          ))}
+        </div>
+      </div>
     </section>
   )
 }
@@ -258,58 +345,48 @@ function EmptyState({ view }: { view: string }) {
   )
 }
 
-// ---------------- 看板 ----------------
-function Kanban({ listId }: { listId: string }) {
-  const data = useData()
-  const ui = useUI()
-  const list = data.lists.find((l) => l.id === listId)!
-  const prefs = ui.prefs['list:' + listId] ?? defaultPrefs('list:' + listId)
-  const tasks = sortTasks(
-    data.tasks.filter((t) => t.listId === listId && !t.deleted && t.status === 0),
-    prefs.sortBy,
-  )
+// ---------------- kanban ----------------
+function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskList; data: AppData; sortBy: SortBy; setCustomSort: () => void; boardRef: Ref<HTMLDivElement> }) {
+  const listId = list.id
+  const tree = useMemo(() => buildTree(sortTasks(data.tasks.filter((t) => t.listId === listId && !t.deleted && t.status === 0), sortBy)), [data.tasks, listId, sortBy])
   const cols = [{ id: undefined as string | undefined, name: '未分组' }, ...list.sections]
-  const [over, setOver] = useState<string | null>(null)
+  const sectionOf = (t: Task) => (t.sectionId && list.sections.some((s) => s.id === t.sectionId) ? t.sectionId : undefined)
+  const env = useRef<KanbanEnv>({ listId, sortBy, setCustomSort, columns: new Map() })
+  useLayoutEffect(() => {
+    env.current = { listId, sortBy, setCustomSort, columns: new Map(cols.map((c) => [c.id ?? '', c.name])) }
+  })
+  const dnd = useMemo<TaskDragApi>(() => ({ start: (e, task, row) => startCardDrag(e, task, row, env), flipRows: false }), [])
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
   return (
-    <div className="kanban">
-      {cols.map((c) => {
-        const ts = tasks.filter((t) => (c.id ? t.sectionId === c.id : !t.sectionId || !list.sections.some((s) => s.id === t.sectionId)))
-        if (!c.id && ts.length === 0 && list.sections.length > 0) return null
-        const k = c.id ?? 'none'
-        return (
-          <div
-            key={k}
-            className={'kanban-col' + (over === k ? ' over' : '')}
-            onDragOver={(e) => {
-              e.preventDefault()
-              setOver(k)
-            }}
-            onDragLeave={() => setOver(null)}
-            onDrop={(e) => {
-              setOver(null)
-              const id = e.dataTransfer.getData('text/task-id')
-              if (id) updateTask(id, { sectionId: c.id })
-            }}
-          >
-            <div className="kanban-head" onContextMenu={(e) => c.id && sectionMenu(e, listId, { key: k, name: c.name, tasks: ts, patch: { sectionId: c.id } })}>
-              <span>{c.name}</span>
-              <span className="group-count">{ts.length}</span>
+    <div className="kanban" ref={boardRef} key={listId}>
+      <TaskDragContext.Provider value={dnd}>
+        {cols.map((c) => {
+          const ts = tree.roots.filter((t) => sectionOf(t) === c.id)
+          if (!c.id && ts.length === 0 && list.sections.length > 0) return null
+          const k = c.id ?? ''
+          return (
+            <div key={k || 'none'} className="kanban-col" data-kanban-col={k} data-flip-col={k || 'none'}>
+              <div
+                className={'kanban-head' + (c.id ? ' movable' : '')}
+                onPointerDown={c.id ? (e) => startColumnDrag(e, listId, c.id!) : undefined}
+                onContextMenu={(e) => c.id && sectionMenu(e, listId, { patch: { sectionId: c.id } })}
+              >
+                <span>{c.name}</span>
+                <span className="group-count">{countTree(ts, tree.children)}</span>
+              </div>
+              <div className="kanban-add">
+                <QuickAdd defaults={{ listId, sectionId: c.id }} placeholder="+ 添加任务" compact />
+              </div>
+              <div className="kanban-cards">
+                {ts.map((t) => (
+                  <KanbanCard key={t.id} task={t} tree={tree} />
+                ))}
+              </div>
             </div>
-            <div className="kanban-add">
-              <QuickAdd defaults={{ listId, sectionId: c.id }} placeholder="+ 添加任务" compact />
-            </div>
-            <div className="kanban-cards">
-              {ts.map((t) => (
-                <div className="kanban-card" key={t.id}>
-                  <TaskRow task={t} onReorder={(d, tg, after) => reorderTask(d, tg, after, { sectionId: c.id })} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </TaskDragContext.Provider>
       <div className="kanban-col kanban-new">
         {adding ? (
           <input
@@ -334,6 +411,25 @@ function Kanban({ listId }: { listId: string }) {
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+function KanbanCard({ task, tree }: { task: Task; tree: TaskTree }) {
+  const ui = useUI()
+  const ref = useRef<HTMLDivElement>(null)
+  const kids = tree.children.get(task.id)
+  const key = 'task:' + task.id
+  const folded = !!ui.collapsed[key]
+  useLayoutEffect(() => maybeEnter(task.id, ref.current), [task.id])
+  return (
+    <div className="kanban-card" ref={ref} data-dnd-card={task.id} data-flip={task.id} data-exit={task.id} data-linger-node={task.id}>
+      <TaskRow task={task} fold={kids?.length ? { folded, toggle: () => toggleCollapsed(key) } : undefined} />
+      {kids && kids.length > 0 && (
+        <TaskDragContext.Provider value={null}>
+          <Children tasks={kids} tree={tree} depth={1} showList={false} folded={folded} />
+        </TaskDragContext.Provider>
+      )}
     </div>
   )
 }

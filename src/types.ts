@@ -26,6 +26,7 @@ export interface Task {
   priority: Priority
   dueDate?: string // yyyy-MM-dd
   dueTime?: string // HH:mm
+  duration?: number // 分钟；日历里有时间的任务的时长，缺省按 30 分钟显示
   reminder?: number | null // 提前分钟数；0 = 准时
   repeat?: RepeatRule | null
   status: TaskStatus

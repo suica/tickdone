@@ -3,10 +3,12 @@ import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
 import { dueLabel, isOverdue } from '../dates'
 import { usePan } from '../gestures'
+import { useT, type MessageKey } from '../i18n'
+import { fmtFullDate, fmtMonthDay, fmtTime } from '../i18n/format'
 import { cancelAnimations, dur, ease, play } from '../motion'
 import { startFocus } from '../pomo'
 import { deleteTask, duplicateTask, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
-import type { Subtask, Task } from '../types'
+import type { Priority, Subtask, Task } from '../types'
 import { usePhone, useTablet } from '../viewport'
 import { PRIORITY, priorityColor } from '../views'
 import { DatePicker, reminderText, repeatText } from './DatePicker'
@@ -15,6 +17,17 @@ import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { Subtasks } from './Subtasks'
 import { Checkbox } from './TaskRow'
 import './detail.css'
+
+/** Priority names from the shared vocabulary. */
+export const PRIORITY_NAME: Record<Priority, MessageKey> = {
+  5: 'common.priorityGroup.high',
+  3: 'common.priorityGroup.medium',
+  1: 'common.priorityGroup.low',
+  0: 'common.priorityGroup.none',
+}
+
+/** "Nov 18, 2026, 3:36 PM" style date and time of a timestamp, in the current language. */
+const stamp = (ms: number, withYear: boolean) => `${withYear ? fmtFullDate(new Date(ms)) : fmtMonthDay(new Date(ms))} ${fmtTime(format(ms, 'HH:mm'))}`
 
 function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, autoFocus, readOnly }: { value: string; onChange: (v: string) => void; className?: string; placeholder?: string; onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void; autoFocus?: boolean; readOnly?: boolean }) {
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -73,6 +86,7 @@ const DISMISSABLE = '.popover, .sheet-layer, .modal-mask, .dlg-mask'
 function DetailLayer({ task, mode }: { task: Task; mode: Exclude<Mode, 'pane'> }) {
   const ref = useRef<HTMLDivElement>(null)
   const data = useData()
+  const t = useT()
   const list = data.lists.find((l) => l.id === task.listId)
 
   // Another task picked while the panel was sliding out: keep it open.
@@ -135,17 +149,17 @@ function DetailLayer({ task, mode }: { task: Task; mode: Exclude<Mode, 'pane'> }
 
   const cls = mode === 'page' ? 'detail-page' : 'detail-float' + (mode === 'overlay' ? ' detail-overlay' : '')
   return createPortal(
-    <div ref={ref} className={cls} data-detail-layer={mode} role="dialog" aria-label="任务详情" {...(mode === 'page' ? swipe : {})}>
+    <div ref={ref} className={cls} data-detail-layer={mode} role="dialog" aria-label={t('shell.detail.label')} {...(mode === 'page' ? swipe : {})}>
       {mode === 'page' ? (
         <div className="detail-nav">
-          <button className="detail-back" title="返回" aria-label="返回" onClick={closeDetail}>
+          <button className="detail-back" title={t('common.back')} aria-label={t('common.back')} onClick={closeDetail}>
             <Icon name="chevronLeft" size={24} />
           </button>
-          <span className="detail-nav-title">{list?.name ?? '收件箱'}</span>
+          <span className="detail-nav-title">{list?.name ?? t('common.list.inbox')}</span>
         </div>
       ) : (
         <div className="detail-float-close">
-          <button className="icon-btn" onClick={closeDetail} title="关闭">
+          <button className="icon-btn" onClick={closeDetail} title={t('common.close')}>
             <Icon name="close" size={16} />
           </button>
         </div>
@@ -158,6 +172,7 @@ function DetailLayer({ task, mode }: { task: Task; mode: Exclude<Mode, 'pane'> }
 
 function DetailPane({ task, width }: { task?: Task; width?: number }) {
   const ref = useRef<HTMLElement>(null)
+  const t = useT()
   const style: CSSProperties | undefined = width ? { flex: `0 1 ${width}px`, maxWidth: 'none' } : undefined
   return (
     <aside className="detail" ref={ref} style={style}>
@@ -170,7 +185,7 @@ function DetailPane({ task, width }: { task?: Task; width?: number }) {
             <circle cx="48" cy="48" r="40" fill="var(--primary-soft)" />
             <path d="M32 50l10 10 22-24" stroke="var(--primary)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <div>点击任务标题查看详情</div>
+          <div>{t('shell.detail.empty')}</div>
         </div>
       )}
     </aside>
@@ -182,6 +197,7 @@ const KEY_STEP = 16
 
 /** The divider between the list and the desktop detail: drag (or arrow keys) to resize, double-click to reset. */
 function Divider({ pane, width }: { pane: RefObject<HTMLElement | null>; width?: number }) {
+  const t = useT()
   const limits = () => {
     const el = pane.current!
     const r = el.getBoundingClientRect()
@@ -250,7 +266,7 @@ function Divider({ pane, width }: { pane: RefObject<HTMLElement | null>; width?:
       className="detail-divider"
       role="separator"
       aria-orientation="vertical"
-      aria-label="调整详情宽度"
+      aria-label={t('shell.detail.resize')}
       aria-valuenow={width}
       aria-valuemin={MIN_DETAIL}
       tabIndex={0}
@@ -272,6 +288,7 @@ function Divider({ pane, width }: { pane: RefObject<HTMLElement | null>; width?:
 function DetailBody({ task }: { task: Task }) {
   const data = useData()
   const phone = usePhone()
+  const t = useT()
   const [pop, setPop] = useState<{ kind: 'date' | 'prio' | 'list' | 'more' | 'tag'; anchor: Anchor } | null>(null)
   const [focusSub, setFocusSub] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState('')
@@ -281,7 +298,7 @@ function DetailBody({ task }: { task: Task }) {
   const list = data.lists.find((l) => l.id === task.listId)
   const overdue = isOverdue(task)
 
-  // 新建的空标题任务自动聚焦标题
+  // A new task with an empty title gets the focus in its title
   useEffect(() => {
     if (!task.title) titleRef.current?.querySelector('textarea')?.focus()
   }, [])
@@ -294,17 +311,17 @@ function DetailBody({ task }: { task: Task }) {
     setFocusSub(s.id)
   }
 
-  const dateText = task.dueDate ? dueLabel(task) : '日期与提醒'
+  const dateText = task.dueDate ? dueLabel(task) : t('shell.detail.dateAndReminder')
   const dateColor = !task.dueDate ? 'var(--text-3)' : task.status !== 0 ? 'var(--text-3)' : overdue ? 'var(--overdue)' : 'var(--primary)'
 
   return (
     <div className="detail-inner">
       {ro && (
         <div className="detail-banner">
-          该任务在垃圾桶中
-          <button onClick={() => updateTask(task.id, { deleted: false })}>恢复</button>
+          {t('shell.detail.inTrash')}
+          <button onClick={() => updateTask(task.id, { deleted: false })}>{t('shell.task.restore')}</button>
           <button className="danger" onClick={() => deleteTask(task.id)}>
-            永久删除
+            {t('shell.task.deleteForever')}
           </button>
         </div>
       )}
@@ -317,7 +334,7 @@ function DetailBody({ task }: { task: Task }) {
           {task.repeat && <Icon name="repeat" size={13} />}
         </button>
         <div style={{ flex: 1 }} />
-        <button className="icon-btn" title="优先级" disabled={ro} onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
+        <button className="icon-btn" title={t('common.priority')} disabled={ro} onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
           <Flag color={priorityColor(task.priority)} size={17} />
         </button>
       </div>
@@ -327,7 +344,7 @@ function DetailBody({ task }: { task: Task }) {
           <AutoTextarea
             className={'detail-title' + (task.status !== 0 ? ' done' : '')}
             value={task.title}
-            placeholder="准备做什么？"
+            placeholder={t('shell.detail.titlePlaceholder')}
             readOnly={ro}
             onChange={(v) => set({ title: v.replace(/\n/g, '') })}
             onKeyDown={(e) => {
@@ -341,11 +358,11 @@ function DetailBody({ task }: { task: Task }) {
 
         {task.subtasks.length > 0 && <Subtasks task={task} ro={ro} set={set} focusSub={focusSub} setFocusSub={setFocusSub} addSubAfter={addSubAfter} />}
 
-        <AutoTextarea className="detail-content" value={task.content} placeholder="描述" readOnly={ro} onChange={(v) => set({ content: v })} />
+        <AutoTextarea className="detail-content" value={task.content} placeholder={t('shell.detail.description')} readOnly={ro} onChange={(v) => set({ content: v })} />
 
         {!ro && (
           <button className="detail-addsub" onClick={() => addSubAfter(task.subtasks.length - 1)}>
-            <Icon name="plus" size={14} /> 添加子任务
+            <Icon name="plus" size={14} /> {t('shell.detail.addSubtask')}
           </button>
         )}
 
@@ -384,20 +401,20 @@ function DetailBody({ task }: { task: Task }) {
       <div className="detail-foot">
         <button className="detail-list" disabled={ro} onClick={(e) => setPop({ kind: 'list', anchor: anchorOf(e.currentTarget) })}>
           {list?.color ? <i className="dot" style={{ background: list.color }} /> : <Icon name={list ? 'list' : 'inbox'} size={15} />}
-          <span>{list?.name ?? '收件箱'}</span>
+          <span>{list?.name ?? t('common.list.inbox')}</span>
         </button>
         <div style={{ flex: 1 }} />
         {!ro && (
           <>
-            <button className="icon-btn" title="标签" onClick={(e) => setPop({ kind: 'tag', anchor: anchorOf(e.currentTarget) })}>
+            <button className="icon-btn" title={t('shell.task.tags')} onClick={(e) => setPop({ kind: 'tag', anchor: anchorOf(e.currentTarget) })}>
               <Icon name="tag" size={16} />
             </button>
-            <button className="icon-btn" title="开始专注" onClick={() => { startFocus(task.id); setUI({ module: 'pomo' }) }}>
+            <button className="icon-btn" title={t('shell.task.startFocus')} onClick={() => { startFocus(task.id); setUI({ module: 'pomo' }) }}>
               <Icon name="pomo" size={17} />
             </button>
           </>
         )}
-        <button className="icon-btn" title="更多" onClick={(e) => setPop({ kind: 'more', anchor: anchorOf(e.currentTarget) })}>
+        <button className="icon-btn" title={t('common.more')} onClick={(e) => setPop({ kind: 'more', anchor: anchorOf(e.currentTarget) })}>
           <Icon name="more" size={18} stroke={2.6} />
         </button>
       </div>
@@ -416,7 +433,7 @@ function DetailBody({ task }: { task: Task }) {
             {PRIORITY.map((p) => (
               <button
                 key={p.v}
-                title={p.name}
+                title={t(PRIORITY_NAME[p.v])}
                 className={'prio-btn' + (p.v === task.priority ? ' on' : '')}
                 onClick={() => {
                   set({ priority: p.v })
@@ -433,7 +450,7 @@ function DetailBody({ task }: { task: Task }) {
         <Popover anchor={pop.anchor} onClose={() => setPop(null)}>
           <MenuList
             onClose={() => setPop(null)}
-            items={[{ id: 'inbox', name: '收件箱', color: undefined as string | undefined }, ...data.lists].map((l) => ({
+            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...data.lists].map((l) => ({
               label: l.name,
               icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
               checked: l.id === task.listId,
@@ -448,7 +465,7 @@ function DetailBody({ task }: { task: Task }) {
             <input
               className="input"
               autoFocus
-              placeholder="输入标签"
+              placeholder={t('shell.tagPicker.placeholder')}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value.replace(/[#\s]/g, ''))}
               onKeyDown={(e) => {
@@ -484,7 +501,7 @@ function DetailBody({ task }: { task: Task }) {
                   <span className="menu-icon">
                     <Icon name="plus" size={14} />
                   </span>
-                  <span className="menu-label">创建标签「{tagInput}」</span>
+                  <span className="menu-label">{t('shell.tagPicker.create', { name: tagInput })}</span>
                 </div>
               )}
             </div>
@@ -498,26 +515,26 @@ function DetailBody({ task }: { task: Task }) {
             items={
               ro
                 ? [
-                    { label: '恢复', icon: <Icon name="restore" size={15} />, onClick: () => updateTask(task.id, { deleted: false }) },
-                    { label: '永久删除', icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(task.id) },
+                    { label: t('shell.task.restore'), icon: <Icon name="restore" size={15} />, onClick: () => updateTask(task.id, { deleted: false }) },
+                    { label: t('shell.task.deleteForever'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(task.id) },
                   ]
                 : [
-                    { label: '添加子任务', icon: <Icon name="subtask" size={15} />, onClick: () => addSubAfter(task.subtasks.length - 1) },
-                    { label: task.pinned ? '取消置顶' : '置顶', icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !task.pinned }) },
-                    { label: task.status === -1 ? '取消放弃' : '放弃', icon: <Icon name="wontdo" size={15} />, onClick: () => (task.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(task.id)) },
-                    { label: '开始专注', icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(task.id); setUI({ module: 'pomo' }) } },
-                    { label: '创建副本', icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(task.id) },
-                    { label: task.status === 2 ? '标记为未完成' : '标记为已完成', icon: <Icon name="check" size={15} />, hint: phone ? undefined : 'Ctrl+Enter', onClick: () => toggleTask(task.id) },
+                    { label: t('shell.detail.addSubtask'), icon: <Icon name="subtask" size={15} />, onClick: () => addSubAfter(task.subtasks.length - 1) },
+                    { label: t(task.pinned ? 'shell.task.unpin' : 'shell.task.pin'), icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !task.pinned }) },
+                    { label: t(task.status === -1 ? 'shell.task.reopen' : 'shell.task.wontDo'), icon: <Icon name="wontdo" size={15} />, onClick: () => (task.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(task.id)) },
+                    { label: t('shell.task.startFocus'), icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(task.id); setUI({ module: 'pomo' }) } },
+                    { label: t('shell.task.duplicate'), icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(task.id) },
+                    { label: t(task.status === 2 ? 'shell.task.markNotDone' : 'shell.task.markDone'), icon: <Icon name="check" size={15} />, hint: phone ? undefined : 'Ctrl+Enter', onClick: () => toggleTask(task.id) },
                     { divider: true },
-                    { label: '删除', icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(task.id) },
+                    { label: t('common.delete'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(task.id) },
                   ]
             }
           />
         </Popover>
       )}
       <div className="detail-meta">
-        创建于 {format(task.createdAt, 'yyyy年M月d日 HH:mm')}
-        {task.completedAt && task.status !== 0 && ` · ${task.status === 2 ? '完成' : '放弃'}于 ${format(task.completedAt, 'M月d日 HH:mm')}`}
+        {t('shell.detail.created', { date: stamp(task.createdAt, true) })}
+        {task.completedAt && task.status !== 0 && ` · ${t(task.status === 2 ? 'shell.detail.completedOn' : 'shell.detail.wontDoOn', { date: stamp(task.completedAt, false) })}`}
       </div>
     </div>
   )

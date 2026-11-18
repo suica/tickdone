@@ -7,6 +7,7 @@ import { Drawer } from './components/Drawer'
 import { Sidebar } from './components/Sidebar'
 import { TaskListPane } from './components/TaskListPane'
 import { closeDetail, TaskDetail } from './components/TaskDetail'
+import { useT, type MessageKey } from './i18n'
 import { GITHUB_URL } from './links'
 import { getUI, setUI, undoToast, useData, useUI, type Module } from './store'
 import { usePhone } from './viewport'
@@ -16,13 +17,13 @@ import PomoView from './views/PomoView'
 import HabitView from './views/HabitView'
 import SearchView from './views/SearchView'
 
-const RAIL: { id: Module; icon: string; title: string }[] = [
-  { id: 'tasks', icon: 'check', title: '任务' },
-  { id: 'calendar', icon: 'calendar', title: '日历' },
-  { id: 'matrix', icon: 'matrix', title: '四象限' },
-  { id: 'pomo', icon: 'pomo', title: '番茄专注' },
-  { id: 'habit', icon: 'habit', title: '习惯打卡' },
-  { id: 'search', icon: 'search', title: '搜索' },
+const RAIL: { id: Module; icon: string; title: MessageKey }[] = [
+  { id: 'tasks', icon: 'check', title: 'common.module.tasks' },
+  { id: 'calendar', icon: 'calendar', title: 'common.module.calendar' },
+  { id: 'matrix', icon: 'matrix', title: 'common.module.matrix' },
+  { id: 'pomo', icon: 'pomo', title: 'common.module.focus' },
+  { id: 'habit', icon: 'habit', title: 'common.module.habits' },
+  { id: 'search', icon: 'search', title: 'common.search' },
 ]
 /** Phone bottom bar: every module except search (search lives at the top of the drawer). */
 const TABS = RAIL.filter((r) => r.id !== 'search')
@@ -35,6 +36,7 @@ export default function App() {
   const ui = useUI()
   const data = useData()
   const phone = usePhone()
+  const t = useT()
 
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.theme
@@ -46,7 +48,7 @@ export default function App() {
     if (getUI().drawerOpen) setUI({ drawerOpen: false })
   }, [phone, ui.view, ui.module])
 
-  // 全局快捷键
+  // Global keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement
@@ -86,7 +88,7 @@ export default function App() {
         <nav className="rail">
           <div className="rail-avatar" title="TickDone">T</div>
           {RAIL.map((r) => (
-            <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} onClick={() => openModule(r.id)}>
+            <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={t(r.title)} onClick={() => openModule(r.id)}>
               <Icon name={r.icon} size={22} />
             </button>
           ))}
@@ -94,7 +96,7 @@ export default function App() {
           <a className="rail-btn" href={GITHUB_URL} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
             <Icon name="github" size={20} />
           </a>
-          <button className="rail-btn" title="设置" onClick={() => setUI({ dialog: { kind: 'settings' } })}>
+          <button className="rail-btn" title={t('common.settings')} onClick={() => setUI({ dialog: { kind: 'settings' } })}>
             <Icon name="settings" size={22} />
           </button>
         </nav>
@@ -119,7 +121,7 @@ export default function App() {
       {phone && (
         <nav className="tabbar">
           {TABS.map((r) => (
-            <button key={r.id} className={'tabbar-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} aria-label={r.title} aria-current={ui.module === r.id ? 'page' : undefined} onClick={() => openModule(r.id)}>
+            <button key={r.id} className={'tabbar-btn' + (ui.module === r.id ? ' active' : '')} title={t(r.title)} aria-label={t(r.title)} aria-current={ui.module === r.id ? 'page' : undefined} onClick={() => openModule(r.id)}>
               <Icon name={r.icon} size={24} />
             </button>
           ))}
@@ -132,7 +134,7 @@ export default function App() {
       {ui.toast && (
         <div className="toast" key={ui.toast.id} role="status">
           <span>{ui.toast.text}</span>
-          {ui.toast.undo && <button onClick={undoToast}>撤销</button>}
+          {ui.toast.undo && <button onClick={undoToast}>{t('common.undo')}</button>}
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, type MouseEvent as RMouseEvent } from 'react'
 import { usePan } from '../gestures'
+import { useT } from '../i18n'
 import { GITHUB_URL } from '../links'
 import { setUI, useUI } from '../store'
 import { Icon } from './Icon'
@@ -13,6 +14,7 @@ import { Sidebar } from './Sidebar'
  */
 export function Drawer() {
   const ui = useUI()
+  const t = useT()
   const open = ui.drawerOpen
   const layer = useRef<HTMLDivElement>(null)
   const panel = useRef<HTMLDivElement>(null)
@@ -88,16 +90,16 @@ export function Drawer() {
       {edge && <div className="drawer-edge" aria-hidden="true" onClick={passTap} {...swipeOpen} />}
       <div ref={layer} className={'drawer-layer' + (open ? ' open' : '')} inert={!open} aria-hidden={open ? undefined : true} {...swipeClose}>
         <div className="drawer-mask" onClick={close} />
-        <div ref={panel} className="drawer" role="dialog" aria-modal="true" aria-label="侧栏" tabIndex={-1}>
+        <div ref={panel} className="drawer" role="dialog" aria-modal="true" aria-label={t('shell.drawer.label')} tabIndex={-1}>
           <div className="drawer-head">
             <div className="drawer-brand">
               <span className="drawer-avatar">T</span>
               <span className="drawer-name">TickDone</span>
             </div>
-            <button className="drawer-act" title="搜索" aria-label="搜索" onClick={() => setUI({ drawerOpen: false, module: 'search', selectedTaskId: undefined })}>
+            <button className="drawer-act" title={t('common.search')} aria-label={t('common.search')} onClick={() => setUI({ drawerOpen: false, module: 'search', selectedTaskId: undefined })}>
               <Icon name="search" size={21} />
             </button>
-            <button className="drawer-act" title="设置" aria-label="设置" onClick={() => setUI({ drawerOpen: false, dialog: { kind: 'settings' } })}>
+            <button className="drawer-act" title={t('common.settings')} aria-label={t('common.settings')} onClick={() => setUI({ drawerOpen: false, dialog: { kind: 'settings' } })}>
               <Icon name="settings" size={21} />
             </button>
             <a className="drawer-act" href={GITHUB_URL} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">

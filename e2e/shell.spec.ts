@@ -98,6 +98,19 @@ test.describe('desktop', () => {
     await expect.poll(async () => Math.round((await detail.boundingBox())!.width)).toBe(Math.round(w0))
   })
 
+  test('shell strings follow the chosen language', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('tickdone-locale', 'de'))
+    await page.goto('/')
+    await expect(page.locator('.rail-btn[title="Einstellungen"]')).toHaveCount(1)
+    await expect(page.locator('.rail-btn[title="Kalender"]')).toHaveCount(1)
+    await expect(page.locator('aside.detail .empty')).toContainText('Aufgabe anklicken')
+    await page.locator('.task-row .task-meta').first().click()
+    await expect(page.locator('.detail-title')).toHaveAttribute('placeholder', 'Was ist zu tun?')
+    await page.locator('.detail-foot .icon-btn[title="Mehr"]').click()
+    await expect(page.locator('.popover .menu-item', { hasText: 'Duplizieren' })).toBeVisible()
+    await expect(page.locator('.popover .menu-item', { hasText: 'Teilaufgabe hinzufügen' })).toBeVisible()
+  })
+
   test('GitHub link sits in the rail above settings and opens a new tab', async ({ page }) => {
     await page.goto('/')
     const a = page.locator('.rail a[aria-label="GitHub"]')
@@ -156,6 +169,22 @@ test.describe('phone (Pixel 7 emulation)', () => {
     await expect(page.locator('.sheet-layer')).toHaveCount(0)
     await page.locator('.detail-back').tap()
     await expect(sheetPage).toHaveCount(0)
+  })
+
+  test('the undo toast stays clear of the round add button', async ({ page }) => {
+    await page.goto('/')
+    const fab = page.locator('.qa-fab')
+    await expect(fab).toBeVisible()
+    await page.locator('.task-row .checkbox').first().tap()
+    const toast = page.locator('.toast')
+    await expect(toast).toBeVisible()
+    // compare once the slide-up has finished
+    await expect.poll(() => toast.evaluate((el) => el.getAnimations().length)).toBe(0)
+    const a = (await toast.boundingBox())!
+    const b = (await fab.boundingBox())!
+    const overlap = a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
+    expect(overlap, `toast ${JSON.stringify(a)} vs add button ${JSON.stringify(b)}`).toBe(false)
+    expect(a.y + a.height).toBeLessThanOrEqual(b.y)
   })
 
   test('subtasks reorder by long-press touch drag', async ({ page }) => {

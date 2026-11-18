@@ -1,4 +1,4 @@
-/* ---------- 详情 ---------- */
+/* ---------- Task detail ---------- */
 /* Desktop: a column next to the list. Its width follows the screen until the user drags the
    divider (TaskDetail then sets an inline flex-basis). */
 .detail {
@@ -404,6 +404,14 @@ body.col-resizing * {
 }
 .tag-picker {
   padding: 8px;
+}
+/* Long tag names and "create tag" labels wrap instead of hiding the verb at the end */
+.tag-picker .menu-item {
+  white-space: normal;
+}
+.tag-picker .menu-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .tag-picker-list {
   max-height: 220px;

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-// 线性图标，24x24 viewBox，stroke=currentColor
+// Line icons: 24x24 viewBox, stroke=currentColor
 const P: Record<string, string> = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   tasks: 'M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11',
@@ -94,7 +94,7 @@ export function Icon({ name, size = 18, style, className, stroke = 1.7 }: { name
   )
 }
 
-/** 实心旗帜（优先级） */
+/** Solid flag (priority) */
 export function Flag({ color, size = 16 }: { color: string; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>

@@ -119,7 +119,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 语言
 
-本 README 提供 10 种语言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。应用内置了支持同样 10 种语言的翻译层，把所有界面迁移到翻译层的工作在 [#14](https://github.com/suica/tickdone/issues/14) 中进行。在此之前界面为简体中文；快速添加已经同时支持中文和英文输入。
+本 README 提供 10 种语言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。应用会跟随浏览器的语言，并内置了支持同样 10 种语言的翻译层。把所有界面迁移到翻译层的工作正在 [#14](https://github.com/suica/tickdone/issues/14) 中进行：部分界面已经翻译，其余界面在完成之前仍显示简体中文。快速添加已经同时支持中文和英文输入。
 
 发现翻译不够地道？英文是源语言：直接修改 `src/i18n/` 或对应的 `README.<locale>.md`，然后提交 Pull Request。
 

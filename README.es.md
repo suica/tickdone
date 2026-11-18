@@ -60,7 +60,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 
 ## 📸 Capturas de pantalla
 
-Las capturas en español llegarán con [#14](https://github.com/suica/tickdone/issues/14), que pasa todas las pantallas a la capa de traducción. Hasta entonces la interfaz está en chino simplificado, así que el banner de arriba muestra el diseño como ilustración. Para verla de verdad, [abre la app](https://tickdone.pages.dev): basta un clic y no hace falta registrarse.
+Las capturas en español llegarán con [#14](https://github.com/suica/tickdone/issues/14), que pasa todas las pantallas a la capa de traducción. Hasta entonces, parte de la interfaz sigue en chino simplificado, así que el banner de arriba muestra el diseño como ilustración. Para verla de verdad, [abre la app](https://tickdone.pages.dev): basta un clic y no hace falta registrarse.
 
 ## 🚀 Inicio rápido
 
@@ -88,7 +88,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 Idiomas
 
-Este README está disponible en 10 idiomas: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) y Русский. La app tiene una capa de traducción para esos mismos 10 idiomas, y el paso de todas las pantallas a ella se sigue en [#14](https://github.com/suica/tickdone/issues/14). Hasta que llegue, la interfaz está en chino simplificado; la entrada rápida ya entiende inglés y chino.
+Este README está disponible en 10 idiomas: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) y Русский. La app sigue el idioma de tu navegador y tiene una capa de traducción para esos mismos 10 idiomas. El paso de todas las pantallas a ella está en marcha en [#14](https://github.com/suica/tickdone/issues/14): algunas ya están traducidas y el resto sigue en chino simplificado hasta que termine. La entrada rápida ya entiende inglés y chino.
 
 ¿Has visto una traducción poco natural? El inglés es el idioma de origen: corrige el texto en `src/i18n/` o en `README.<locale>.md` y abre una pull request.
 

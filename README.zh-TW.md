@@ -61,7 +61,7 @@ TickDone 是一款免費、開源的待辦清單與時間管理工具，直接�
 
 ## 📸 截圖
 
-目前介面為簡體中文，繁體中文介面會隨 [#14](https://github.com/suica/tickdone/issues/14) 推出，所以上方的橫幅是版面示意圖。以下是目前的介面：
+目前介面仍有部分為簡體中文，繁體中文介面會隨 [#14](https://github.com/suica/tickdone/issues/14) 推出，所以上方的橫幅是版面示意圖。以下是目前的簡體中文介面：
 
 <table>
   <tr>
@@ -121,7 +121,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 語言
 
-本 README 提供 10 種語言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。應用程式內建支援同樣 10 種語言的翻譯層，把所有畫面移到翻譯層的工作在 [#14](https://github.com/suica/tickdone/issues/14) 中進行。在那之前介面為簡體中文；快速新增已經同時支援中文和英文輸入。
+本 README 提供 10 種語言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。應用程式會跟隨瀏覽器的語言，並內建支援同樣 10 種語言的翻譯層。把所有畫面移到翻譯層的工作正在 [#14](https://github.com/suica/tickdone/issues/14) 中進行：部分畫面已經翻譯，其餘畫面在完成前仍顯示簡體中文。快速新增已經同時支援中文和英文輸入。
 
 發現翻譯不夠道地？英文是來源語言：直接修改 `src/i18n/` 或對應的 `README.<locale>.md`，再送出 Pull Request。
 

@@ -60,7 +60,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 
 ## 📸 Captures d'écran
 
-Les captures en français arriveront avec [#14](https://github.com/suica/tickdone/issues/14), qui fait passer tous les écrans par la couche de traduction. D'ici là, l'interface est en chinois simplifié : la bannière ci-dessus montre donc la mise en page sous forme d'illustration. Pour voir la vraie, [ouvrez l'application](https://tickdone.pages.dev) : un clic suffit, sans inscription.
+Les captures en français arriveront avec [#14](https://github.com/suica/tickdone/issues/14), qui fait passer tous les écrans par la couche de traduction. D'ici là, une partie de l'interface reste en chinois simplifié : la bannière ci-dessus montre donc la mise en page sous forme d'illustration. Pour voir la vraie, [ouvrez l'application](https://tickdone.pages.dev) : un clic suffit, sans inscription.
 
 ## 🚀 Démarrage rapide
 
@@ -88,7 +88,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 Langues
 
-Ce README existe en 10 langues : English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) et Русский. L'application dispose d'une couche de traduction pour ces mêmes 10 langues, et le passage de tous les écrans par cette couche est suivi dans [#14](https://github.com/suica/tickdone/issues/14). En attendant, l'interface est en chinois simplifié ; l'ajout rapide comprend déjà l'anglais et le chinois.
+Ce README existe en 10 langues : English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) et Русский. L'application suit la langue de votre navigateur et dispose d'une couche de traduction pour ces mêmes 10 langues. Le passage de tous les écrans par cette couche est en cours dans [#14](https://github.com/suica/tickdone/issues/14) : certains écrans sont déjà traduits, les autres restent en chinois simplifié jusqu'à la fin. L'ajout rapide comprend déjà l'anglais et le chinois.
 
 Une traduction vous semble maladroite ? L'anglais fait foi : corrigez le texte dans `src/i18n/` ou dans `README.<locale>.md` et ouvrez une pull request.
 

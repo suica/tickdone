@@ -60,7 +60,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 
 ## 📸 Screenshots
 
-Screenshots auf Deutsch folgen mit [#14](https://github.com/suica/tickdone/issues/14), das alle Bildschirme auf die Übersetzungsschicht umstellt. Bis dahin ist die Oberfläche auf vereinfachtem Chinesisch, deshalb zeigt das Banner oben das Layout als Illustration. Das Original siehst du, wenn du [die App öffnest](https://tickdone.pages.dev): ein Klick, keine Anmeldung.
+Screenshots auf Deutsch folgen mit [#14](https://github.com/suica/tickdone/issues/14), das alle Bildschirme auf die Übersetzungsschicht umstellt. Bis dahin ist ein Teil der Oberfläche noch auf vereinfachtem Chinesisch, deshalb zeigt das Banner oben das Layout als Illustration. Das Original siehst du, wenn du [die App öffnest](https://tickdone.pages.dev): ein Klick, keine Anmeldung.
 
 ## 🚀 Schnellstart
 
@@ -88,7 +88,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 Sprachen
 
-Diese README gibt es in 10 Sprachen: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) und Русский. Die App hat eine Übersetzungsschicht für dieselben 10 Sprachen; die Umstellung aller Bildschirme darauf wird in [#14](https://github.com/suica/tickdone/issues/14) verfolgt. Bis dahin ist die Oberfläche auf vereinfachtem Chinesisch; die Schnelleingabe versteht schon jetzt Englisch und Chinesisch.
+Diese README gibt es in 10 Sprachen: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) und Русский. Die App folgt der Sprache deines Browsers und hat eine Übersetzungsschicht für dieselben 10 Sprachen. Die Umstellung aller Bildschirme darauf läuft in [#14](https://github.com/suica/tickdone/issues/14): Manche sind schon übersetzt, der Rest bleibt bis dahin auf vereinfachtem Chinesisch. Die Schnelleingabe versteht schon jetzt Englisch und Chinesisch.
 
 Eine Übersetzung klingt holprig? Englisch ist die Ausgangssprache: Korrigiere den Text in `src/i18n/` oder in `README.<locale>.md` und öffne einen Pull Request.
 

@@ -60,7 +60,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 
 ## 📸 Screenshots
 
-Screenshots in English are coming with [#14](https://github.com/suica/tickdone/issues/14), which moves every screen onto the translation layer; until then the interface is in Simplified Chinese, so the banner above shows the layout as an illustration. To see the real thing, [open the app](https://tickdone.pages.dev): it takes one click and no sign-up.
+Screenshots in English are coming with [#14](https://github.com/suica/tickdone/issues/14), which moves every screen onto the translation layer. Until then parts of the interface are still in Simplified Chinese, so the banner above shows the layout as an illustration. To see the real thing, [open the app](https://tickdone.pages.dev): it takes one click and no sign-up.
 
 ## 🚀 Quick start
 
@@ -88,7 +88,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 Languages
 
-This README is available in 10 languages: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) and Русский. The app has a translation layer for the same 10 languages, and moving every screen onto it is tracked in [#14](https://github.com/suica/tickdone/issues/14). Until that lands the interface is in Simplified Chinese; quick add already understands both English and Chinese.
+This README is available in 10 languages: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) and Русский. The app follows your browser's language and has a translation layer for the same 10 languages. Moving every screen onto it is under way in [#14](https://github.com/suica/tickdone/issues/14): some screens are translated already, the rest show Simplified Chinese until it is done. Quick add already understands both English and Chinese.
 
 Spotted a clumsy translation? English is the source: fix the text in `src/i18n/` or in `README.<locale>.md` and open a pull request.
 

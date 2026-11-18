@@ -6,3 +6,6 @@ dist
 # Playwright
 playwright-report/
 test-results/
+
+# Wrangler (local Pages Functions dev state)
+.wrangler/

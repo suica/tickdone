@@ -42,7 +42,7 @@
 TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die in deinem Browser läuft. Schreib Aufgaben einfach so auf, wie sie dir einfallen, plane sie im Kalender, ordne sie nach Dringlichkeit und Wichtigkeit, arbeite sie mit dem Fokus-Timer ab und bleib bei deinen Gewohnheiten – alles an einem Ort.
 
 > [!NOTE]
-> **Deine Daten bleiben bei dir.** Alles wird im lokalen Speicher deines Browsers gesichert: kein Konto, keine Anmeldung, kein Server, und nichts, was du eingibst, verlässt dein Gerät. Eine Sicherungsdatei kannst du jederzeit in den Einstellungen exportieren.
+> **Deine Daten bleiben bei dir.** Alles wird im lokalen Speicher deines Browsers gesichert: kein Konto, keine Anmeldung, und deine Aufgaben verlassen nie dein Gerät. Über den Server von TickDone läuft nur die Adresse eines abonnierten Kalenders: Ein kleiner Proxy ruft ihn für dich ab und speichert nichts. Eine Sicherungsdatei kannst du jederzeit in den Einstellungen exportieren.
 
 ## ✨ Funktionen
 
@@ -50,6 +50,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - ⚡ **Smarte Schnelleingabe**: Tippe `call mom tomorrow 3pm !high #family ~Personal`, und TickDone setzt Datum, Uhrzeit, Priorität, Tag und Liste und hebt jeden erkannten Teil schon beim Tippen hervor. Chinesisch versteht sie auch.
 - 🗂️ **Listen- und Kanban-Ansicht** mit Gruppierung und Sortierung.
 - 📅 **Kalender** mit Monats-, Wochen-, Tages- und Listenansicht. Zieh eine Aufgabe auf einen anderen Tag oder eine andere Uhrzeit, oder zieh die Unterkante eines Blocks, um die Dauer zu ändern.
+- 🔔 **Kalenderabos**: Abonniere jeden Kalender mit einer iCal-Adresse (.ics oder webcal://), etwa für Arbeit, Schule, Team oder Feiertage, und sieh seine Termine schreibgeschützt und in eigener Farbe im Kalender. Sie aktualisieren sich von selbst und bleiben auch offline verfügbar.
 - 🧭 **Eisenhower-Matrix**: Ordne Aufgaben nach Dringlichkeit und Wichtigkeit ein und zieh sie in einen anderen Quadranten, um ihre Priorität zu ändern.
 - 🍅 **Fokus-Timer** mit Pomodoro- und Stoppuhr-Modus und einem Verlauf vergangener Sitzungen.
 - 🔥 **Gewohnheitstracker** mit Check-ins, Serien und Statistiken.
@@ -149,6 +150,7 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [ ] Schnell auch bei Tausenden von Aufgaben ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] Kalender: Aufgaben ohne Datum einplanen, Agenda-Ansicht ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Kalenderabos ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Technik
 

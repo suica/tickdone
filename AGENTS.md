@@ -5,7 +5,7 @@ These rules apply to everyone working on this repository, people and coding agen
 ## Product
 
 - TickDone is an original work. Do not name, reference or compare with other to-do apps, and do not use their names, logos, icons, images or copy, anywhere in the repository: code, comments, tests, commit messages, issues, pull requests, docs and file names.
-- All data lives in the browser (localStorage). There is no backend and no account.
+- All data lives in the browser (localStorage). There is no account and no backend, apart from a stateless same-origin proxy (`functions/api/ics.ts`, a Cloudflare Pages Function) that fetches subscribed calendar feeds for the browser and stores nothing.
 
 ## Language
 

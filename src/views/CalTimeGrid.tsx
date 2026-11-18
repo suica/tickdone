@@ -7,25 +7,31 @@ import type { Task } from '../types'
 import { beginDrag } from './calDnd'
 import { flyFrom } from './calMotion'
 import { CalTask } from './calParts'
+import type { DayEvent } from './calEvents'
+import { CalEvent, type OpenEvent } from './calEventParts'
 import { clamp, DAY_MIN, DEFAULT_DUR, dayLabel, durOf, fmtDur, snapCeil, snapFloor, snapRound, SNAP, timeLabel, timeRange, toHM, toMin, useColorOf, type AddState } from './calUtil'
 
 interface Placed {
-  t: Task
+  /** A task, or else an event of a subscribed calendar. */
+  t?: Task
+  ev?: DayEvent
   s: number
   e: number
   col: number
   cols: number
 }
 
-/** Place the timed tasks of a day side by side where they overlap. */
-function layoutDay(tasks: Task[]): Placed[] {
-  const items: Placed[] = tasks
-    .filter((t) => t.dueTime)
-    .map((t) => {
-      const s = toMin(t.dueTime!)
-      return { t, s, e: Math.min(s + durOf(t), DAY_MIN), col: 0, cols: 1 }
-    })
-    .sort((a, b) => a.s - b.s || b.e - a.e)
+/** Place the timed tasks and events of a day side by side where they overlap. */
+function layoutDay(tasks: Task[], events: DayEvent[] = []): Placed[] {
+  const items: Placed[] = [
+    ...tasks
+      .filter((t) => t.dueTime)
+      .map((t) => {
+        const s = toMin(t.dueTime!)
+        return { t, s, e: Math.min(s + durOf(t), DAY_MIN), col: 0, cols: 1 }
+      }),
+    ...events.filter((x) => !x.allDay).map((ev) => ({ ev, s: Math.min(ev.s, DAY_MIN - SNAP), e: Math.min(Math.max(ev.e, ev.s + SNAP), DAY_MIN), col: 0, cols: 1 })),
+  ].sort((a, b) => a.s - b.s || b.e - a.e)
   let cluster: Placed[] = []
   let ends: number[] = []
   let clusterEnd = -1
@@ -62,6 +68,9 @@ const TWO_LINES = 34
 interface Props {
   days: Date[]
   byDay: Map<string, Task[]>
+  /** Events of subscribed calendars per day (read-only). */
+  evByDay: Map<string, DayEvent[]>
+  onEvent: OpenEvent
   hourH: number
   labelW: number
   /** The open quick add; a timed one is drawn as a draft block. */
@@ -72,7 +81,7 @@ interface Props {
 }
 
 /** Week, three-day and day views: an all-day row above a 24-hour grid. */
-export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Props) {
+export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fresh, onAdd }: Props) {
   const colorOf = useColorOf()
   const t = useT()
   const today = todayStr()
@@ -268,6 +277,11 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
               data-day={ds}
               onClick={(e) => blankClick(() => onAdd({ date: ds, anchor: { x: e.clientX, y: e.clientY + 4, h: 8 } }))}
             >
+              {(evByDay.get(ds) ?? [])
+                .filter((x) => x.allDay)
+                .map((x) => (
+                  <CalEvent key={x.ev.id} d={x} onOpen={onEvent} />
+                ))}
               {list.map((t) => (
                 <CalTask key={t.id} task={t} color={colorOf(t)} className={moving?.id === t.id ? 'cal-src' : ''} onPointerDown={(e) => startMove(e, t, true)} />
               ))}
@@ -291,7 +305,7 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
           </div>
           {days.map((d) => {
             const ds = fmt(d)
-            const placed = layoutDay(byDay.get(ds) ?? [])
+            const placed = layoutDay(byDay.get(ds) ?? [], evByDay.get(ds))
             return (
               <div
                 key={ds}
@@ -304,7 +318,16 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
                 }}
               >
                 {placed.map((p) => {
-                  const t = p.t
+                  const geo = { top: px(p.s), left: `calc(${(p.col / p.cols) * 100}% + 1px)`, width: `calc(${100 / p.cols}% - 3px)` }
+                  if (p.ev) {
+                    const h = Math.max(20, px(p.e - p.s)) - 2
+                    return (
+                      <div key={p.ev.ev.id} className={'cal-block-wrap cal-ev-wrap' + (h < TWO_LINES ? ' short' : '')} style={{ ...geo, height: h }}>
+                        <CalEvent d={p.ev} block onOpen={onEvent} />
+                      </div>
+                    )
+                  }
+                  const t = p.t!
                   const resizing = drag?.kind === 'resize' && drag.id === t.id ? drag : null
                   const end = resizing ? resizing.e : p.e
                   const height = Math.max(20, px(end - p.s)) - 2

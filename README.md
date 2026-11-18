@@ -42,7 +42,7 @@
 TickDone is a free, open-source to-do list and time manager that runs in your browser. Jot tasks down in plain words, see them on a calendar, sort them by urgency and importance, work through them with a focus timer and keep your habits going, all in one place.
 
 > [!NOTE]
-> **Your data stays with you.** Everything is saved in your browser's local storage: there is no account, no sign-up and no server, and nothing you type leaves your device. You can export a backup file at any time from Settings.
+> **Your data stays with you.** Everything is saved in your browser's local storage: there is no account and no sign-up, and your tasks never leave your device. The only thing that goes through TickDone's server is a calendar subscription address, which a small proxy fetches for you without storing anything. You can export a backup file at any time from Settings.
 
 ## ✨ Features
 
@@ -50,6 +50,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - ⚡ **Smart quick add**: type `call mom tomorrow 3pm !high #family ~Personal` and TickDone sets the date, time, priority, tag and list, highlighting each part as you type.
 - 🗂️ **List and kanban views**, with grouping and sorting.
 - 📅 **Calendar** with month, week, day and list views. Drag a task to another day or time, or drag the bottom edge of a block to change how long it takes.
+- 🔔 **Calendar subscriptions**: subscribe to any calendar that publishes an iCal (.ics or webcal://) address, such as work, school, team or holiday calendars, and see its events read-only in the calendar, in its own color. They refresh on their own and stay available offline.
 - 🧭 **Eisenhower matrix**: sort tasks by urgency and importance, and drag them between quadrants to change their priority.
 - 🍅 **Focus timer** with Pomodoro and stopwatch modes and a record of past sessions.
 - 🔥 **Habit tracker** with check-ins, streaks and statistics.
@@ -149,6 +150,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [ ] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] Calendar: plan undated tasks, agenda view ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Calendar subscriptions ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Tech stack
 

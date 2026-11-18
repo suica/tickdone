@@ -18,6 +18,9 @@ import { TimeGrid } from './CalTimeGrid'
 import { dayLabel, isTyping, monthSpan, sortDay, twelveHour, useColorOf, withWeekday, type AddState } from './calUtil'
 import { capChips, weekNumber } from './monthCell'
 import { lunarLabel } from '../lunar'
+import { useFeedEvents, type FeedEvent } from '../feeds'
+import { eventsByDay, type DayEvent } from './calEvents'
+import { CalEvent, EventPopover, EventRow, type OpenEvent } from './calEventParts'
 
 type Mode = 'month' | 'week' | 'day' | 'agenda'
 const MODES: { id: Mode; label: MessageKey; phone?: MessageKey }[] = [
@@ -63,6 +66,9 @@ const noNativeDrag = (e: { preventDefault(): void; stopPropagation(): void }) =>
 interface MonthProps {
   cursor: Date
   byDay: Map<string, Task[]>
+  /** Events of subscribed calendars per day. */
+  evByDay: Map<string, DayEvent[]>
+  onEvent: OpenEvent
   weekStartsOn: 0 | 1
   /** Phone: small cells with dots and the picked day's tasks underneath. */
   compact: boolean
@@ -77,7 +83,7 @@ interface MonthProps {
   onOpenDay: (date: string) => void
 }
 
-function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, lunar, weekNumbers, onAdd, onPick, onOpenDay }: MonthProps) {
+function MonthView({ cursor, byDay, evByDay, onEvent, weekStartsOn, compact, chipH, fresh, lunar, weekNumbers, onAdd, onPick, onOpenDay }: MonthProps) {
   const colorOf = useColorOf()
   const t = useT()
   const days = eachDayOfInterval({ start: startOfWeek(startOfMonth(cursor), { weekStartsOn }), end: endOfWeek(endOfMonth(cursor), { weekStartsOn }) })
@@ -153,8 +159,11 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, lunar, 
         {days.map((d, i) => {
           const ds = fmt(d)
           const list = byDay.get(ds) ?? []
-          const cap = capChips(list.length, fit)
-          const shown = list.slice(0, cap.shown)
+          const evs = evByDay.get(ds) ?? []
+          // Calendar events come first (all-day ones on top), then tasks; together they share the room.
+          const cap = capChips(evs.length + list.length, fit)
+          const shownEv = evs.slice(0, cap.shown)
+          const shown = list.slice(0, Math.max(0, cap.shown - evs.length))
           const dow = d.getDay()
           const label = lunar ? lunarLabel(ds, lunar === 'hant') : undefined
           const week = weekNumbers && i % 7 === 0 ? weekNumber(d, weekStartsOn) : 0
@@ -190,15 +199,18 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, lunar, 
                 )}
               </div>
               {compact ? (
-                list.length > 0 && (
+                evs.length + list.length > 0 && (
                   <div className="cal-dots">
-                    {list.slice(0, 3).map((t) => (
-                      <i key={t.id} style={{ background: t.status !== 0 ? 'var(--p-none)' : colorOf(t) }} />
+                    {[...evs.map((x) => ({ id: x.ev.id, c: x.ev.color })), ...list.map((t) => ({ id: t.id, c: t.status !== 0 ? 'var(--p-none)' : colorOf(t) }))].slice(0, 3).map((x) => (
+                      <i key={x.id} style={{ background: x.c }} />
                     ))}
                   </div>
                 )
               ) : (
                 <div className="cal-cell-items">
+                  {shownEv.map((x) => (
+                    <CalEvent key={x.ev.id} d={x} showTime onOpen={onEvent} />
+                  ))}
                   {shown.map((t) => (
                     <CalTask
                       key={t.id}
@@ -231,6 +243,8 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, lunar, 
         <DayList
           date={picked}
           tasks={pickedTasks}
+          events={evByDay.get(picked) ?? []}
+          onEvent={onEvent}
           dragId={drag?.id ?? null}
           onAdd={onAdd}
           onRowDown={(e, t) => rowDown(e, (ev) => startDrag(ev, t))}
@@ -244,12 +258,16 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, lunar, 
 function DayList({
   date,
   tasks,
+  events,
+  onEvent,
   dragId,
   onAdd,
   onRowDown,
 }: {
   date: string
   tasks: Task[]
+  events: DayEvent[]
+  onEvent: OpenEvent
   dragId: string | null
   onAdd: (s: AddState) => void
   onRowDown: (e: ReactPointerEvent<HTMLElement>, t: Task) => void
@@ -263,13 +281,16 @@ function DayList({
           {withWeekday(d)}
           {date === todayStr() && ` · ${t('common.today')}`}
         </span>
-        {tasks.length > 0 && <span className="cal-dl-count">{tasks.length}</span>}
+        {tasks.length + events.length > 0 && <span className="cal-dl-count">{tasks.length + events.length}</span>}
         <button className="icon-btn cal-dl-add" title={t('calendar.addTask')} onClick={(e) => onAdd({ date, anchor: anchorOf(e.currentTarget) })}>
           <Icon name="plus" size={18} />
         </button>
       </div>
       <div className="cal-dl-body" key={date}>
-        {tasks.length === 0 && <div className="cal-dl-empty">{t('calendar.noTasks')}</div>}
+        {tasks.length + events.length === 0 && <div className="cal-dl-empty">{t('calendar.noTasks')}</div>}
+        {events.map((x) => (
+          <EventRow key={x.ev.id} d={x} onOpen={onEvent} />
+        ))}
         {tasks.map((t) => (
           <div key={t.id} className={'cal-dl-item' + (dragId === t.id ? ' cal-src' : '')} data-id={t.id} onPointerDownCapture={(e) => onRowDown(e, t)} onDragStartCapture={noNativeDrag}>
             <TaskRow task={t} showList />
@@ -281,18 +302,31 @@ function DayList({
 }
 
 // ---------------- agenda ----------------
-function AgendaView({ cursor, byDay, onAdd }: { cursor: Date; byDay: Map<string, Task[]>; onAdd: (s: AddState) => void }) {
+function AgendaView({
+  cursor,
+  byDay,
+  evByDay,
+  onEvent,
+  onAdd,
+}: {
+  cursor: Date
+  byDay: Map<string, Task[]>
+  evByDay: Map<string, DayEvent[]>
+  onEvent: OpenEvent
+  onAdd: (s: AddState) => void
+}) {
   const t = useT()
   const today = todayStr()
   const days = eachDayOfInterval({ start: startOfMonth(cursor), end: endOfMonth(cursor) })
     .map(fmt)
-    .filter((ds) => byDay.has(ds) || ds === today)
+    .filter((ds) => byDay.has(ds) || evByDay.has(ds) || ds === today)
   return (
     <div className="cal-agenda" data-slide>
       {days.length === 0 && <div className="empty">{t('calendar.agendaEmpty')}</div>}
       {days.map((ds) => {
         const d = parseISO(ds)
         const list = byDay.get(ds) ?? []
+        const evs = evByDay.get(ds) ?? []
         return (
           <section key={ds} className={'cal-agenda-day' + (ds === today ? ' today' : '')}>
             <div className="cal-agenda-head">
@@ -306,7 +340,10 @@ function AgendaView({ cursor, byDay, onAdd }: { cursor: Date; byDay: Map<string,
               </button>
             </div>
             <div className="cal-agenda-list">
-              {list.length === 0 && <div className="cal-agenda-none">{t('calendar.noTasks')}</div>}
+              {list.length + evs.length === 0 && <div className="cal-agenda-none">{t('calendar.noTasks')}</div>}
+              {evs.map((x) => (
+                <EventRow key={x.ev.id} d={x} onOpen={onEvent} />
+              ))}
               {list.map((t) => (
                 <TaskRow key={t.id} task={t} showList />
               ))}
@@ -334,6 +371,7 @@ export default function CalendarView() {
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [add, setAdd] = useState<AddState | null>(null)
   const [fresh, setFresh] = useState<string | null>(null)
+  const [evPop, setEvPop] = useState<{ ev: FeedEvent; anchor: Anchor } | null>(null)
   const [viewAnim, setViewAnim] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -373,6 +411,17 @@ export default function CalendarView() {
     const s = startOfWeek(cursor, { weekStartsOn })
     return Array.from({ length: 7 }, (_, i) => addDays(s, i))
   }, [mode, phone, cursor, weekStartsOn])
+
+  // The days in view, for the events of subscribed calendars (recurring ones are expanded over them only).
+  const [rangeFrom, rangeTo] = useMemo(() => {
+    if (mode === 'week' || mode === 'day') return [days[0].getTime(), addDays(days[days.length - 1], 1).getTime()]
+    const s = mode === 'agenda' ? startOfMonth(cursor) : startOfWeek(startOfMonth(cursor), { weekStartsOn })
+    const e = mode === 'agenda' ? endOfMonth(cursor) : endOfWeek(endOfMonth(cursor), { weekStartsOn })
+    return [s.getTime(), addDays(startOfDay(e), 1).getTime()]
+  }, [mode, days, cursor, weekStartsOn])
+  const feedEvents = useFeedEvents(rangeFrom, rangeTo)
+  const evByDay = useMemo(() => eventsByDay(feedEvents), [feedEvents])
+  const openEvent: OpenEvent = (ev, anchor) => setEvPop({ ev, anchor })
 
   const periodOf = (d: Date) => (mode === 'month' || mode === 'agenda' ? format(d, 'yyyy-MM') : mode === 'week' && !phone ? fmt(startOfWeek(d, { weekStartsOn })) : fmt(d))
   const period = periodOf(cursor)
@@ -529,6 +578,8 @@ export default function CalendarView() {
               <MonthView
                 cursor={cursor}
                 byDay={byDay}
+                evByDay={evByDay}
+                onEvent={openEvent}
                 weekStartsOn={weekStartsOn}
                 compact={phone}
                 chipH={large ? 23 : 21}
@@ -541,14 +592,15 @@ export default function CalendarView() {
               />
             )}
             {(mode === 'week' || mode === 'day') && (
-              <TimeGrid days={days} byDay={byDay} hourH={phone ? 52 : large ? 56 : 48} labelW={(phone ? 40 : 56) + (twelveHour() ? 16 : 0)} add={add} fresh={fresh} onAdd={setAdd} />
+              <TimeGrid days={days} byDay={byDay} evByDay={evByDay} onEvent={openEvent} hourH={phone ? 52 : large ? 56 : 48} labelW={(phone ? 40 : 56) + (twelveHour() ? 16 : 0)} add={add} fresh={fresh} onAdd={setAdd} />
             )}
-            {mode === 'agenda' && <AgendaView cursor={cursor} byDay={byDay} onAdd={setAdd} />}
+            {mode === 'agenda' && <AgendaView cursor={cursor} byDay={byDay} evByDay={evByDay} onEvent={openEvent} onAdd={setAdd} />}
           </div>
           <div className="cal-slide-layer" ref={layerRef} aria-hidden="true" inert />
         </div>
       </div>
       {add && <AddPopover key={add.date + add.time + add.anchor.x + add.anchor.y} s={add} onClose={() => setAdd(null)} onAdded={onAdded} />}
+      {evPop && <EventPopover key={evPop.ev.id} ev={evPop.ev} anchor={evPop.anchor} onClose={() => setEvPop(null)} />}
       {ui.selectedTaskId && <TaskDetail floating />}
     </div>
   )

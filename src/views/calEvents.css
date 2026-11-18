@@ -1,0 +1,187 @@
+/* Events of subscribed calendars: read-only, so no checkbox and no side stripe; a dot in the
+   calendar's colour and an outlined tint set them apart from tasks. */
+.cal-task.cal-event {
+  background: color-mix(in srgb, var(--c) 9%, var(--bg));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 38%, transparent);
+  border-radius: 4px;
+  padding-left: 5px;
+  cursor: default;
+}
+.cal-task.cal-event::before {
+  display: none;
+}
+.cal-task.cal-event:hover {
+  background: color-mix(in srgb, var(--c) 17%, var(--bg));
+  cursor: pointer;
+}
+.cal-task.cal-event:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: 1px;
+}
+.cal-ev-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  flex-shrink: 0;
+}
+.cal-task.cal-event.block .cal-ev-dot {
+  margin-top: 5px;
+}
+.cal-task.cal-event.block .cal-task-range {
+  padding-left: 10px;
+}
+.cal-ev-wrap {
+  z-index: 0;
+}
+
+/* rows in the phone day list and the list view */
+.cal-ev-row {
+  --c: var(--primary);
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px 6px 12px;
+  margin: 2px 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--c) 7%, transparent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.cal-ev-row:hover {
+  background: color-mix(in srgb, var(--c) 13%, transparent);
+}
+.cal-ev-row:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: -2px;
+}
+.cal-ev-row-bar {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  flex-shrink: 0;
+}
+.cal-ev-row-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.cal-ev-row-title {
+  font-size: 14px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cal-ev-row-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* event details */
+.cal-ev-pop-body {
+  --c: var(--primary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 12px 16px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.cal-ev-pop-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.cal-ev-pop-swatch {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 4px;
+  background: var(--c);
+  flex-shrink: 0;
+}
+.cal-ev-pop-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.cal-ev-pop-head .icon-btn {
+  margin: -4px -4px 0 0;
+}
+.cal-ev-pop-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 18px;
+}
+.cal-ev-pop-row svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--text-3);
+}
+.cal-ev-pop-text {
+  overflow-wrap: anywhere;
+}
+.cal-ev-pop-desc {
+  max-height: 180px;
+  overflow: auto;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-hover);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 18px;
+}
+.cal-ev-pop-body a {
+  color: var(--primary);
+}
+.cal-ev-pop-feed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-3);
+  min-width: 0;
+}
+.cal-ev-pop-feed > span:first-of-type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cal-ev-pop-ro {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+}
+
+@media (max-width: 767px) {
+  .cal-ev-pop-body {
+    padding: 4px 16px 16px;
+    font-size: 14px;
+  }
+  .cal-ev-pop-title {
+    font-size: 17px;
+    line-height: 22px;
+  }
+  .cal-ev-pop-head .icon-btn {
+    display: none;
+  }
+}

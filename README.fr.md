@@ -50,6 +50,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - ⚡ **Ajout rapide intelligent** : tapez `call mom tomorrow 3pm !high #family ~Personal` et TickDone définit la date, l'heure, la priorité, l'étiquette et la liste, en surlignant chaque élément pendant la saisie. Il comprend aussi le chinois.
 - 🗂️ **Vues liste et kanban**, avec regroupement et tri.
 - 🔎 **Filtres enregistrés** : combinez listes, étiquettes, priorités, dates (en retard, aujourd’hui, cette semaine, une période personnalisée…), mots-clés et tâches terminées en une liste intelligente à vous, avec son nom, son icône et sa couleur dans la barre latérale.
+- 📝 **Markdown dans les notes** : titres, gras, italique, barré, code, liens, listes, citations et listes de contrôle à cocher directement dans la note ; cliquez sur la note pour modifier sa source.
 - 📅 **Calendrier** avec vues mois, semaine, jour et liste. Faites glisser une tâche vers un autre jour ou une autre heure, ou tirez le bord inférieur d'un bloc pour changer sa durée.
 - 🔔 **Abonnements à des calendriers** : abonnez-vous à tout calendrier qui publie une adresse iCal (.ics ou webcal://), comme ceux du travail, de l’école, de l’équipe ou des jours fériés, et voyez ses événements dans le calendrier, en lecture seule et dans leur propre couleur. Ils se mettent à jour d’eux-mêmes et restent disponibles hors ligne.
 - 🧭 **Matrice d'Eisenhower** : classez les tâches selon leur urgence et leur importance, et faites-les glisser d'un quadrant à l'autre pour changer leur priorité.
@@ -156,7 +157,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [x] Installation comme application et utilisation hors ligne ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] Filtres enregistrés ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Statistiques des tâches, du minuteur de concentration et du suivi des habitudes ([#20](https://github.com/suica/tickdone/issues/20))
-- [ ] Markdown dans les notes des tâches ([#21](https://github.com/suica/tickdone/issues/21))
+- [x] Markdown dans les notes des tâches ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Vue chronologique ([#22](https://github.com/suica/tickdone/issues/22))
 - [ ] Plus de règles de répétition ([#23](https://github.com/suica/tickdone/issues/23))
 - [ ] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))

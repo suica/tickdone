@@ -51,6 +51,7 @@ TickDone 是一款免費、開源的待辦清單與時間管理工具，直接�
 - ⚡ **智慧快速新增**：輸入 `call mom tomorrow 3pm !high #family ~Personal`，TickDone 就會設定好日期、時間、優先順序、標籤和清單，輸入時還會標示出辨識到的部分；也支援簡體中文輸入，例如 `明天下午3点 开周会 !高 #重要`。
 - 🗂️ **列表與看板檢視**，可分組和排序。
 - 🔎 **篩選器**：組合清單、標籤、優先順序、日期（已逾期、今天、本週、自訂範圍……）、關鍵字和已完成的任務，做成你自己的智慧清單，並在側欄顯示名稱、圖示和顏色。
+- 📝 **描述支援 Markdown**：標題、粗體、斜體、刪除線、程式碼、連結、清單、引用，以及可以直接勾選的待辦清單；點擊描述即可編輯原文。
 - 📅 **行事曆**：月、週、日和列表檢視。把任務拖到另一天或另一個時間，或拖曳時間區塊的下緣來調整時長。
 - 🔔 **訂閱日曆**：訂閱任何提供 iCal 網址（.ics 或 webcal://）的日曆，例如工作、學校、團隊或節假日日曆，它們的行程會以唯讀方式、用各自的顏色顯示在行事曆裡。會自動更新，離線也能查看。
 - 🧭 **四象限**：依緊急程度和重要性為任務分類，在象限之間拖曳任務即可變更優先順序。
@@ -157,7 +158,7 @@ npm run dev        # http://localhost:5173
 - [x] 可安裝為 App 並離線使用 ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] 可儲存的篩選條件 ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] 任務、番茄專注和習慣打卡的統計 ([#20](https://github.com/suica/tickdone/issues/20))
-- [ ] 任務備註支援 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
+- [x] 任務備註支援 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 時間軸檢視 ([#22](https://github.com/suica/tickdone/issues/22))
 - [ ] 更多重複規則 ([#23](https://github.com/suica/tickdone/issues/23))
 - [ ] 封存清單 ([#24](https://github.com/suica/tickdone/issues/24))

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
 import { dueLabel, isOverdue } from '../dates'
@@ -17,6 +17,8 @@ import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { Subtasks } from './Subtasks'
 import { Checkbox } from './TaskRow'
 import { BatchPanel } from './BatchPanel'
+import { Markdown } from './Markdown'
+import { toggleTaskLine } from '../markdown'
 import './detail.css'
 
 /** Priority names from the shared vocabulary. */
@@ -30,7 +32,7 @@ export const PRIORITY_NAME: Record<Priority, MessageKey> = {
 /** "Nov 18, 2026, 3:36 PM" style date and time of a timestamp, in the current language. */
 const stamp = (ms: number, withYear: boolean) => `${withYear ? fmtFullDate(new Date(ms)) : fmtMonthDay(new Date(ms))} ${fmtTime(format(ms, 'HH:mm'))}`
 
-function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, autoFocus, readOnly }: { value: string; onChange: (v: string) => void; className?: string; placeholder?: string; onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void; autoFocus?: boolean; readOnly?: boolean }) {
+function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, onBlur, onFocus, autoFocus, readOnly }: { value: string; onChange: (v: string) => void; className?: string; placeholder?: string; onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void; onBlur?: () => void; onFocus?: () => void; autoFocus?: boolean; readOnly?: boolean }) {
   const ref = useRef<HTMLTextAreaElement>(null)
   useLayoutEffect(() => {
     const el = ref.current
@@ -38,7 +40,79 @@ function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, auto
     el.style.height = '0px'
     el.style.height = el.scrollHeight + 'px'
   }, [value])
-  return <textarea ref={ref} rows={1} className={className} value={value} placeholder={placeholder} autoFocus={autoFocus} readOnly={readOnly} onKeyDown={onKeyDown} onChange={(e) => onChange(e.target.value)} />
+  return <textarea ref={ref} rows={1} className={className} value={value} placeholder={placeholder} autoFocus={autoFocus} readOnly={readOnly} onKeyDown={onKeyDown} onBlur={onBlur} onFocus={onFocus} onChange={(e) => onChange(e.target.value)} />
+}
+
+/**
+ * The task's notes: Markdown shown rendered, and its source in a text field while editing. A click or
+ * the keyboard focus on the rendered notes starts editing; leaving the field or Esc shows them rendered
+ * again. Boxes of a checklist tick in place, and links open in a new tab, without starting to edit.
+ */
+function NoteField({ value, onChange, placeholder, readOnly }: { value: string; onChange: (v: string) => void; placeholder: string; readOnly?: boolean }) {
+  const t = useT()
+  const [editing, setEditing] = useState(false)
+  const view = useRef<HTMLDivElement>(null)
+  // set while Esc puts the focus back on the rendered notes, so that focus does not start editing again
+  const quiet = useRef(false)
+  const onToggle = useCallback((line: number) => onChange(toggleTaskLine(value, line)), [value, onChange])
+
+  if (editing || (!value.trim() && !readOnly)) {
+    return (
+      <div className="detail-note editing">
+        <AutoTextarea
+          className="detail-content"
+          value={value}
+          placeholder={placeholder}
+          autoFocus={editing}
+          readOnly={readOnly}
+          onChange={onChange}
+          // an empty note is a field from the start: typing in it is editing
+          onFocus={() => !readOnly && setEditing(true)}
+          onBlur={() => setEditing(false)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Escape' || e.nativeEvent.isComposing) return
+            // Esc leaves the editor, not the task
+            e.preventDefault()
+            e.stopPropagation()
+            quiet.current = true
+            setEditing(false)
+            requestAnimationFrame(() => {
+              view.current?.focus({ preventScroll: true })
+              quiet.current = false
+            })
+          }}
+        />
+        {editing && <div className="detail-md-hint">{t('shell.detail.markdownHint')}</div>}
+      </div>
+    )
+  }
+  const edit = () => !readOnly && setEditing(true)
+  return (
+    <div
+      ref={view}
+      className="detail-content detail-md"
+      tabIndex={readOnly ? -1 : 0}
+      role={readOnly ? undefined : 'button'}
+      aria-label={readOnly ? undefined : t('shell.detail.editNotes')}
+      onFocus={(e) => {
+        if (e.target === e.currentTarget && !quiet.current) edit()
+      }}
+      onClick={(e) => {
+        const el = e.target as HTMLElement
+        // links, boxes and a text selection are not a request to edit
+        if (el.closest('a, input, label') || window.getSelection()?.toString()) return
+        edit()
+      }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && e.key === 'Enter') {
+          e.preventDefault()
+          edit()
+        }
+      }}
+    >
+      <Markdown source={value} onToggle={readOnly ? undefined : onToggle} />
+    </div>
+  )
 }
 
 /**
@@ -514,7 +588,7 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
 
         {task.subtasks.length > 0 && <Subtasks task={task} ro={ro} set={set} focusSub={focusSub} setFocusSub={setFocusSub} addSubAfter={addSubAfter} />}
 
-        <AutoTextarea className="detail-content" value={task.content} placeholder={t('shell.detail.description')} readOnly={ro} onChange={(v) => set({ content: v })} />
+        <NoteField key={task.id} value={task.content} placeholder={t('shell.detail.description')} readOnly={ro} onChange={(v) => set({ content: v })} />
 
         {!ro && (
           <button className="detail-addsub" onClick={() => addSubAfter(task.subtasks.length - 1)}>

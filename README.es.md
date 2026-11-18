@@ -50,6 +50,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - ⚡ **Entrada rápida inteligente**: escribe `call mom tomorrow 3pm !high #family ~Personal` y TickDone asigna la fecha, la hora, la prioridad, la etiqueta y la lista, y resalta cada parte mientras escribes. También entiende chino.
 - 🗂️ **Vistas de lista y kanban**, con agrupación y ordenación.
 - 🔎 **Filtros guardados**: combina listas, etiquetas, prioridades, fechas (vencidas, hoy, esta semana, un rango personalizado…), palabras clave y tareas completadas en una lista inteligente propia, con nombre, icono y color en la barra lateral.
+- 📝 **Markdown en las notas**: títulos, negrita, cursiva, tachado, código, enlaces, listas, citas y listas de control que se marcan en la propia nota; haz clic en la nota para editar el texto.
 - 📅 **Calendario** con vistas de mes, semana, día y lista. Arrastra una tarea a otro día u otra hora, o arrastra el borde inferior de un bloque para cambiar su duración.
 - 🔔 **Suscripciones a calendarios**: suscríbete a cualquier calendario que publique una dirección iCal (.ics o webcal://), como los de trabajo, clase, equipo o festivos, y ve sus eventos en el calendario, en solo lectura y con su propio color. Se actualizan solos y siguen disponibles sin conexión.
 - 🧭 **Matriz de Eisenhower**: clasifica las tareas según su urgencia e importancia, y arrástralas entre cuadrantes para cambiar su prioridad.
@@ -156,7 +157,7 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Instalar como app y usar sin conexión ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] Filtros guardados ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Estadísticas de tareas, del temporizador de concentración y del seguimiento de hábitos ([#20](https://github.com/suica/tickdone/issues/20))
-- [ ] Markdown en las notas de las tareas ([#21](https://github.com/suica/tickdone/issues/21))
+- [x] Markdown en las notas de las tareas ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Vista de línea de tiempo ([#22](https://github.com/suica/tickdone/issues/22))
 - [ ] Más reglas de repetición ([#23](https://github.com/suica/tickdone/issues/23))
 - [ ] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))

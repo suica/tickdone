@@ -46,4 +46,6 @@ export default {
   'shell.task.copyLink': '링크 복사',
   'shell.toast.linkCopied': '링크를 복사했습니다',
   'shell.toast.taskNotFound': '이 작업은 더 이상 없습니다',
+  'shell.detail.editNotes': '메모 편집',
+  'shell.detail.markdownHint': 'Markdown 지원: **굵게**, *기울임*, `코드`, - [ ] 체크리스트, [링크](https://…). Esc로 마치기',
 } satisfies Catalog<typeof en>

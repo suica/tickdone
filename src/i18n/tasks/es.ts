@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': 'Nueva sección',
   'tasks.section.none': 'Sin sección',
   'tasks.group.noTag': 'Sin etiqueta',
+  'tasks.group.pinned': 'Fijadas',
+  'tasks.group.unpinned': 'Sin fijar',
   'tasks.overdue.postpone': 'Posponer',
   'tasks.overdue.postponed': 'Movidas a hoy',
   'tasks.trash.empty': 'Vaciar',

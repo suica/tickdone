@@ -36,6 +36,7 @@ function viewName(view: string, d: AppData): string {
 
 /** The heading of a group, from its key (see views.groupTasks); names that come from user data stay as they are. */
 function groupName(g: Group, groupBy: GroupBy, d: AppData): string {
+  if (g.nameKey) return tr(g.nameKey)
   if (groupBy === 'date') {
     if (g.key === '0-overdue') return tr('common.overdue')
     if (g.key === '1-today') return tr('common.today')
@@ -279,6 +280,7 @@ function GroupSection({ g, name, tree, listId, showList, collapsed, onToggle, ke
       {name && (
         <div className={'group-head' + (collapsed ? ' is-collapsed' : '')} data-group-head={g.key} onClick={onToggle} onContextMenu={(e) => sectionMenu(e, listId, g)}>
           <Icon name="chevronDown" size={14} className="chev" />
+          {g.pinned && <Icon name="pin" size={14} className="group-pin" />}
           <span className={g.overdue ? 'overdue' : ''}>{name}</span>
           <span className="group-count">{countTree(g.tasks, tree.children)}</span>
           {g.overdue && (

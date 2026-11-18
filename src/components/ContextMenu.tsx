@@ -4,7 +4,7 @@ import { fmt, todayStr } from '../dates'
 import { useT } from '../i18n'
 import { startFocus } from '../pomo'
 import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, updateList, updateTask, useData, useUI, wontDo } from '../store'
-import { usePhone, useTablet } from '../viewport'
+import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
@@ -16,14 +16,17 @@ export function ContextMenu() {
   const data = useData()
   const phone = usePhone()
   const tablet = useTablet()
+  const narrow = useNarrowTablet()
   const tr = useT()
   const m = ui.menu
-  // On phones and tablets a selected task opens as a full-screen page / overlay. Opening a task's
-  // menu (long press, right click) selects the task, so put the previous selection back.
+  // On phones and tablets a selected task opens as a full-screen page / overlay (in the task module,
+  // only on tablets narrower than 1024px). Opening a task's menu (long press, right click) selects
+  // the task, so put the previous selection back.
+  const overlay = phone || (tablet && (narrow || ui.module !== 'tasks'))
   const selBefore = useRef(ui.selectedTaskId)
   useLayoutEffect(() => {
     if (!m) selBefore.current = ui.selectedTaskId
-    else if ((phone || tablet) && m.kind === 'task' && ui.selectedTaskId === m.id && selBefore.current !== m.id) setUI({ selectedTaskId: selBefore.current })
+    else if (overlay && m.kind === 'task' && ui.selectedTaskId === m.id && selBefore.current !== m.id) setUI({ selectedTaskId: selBefore.current })
   })
   if (!m) return null
   const close = () => setUI({ menu: undefined })

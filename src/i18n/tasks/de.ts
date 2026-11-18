@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': 'Neuer Abschnitt',
   'tasks.section.none': 'Ohne Abschnitt',
   'tasks.group.noTag': 'Ohne Tag',
+  'tasks.group.pinned': 'Angeheftet',
+  'tasks.group.unpinned': 'Nicht angeheftet',
   'tasks.overdue.postpone': 'Verschieben',
   'tasks.overdue.postponed': 'Auf heute verschoben',
   'tasks.trash.empty': 'Leeren',

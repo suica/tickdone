@@ -61,7 +61,7 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [ ] Layouts para celulares, tablets e telas grandes ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] Arrastar e soltar em todo o app ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Animações ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] Link do GitHub e seção Sobre no app ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] Link do GitHub e seção Sobre no app ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] Interface em 10 idiomas ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Refinamento da interface, tela por tela ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Seleção múltipla e edição em lote ([#15](https://github.com/suica/tickdone/issues/15))

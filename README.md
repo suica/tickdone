@@ -61,7 +61,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [ ] Layouts for phones, tablets and large screens ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] Drag and drop everywhere ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Motion ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] GitHub link and About in the app ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] GitHub link and About in the app ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] Interface in 10 languages ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] UI polish, screen by screen ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Multi-select and batch edit ([#15](https://github.com/suica/tickdone/issues/15))

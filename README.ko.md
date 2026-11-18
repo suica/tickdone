@@ -61,7 +61,7 @@
 - [ ] 휴대폰, 태블릿, 대형 화면용 레이아웃 ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] 어디서나 드래그 앤 드롭 ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] 모션 ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] 앱 내 GitHub 링크와 정보 화면 ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] 앱 내 GitHub 링크와 정보 화면 ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] 10개 언어 인터페이스 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 화면별 UI 다듬기 ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 다중 선택과 일괄 편집 ([#15](https://github.com/suica/tickdone/issues/15))

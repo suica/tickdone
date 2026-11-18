@@ -61,7 +61,7 @@
 - [ ] 适配手机、平板和大屏幕的布局 ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] 全面支持拖放 ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] 动效 ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] 应用内的 GitHub 链接和“关于”页面 ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] 应用内的 GitHub 链接和“关于”页面 ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] 界面支持 10 种语言 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 逐个页面打磨界面 ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 多选和批量编辑 ([#15](https://github.com/suica/tickdone/issues/15))

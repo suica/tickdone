@@ -46,6 +46,10 @@ export default {
   'shell.subtasks.reordered': 'Порядок подзадач изменён',
   'shell.task.copyLink': 'Копировать ссылку',
   'shell.toast.linkCopied': 'Ссылка скопирована',
+  'shell.menu.archive': 'Архивировать',
+  'shell.menu.unarchive': 'Вернуть из архива',
+  'shell.toast.listArchived': 'Список «{name}» в архиве',
+  'shell.toast.listUnarchived': 'Список «{name}» снова в списках',
   'shell.toast.taskNotFound': 'Этой задачи больше нет',
   'shell.detail.editNotes': 'Изменить заметки',
 } satisfies Catalog<typeof en>

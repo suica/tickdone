@@ -10,7 +10,7 @@ import { isBatch } from '../selection'
 import { canSkip, deleteTask, duplicateTask, skipOccurrence, getSelection, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
 import type { Priority, Subtask, Task } from '../types'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
-import { PRIORITY, priorityColor } from '../views'
+import { activeLists, isLocked, PRIORITY, priorityColor } from '../views'
 import { DatePicker, reminderText, repeatText } from './DatePicker'
 import { Flag, Icon } from './Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
@@ -496,7 +496,8 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
   const [focusSub, setFocusSub] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState('')
   const titleRef = useRef<HTMLDivElement>(null)
-  const ro = !!task.deleted
+  // tasks in the trash or in an archived list are read-only
+  const ro = isLocked(task, data)
   const set = (p: Partial<Task>) => !ro && updateTask(task.id, p)
   const list = data.lists.find((l) => l.id === task.listId)
   const overdue = isOverdue(task)
@@ -683,7 +684,7 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
         <Popover anchor={pop.anchor} onClose={() => setPop(null)}>
           <MenuList
             onClose={() => setPop(null)}
-            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...data.lists].map((l) => ({
+            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...activeLists(data)].map((l) => ({
               label: l.name,
               icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
               checked: l.id === task.listId,

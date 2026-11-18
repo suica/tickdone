@@ -5,7 +5,7 @@ import { deleteTask, getData, setUI, toast, updateTask, useData, useUI } from '.
 import { markdownToText } from '../markdown'
 import type { Task } from '../types'
 import { useMedia, usePhone } from '../viewport'
-import { priorityColor } from '../views'
+import { activeLists, isLocked, priorityColor } from '../views'
 import { DatePicker } from './DatePicker'
 import { Icon } from './Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
@@ -61,7 +61,8 @@ export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void
       data-no-drag
       onClick={(e) => {
         e.stopPropagation()
-        if (task.deleted) return
+        // tasks in the trash or in an archived list are read-only
+        if (isLocked(task, getData())) return
         ;(onToggle ?? (() => toggleWithMotion(task.id)))()
       }}
     >
@@ -112,7 +113,8 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const subDone = task.subtasks.filter((s) => s.done).length
   // Every open date is blue; overdue ones are red.
   const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : 'var(--primary)'
-  const draggable = !!drag && !task.deleted && !dragDisabled
+  const locked = isLocked(task, data)
+  const draggable = !!drag && !locked && !dragDisabled
 
   // Phone list rows: swipe left for date / move / delete, swipe right for complete / pin.
   const phone = usePhone()
@@ -227,7 +229,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
               className="task-title"
               value={task.title}
               placeholder={t('common.untitled')}
-              readOnly={!!task.deleted}
+              readOnly={locked}
               onFocus={() => setUI({ selectedTaskId: task.id })}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
               onKeyDown={(e) => {
@@ -321,7 +323,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
         <Popover anchor={pop.anchor} onClose={closePop}>
           <MenuList
             onClose={closePop}
-            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...data.lists].map((l) => ({
+            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...activeLists(data)].map((l) => ({
               label: l.name,
               icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
               checked: l.id === task.listId,

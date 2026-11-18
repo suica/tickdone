@@ -148,6 +148,8 @@ export default {
   'misc.search.inDescription': '설명',
   'misc.search.inSubtask': '하위 할 일',
   'misc.search.inTag': '태그',
+  'misc.search.includeArchived': '보관된 목록 포함',
+  'misc.search.archived': '보관됨',
 
   'misc.focus.pomodoro': '뽀모도로',
   'misc.focus.stopwatch': '스톱워치',

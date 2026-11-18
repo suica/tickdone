@@ -3,7 +3,7 @@ import { useT } from '../i18n'
 import { setData, setUI, useData, useUI } from '../store'
 import type { TaskList } from '../types'
 import { isPhone } from '../viewport'
-import { SMART, SMART_BOTTOM, tasksForView } from '../views'
+import { activeLists, SMART, SMART_BOTTOM, tasksForView } from '../views'
 import { pressToDrag } from './dnd'
 import { Icon } from './Icon'
 import { startFilterDrag, startFolderDrag, startListItemDrag } from './sideDnd'
@@ -32,16 +32,18 @@ interface ItemProps {
   /** list rows can be dragged to reorder or move between folders */
   listId?: string
   folder?: string
+  /** tasks cannot be dropped on it (archived lists) */
+  noDrop?: boolean
 }
 
 /** One sidebar entry. Tasks can be dropped on it (data-dnd-view); see taskDnd.sideDrop. */
-function Item({ view, icon, name, count, color, indent, menu, menuId, listId, folder, filterId }: ItemProps) {
+function Item({ view, icon, name, count, color, indent, menu, menuId, listId, folder, filterId, noDrop }: ItemProps) {
   const ui = useUI()
   const onLongPress = (x: number, y: number) => menu && menuAt(menu, menuId!, x, y)
   return (
     <div
       className={'side-item' + (ui.view === view ? ' active' : '') + (indent ? ' indent' : '')}
-      data-dnd-view={view}
+      data-dnd-view={noDrop ? undefined : view}
       data-side-list={listId}
       data-folder={listId ? (folder ?? '') : undefined}
       data-side-filter={filterId}
@@ -77,10 +79,10 @@ function Item({ view, icon, name, count, color, indent, menu, menuId, listId, fo
   )
 }
 
-function SectionHead({ id, title, onAdd, addLabel }: { id: string; title: string; onAdd?: (e: React.MouseEvent) => void; addLabel?: string }) {
+function SectionHead({ id, title, onAdd, addLabel, defaultCollapsed = false }: { id: string; title: string; onAdd?: (e: React.MouseEvent) => void; addLabel?: string; defaultCollapsed?: boolean }) {
   const t = useT()
   const ui = useUI()
-  const collapsed = !!ui.collapsed['side:' + id]
+  const collapsed = ui.collapsed['side:' + id] ?? defaultCollapsed
   return (
     <div className={'side-section' + (collapsed ? ' is-collapsed' : '')} onClick={() => setUI((u) => ({ collapsed: { ...u.collapsed, ['side:' + id]: !collapsed } }))}>
       <Icon name="chevronDown" size={12} className="chev" />
@@ -122,7 +124,7 @@ export function Sidebar() {
     const c: Record<string, number> = {}
     const views = [
       ...SMART.map((s) => s.id),
-      ...data.lists.map((l) => 'list:' + l.id),
+      ...activeLists(data).map((l) => 'list:' + l.id),
       ...data.tags.map((tag) => 'tag:' + tag.name),
       ...(data.filters ?? []).map((f) => FILTER_PREFIX + f.id),
     ]
@@ -131,7 +133,10 @@ export function Sidebar() {
   }, [data])
   const [addMenu, setAddMenu] = useState(false)
 
-  const listsIn = (folderId?: string) => [...data.lists].filter((l) => (l.folderId ?? undefined) === folderId).sort((a, b) => a.order - b.order)
+  const lists = activeLists(data)
+  const archived = data.lists.filter((l) => l.archived).sort((a, b) => a.order - b.order)
+  const archivedOpen = !(ui.collapsed['side:archived'] ?? true)
+  const listsIn = (folderId?: string) => lists.filter((l) => (l.folderId ?? undefined) === folderId).sort((a, b) => a.order - b.order)
   const folders = [...data.folders].sort((a, b) => a.order - b.order)
   const filters = sortedFilters(data)
   const dialog = (kind: 'list' | 'folder' | 'tag' | 'filter', id?: string) => setUI({ dialog: { kind, id }, ...(isPhone() ? { drawerOpen: false } : {}) })
@@ -203,7 +208,7 @@ export function Sidebar() {
             </div>
           ))}
           {listsIn(undefined).map((l) => listItem(l))}
-          {data.lists.length === 0 && <div className="side-hint">{t('tasks.sidebar.listsHint')}</div>}
+          {lists.length === 0 && <div className="side-hint">{t('tasks.sidebar.listsHint')}</div>}
         </Fold>
 
         <SectionHead id="tags" title={t('tasks.sidebar.tags')} onAdd={() => dialog('tag')} />
@@ -236,6 +241,27 @@ export function Sidebar() {
         {SMART_BOTTOM.map((s) => (
           <Item key={s.id} view={s.id} icon={<Icon name={s.icon} size={18} />} name={t(SMART_NAME[s.id])} />
         ))}
+
+        {archived.length > 0 && (
+          <div className="side-archived" data-side-archived>
+            <div className="side-divider" />
+            <SectionHead id="archived" title={t('tasks.sidebar.archived')} defaultCollapsed />
+            <Fold open={archivedOpen}>
+              {archived.map((l) => (
+                <Item
+                  key={l.id}
+                  view={'list:' + l.id}
+                  icon={<Icon name="archive" size={17} />}
+                  color={l.color}
+                  name={l.name}
+                  menu="list"
+                  menuId={l.id}
+                  noDrop
+                />
+              ))}
+            </Fold>
+          </div>
+        )}
       </div>
     </aside>
   )

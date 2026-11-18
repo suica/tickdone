@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': '篩選器',
   'tasks.sidebar.addFilter': '新增篩選器',
   'tasks.sidebar.filtersHint': '篩選器彙整符合條件的任務',
+  'tasks.sidebar.archived': '已封存清單',
+  'tasks.archived.banner': '此清單已封存。其中的任務為唯讀，且不會出現在智慧清單、行事曆、四象限和搜尋中。',
   'tasks.dnd.filtersReordered': '已調整篩選器順序',
   'tasks.menu.editFilter': '編輯篩選器',
   'tasks.empty.filter': '沒有符合此篩選器的任務',

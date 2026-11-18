@@ -21,6 +21,7 @@ import { lunarLabel } from '../lunar'
 import { useFeedEvents, type FeedEvent } from '../feeds'
 import { eventsByDay, type DayEvent } from './calEvents'
 import { CalEvent, EventPopover, EventRow, type OpenEvent } from './calEventParts'
+import { activeTasks } from '../views'
 
 type Mode = 'month' | 'week' | 'day' | 'agenda'
 const MODES: { id: Mode; label: MessageKey; phone?: MessageKey }[] = [
@@ -393,15 +394,17 @@ export default function CalendarView() {
 
   const byDay = useMemo(() => {
     const m = new Map<string, Task[]>()
-    for (const t of data.tasks) {
-      if (t.deleted || !t.dueDate) continue
+    // tasks of archived lists stay out of the calendar
+    for (const t of activeTasks(data)) {
+      if (!t.dueDate) continue
       const arr = m.get(t.dueDate)
       if (arr) arr.push(t)
       else m.set(t.dueDate, [t])
     }
     m.forEach((arr) => arr.sort(sortDay))
     return m
-  }, [data.tasks])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.tasks, data.lists])
 
   // Week view shows the week of the cursor; on phones it becomes three days starting at the cursor.
   const days = useMemo(() => {

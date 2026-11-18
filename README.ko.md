@@ -49,6 +49,7 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 - ✅ **할 일과 목록**: 오늘, 내일, 다음 7일, 수신함, 그리고 완료됨, 하지 않음, 휴지통; 직접 만드는 목록, 폴더, 태그; 하위 작업, 메모, 우선순위, 마감 날짜와 시간, 알림, 반복 규칙; 고정과 모든 할 일의 컨텍스트 메뉴.
 - ⚡ **스마트 빠른 추가**: `call mom tomorrow 3pm !high #family ~Personal`처럼 입력하면 날짜, 시간, 우선순위, 태그, 목록이 한 번에 설정되고, 인식한 부분은 입력하는 동안 강조 표시됩니다. 중국어 입력도 지원합니다.
 - 🗂️ **목록 보기와 칸반 보기**: 그룹화와 정렬을 지원합니다.
+- 🗄️ **목록 보관**: 끝난 목록을 메뉴에서 보관하면 접힌 "보관된 목록" 섹션으로 옮겨지고, 작업은 스마트 목록·캘린더·매트릭스·검색에서 빠지며, 보관을 해제할 때까지 읽기 전용으로 열립니다.
 - 🔎 **필터**: 목록, 태그, 우선순위, 날짜(기한 지남, 오늘, 이번 주, 사용자 지정 기간 등), 키워드, 완료된 작업을 조합해 나만의 스마트 목록을 만들고, 이름·아이콘·색상과 함께 사이드바에 표시합니다.
 - 📝 **메모에 Markdown**: 제목, 굵게, 기울임, 취소선, 코드, 링크, 목록, 인용, 메모에서 바로 체크할 수 있는 체크리스트를 지원합니다. 메모를 클릭하면 원문을 편집합니다.
 - 🔁 **반복 규칙**: N일·주·개월·년마다, 지정한 요일, 매월 N일·마지막 날·N번째/마지막 요일, 매년 특정 날짜, 평일만. N회 후 또는 특정 날짜에 종료, 마감일 또는 완료일 기준, 이번 회차 건너뛰기를 지원하며 빠른 추가에서 "every 2 weeks" 같은 문구도 인식합니다.
@@ -161,7 +162,9 @@ npm run dev        # http://localhost:5173
 - [x] 작업 메모에서 Markdown 지원 ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 타임라인 보기 ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
-- [ ] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
+- [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
+- [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 접근성 ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] 작업이 수천 개여도 빠르게 ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] 테마와 강조 색상 ([#27](https://github.com/suica/tickdone/issues/27))

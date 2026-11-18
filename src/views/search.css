@@ -280,3 +280,39 @@
     max-width: 880px;
   }
 }
+
+/* "Include archived lists", shown when some lists are archived */
+.search-archived {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin: 10px 2px 0;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+.search-archived input {
+  margin: 0;
+  accent-color: var(--primary);
+}
+.search-archived-badge {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-3);
+  font-size: 11px;
+  line-height: 18px;
+}
+@media (max-width: 767px) {
+  .search-archived {
+    min-height: 40px;
+    margin: 4px 0 0;
+    font-size: 14px;
+  }
+  .search-archived input {
+    width: 20px;
+    height: 20px;
+  }
+}

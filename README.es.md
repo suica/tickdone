@@ -49,6 +49,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - ✅ **Tareas y listas**: Hoy, Mañana, Próximos 7 días y Bandeja de entrada, además de Completadas, Descartadas y Papelera; tus propias listas, carpetas y etiquetas; subtareas, notas, prioridades, fechas y horas de vencimiento, recordatorios y reglas de repetición; tareas fijadas y menú contextual en cada tarea.
 - ⚡ **Entrada rápida inteligente**: escribe `call mom tomorrow 3pm !high #family ~Personal` y TickDone asigna la fecha, la hora, la prioridad, la etiqueta y la lista, y resalta cada parte mientras escribes. También entiende chino.
 - 🗂️ **Vistas de lista y kanban**, con agrupación y ordenación.
+- 🗄️ **Listas archivadas**: archiva una lista terminada desde su menú. Pasa a la sección plegada "Listas archivadas", sus tareas salen de las listas inteligentes, el calendario, la matriz y la búsqueda, y se abre en solo lectura hasta que la desarchives.
 - 🔎 **Filtros guardados**: combina listas, etiquetas, prioridades, fechas (vencidas, hoy, esta semana, un rango personalizado…), palabras clave y tareas completadas en una lista inteligente propia, con nombre, icono y color en la barra lateral.
 - 📝 **Markdown en las notas**: títulos, negrita, cursiva, tachado, código, enlaces, listas, citas y listas de control que se marcan en la propia nota; haz clic en la nota para editar el texto.
 - 🔁 **Reglas de repetición**: cada N días, semanas, meses o años; días de la semana elegidos; el día N, el último día o el N.º/último día de la semana del mes; una fecha cada año; solo días laborables. Termina tras N veces o en una fecha, cuenta desde el vencimiento o desde que se completa, omite una vez y escribe "every 2 weeks" en la entrada rápida.
@@ -161,7 +162,9 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Markdown en las notas de las tareas ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Vista de línea de tiempo ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Más reglas de repetición ([#23](https://github.com/suica/tickdone/issues/23))
-- [ ] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
+- [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] Más reglas de repetición ([#23](https://github.com/suica/tickdone/issues/23))
+- [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accesibilidad ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Rápido incluso con miles de tareas ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Temas y colores de acento ([#27](https://github.com/suica/tickdone/issues/27))

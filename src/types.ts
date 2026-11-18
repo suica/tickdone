@@ -77,6 +77,8 @@ export interface TaskList {
   sections: Section[]
   view: 'list' | 'kanban'
   order: number
+  /** Archived lists leave the sidebar's lists and open read-only; their tasks stay out of smart lists, the calendar and the matrix. */
+  archived?: boolean
 }
 
 export interface Folder {

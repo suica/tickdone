@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': '过滤器',
   'tasks.sidebar.addFilter': '添加过滤器',
   'tasks.sidebar.filtersHint': '过滤器汇总符合条件的任务',
+  'tasks.sidebar.archived': '已归档清单',
+  'tasks.archived.banner': '此清单已归档。其中的任务为只读，且不会出现在智能清单、日历、四象限和搜索中。',
   'tasks.dnd.filtersReordered': '已调整过滤器顺序',
   'tasks.menu.editFilter': '编辑过滤器',
   'tasks.empty.filter': '没有符合此过滤器的任务',

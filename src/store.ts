@@ -400,6 +400,19 @@ export function deleteList(id: string) {
   if (ui.view === 'list:' + id) setUI({ view: 'inbox' })
   toast(t('core.toast.listDeleted'), snap)
 }
+/** Archives a list (or brings it back); undo from the toast. */
+export function archiveList(id: string, archived = true) {
+  const snap = data
+  const l = data.lists.find((x) => x.id === id)
+  if (!l || !!l.archived === archived) return
+  setData((d) => ({ ...d, lists: d.lists.map((x) => (x.id === id ? { ...x, archived: archived || undefined } : x)) }))
+  // Tasks of an archived list are not selected any more outside its own view
+  if (archived && ui.view !== 'list:' + id) {
+    const sel = ui.selectedTaskId && data.tasks.find((x) => x.id === ui.selectedTaskId)
+    if (sel && sel.listId === id) setUI({ selectedTaskId: undefined })
+  }
+  toast(t(archived ? 'shell.toast.listArchived' : 'shell.toast.listUnarchived', { name: l.name }), snap)
+}
 export function renameTag(old: string, name: string, color?: string) {
   setData((d) => ({
     ...d,

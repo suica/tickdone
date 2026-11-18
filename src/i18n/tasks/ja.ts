@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': 'フィルター',
   'tasks.sidebar.addFilter': 'フィルターを追加',
   'tasks.sidebar.filtersHint': '条件に合うタスクをまとめて表示します',
+  'tasks.sidebar.archived': 'アーカイブ済みリスト',
+  'tasks.archived.banner': 'このリストはアーカイブ済みです。タスクは読み取り専用で、スマートリスト・カレンダー・マトリックス・検索には表示されません。',
   'tasks.dnd.filtersReordered': 'フィルターを並べ替えました',
   'tasks.menu.editFilter': 'フィルターを編集',
   'tasks.empty.filter': 'このフィルターに合うタスクはありません',

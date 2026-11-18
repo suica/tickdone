@@ -46,6 +46,10 @@ export default {
   'shell.subtasks.reordered': '하위 할 일 순서를 바꿨습니다',
   'shell.task.copyLink': '링크 복사',
   'shell.toast.linkCopied': '링크를 복사했습니다',
+  'shell.menu.archive': '보관',
+  'shell.menu.unarchive': '보관 해제',
+  'shell.toast.listArchived': '“{name}” 보관함',
+  'shell.toast.listUnarchived': '“{name}”을(를) 목록으로 되돌림',
   'shell.toast.taskNotFound': '이 작업은 더 이상 없습니다',
   'shell.detail.editNotes': '메모 편집',
 } satisfies Catalog<typeof en>

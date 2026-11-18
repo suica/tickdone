@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': 'Фильтры',
   'tasks.sidebar.addFilter': 'Добавить фильтр',
   'tasks.sidebar.filtersHint': 'Фильтры собирают задачи, подходящие под ваши условия',
+  'tasks.sidebar.archived': 'Архив списков',
+  'tasks.archived.banner': 'Список в архиве. Его задачи доступны только для чтения и не попадают в умные списки, календарь, матрицу и поиск.',
   'tasks.dnd.filtersReordered': 'Порядок фильтров изменён',
   'tasks.menu.editFilter': 'Изменить фильтр',
   'tasks.empty.filter': 'Нет задач, подходящих под этот фильтр',

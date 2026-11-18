@@ -49,6 +49,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - ✅ **Tasks and lists**: Today, Tomorrow, Next 7 Days and Inbox, plus Completed, Won't Do and Trash; your own lists, folders and tags; subtasks, notes, priorities, due dates and times, reminders and repeat rules; pinning and a context menu on every task.
 - ⚡ **Smart quick add**: type `call mom tomorrow 3pm !high #family ~Personal` and TickDone sets the date, time, priority, tag and list, highlighting each part as you type.
 - 🗂️ **List and kanban views**, with grouping and sorting.
+- 🗄️ **Archived lists**: archive a finished list from its menu to keep it out of the way. It moves to a collapsed "Archived lists" section, its tasks leave smart lists, the calendar, the matrix and search, and it opens read-only until you unarchive it.
 - 🔎 **Saved filters**: combine lists, tags, priorities, dates (overdue, today, this week, a custom range…), keywords and completed tasks into a smart list of your own, with its name, icon and color in the sidebar.
 - 📝 **Markdown in notes**: headings, bold, italics, strikethrough, code, links, lists, quotes and checklists you can tick right in the note; click the note to edit its source.
 - 🔁 **Repeat rules**: every N days, weeks, months or years; chosen weekdays; day N, the last day or the Nth/last weekday of the month; a date each year; weekdays only. End after N times or on a date, count from the due date or the completion date, skip an occurrence, and type "every 2 weeks" or "every last Friday" in quick add.
@@ -161,7 +162,9 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [x] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Timeline view ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
-- [ ] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
+- [x] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
+- [x] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accessibility ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))

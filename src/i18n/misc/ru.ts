@@ -148,6 +148,8 @@ export default {
   'misc.search.inDescription': 'Описание',
   'misc.search.inSubtask': 'Подзадача',
   'misc.search.inTag': 'Метка',
+  'misc.search.includeArchived': 'Искать в архиве',
+  'misc.search.archived': 'В архиве',
 
   'misc.focus.pomodoro': 'Помидоро',
   'misc.focus.stopwatch': 'Секундомер',

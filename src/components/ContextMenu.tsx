@@ -3,10 +3,10 @@ import { addDays, addWeeks, startOfWeek } from 'date-fns'
 import { fmt, todayStr } from '../dates'
 import { useT } from '../i18n'
 import { startFocus } from '../pomo'
-import { canSkip, deleteFilter, deleteList, deleteTag, deleteTask, skipOccurrence, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
+import { archiveList, canSkip, deleteFilter, deleteList, deleteTag, deleteTask, skipOccurrence, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
 import { copyText, taskLink } from '../taskLink'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
-import { PRIORITY } from '../views'
+import { activeLists, inArchivedList, PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
 import { editSubtaskSoon, PRIORITY_NAME } from './TaskDetail'
@@ -38,7 +38,17 @@ export function ContextMenu() {
     const t = data.tasks.find((x) => x.id === m.id)
     if (!t) return null
     const set = (p: Parameters<typeof updateTask>[1]) => updateTask(t.id, p)
-    if (t.deleted) {
+    if (!t.deleted && inArchivedList(t, data)) {
+      // a task in an archived list is read-only: it can only be linked to
+      items = [
+        {
+          label: tr('shell.task.copyLink'),
+          icon: <Icon name="link" size={15} />,
+          onClick: () => void copyText(taskLink(t.id)).then((ok) => ok && toast(tr('shell.toast.linkCopied'))),
+        },
+        { label: tr('shell.menu.unarchive'), icon: <Icon name="archive" size={15} />, onClick: () => archiveList(t.listId, false) },
+      ]
+    } else if (t.deleted) {
       items = [
         { label: tr('shell.task.restore'), icon: <Icon name="restore" size={15} />, onClick: () => set({ deleted: false }) },
         { label: tr('shell.task.deleteForever'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(t.id) },
@@ -118,7 +128,7 @@ export function ContextMenu() {
         {
           label: tr('shell.menu.moveTo'),
           icon: <Icon name="move" size={15} />,
-          children: [{ id: 'inbox', name: tr('common.list.inbox') }, ...data.lists].map((l) => ({
+          children: [{ id: 'inbox', name: tr('common.list.inbox') }, ...activeLists(data)].map((l) => ({
             label: l.name,
             checked: t.listId === l.id,
             onClick: () => {
@@ -142,7 +152,17 @@ export function ContextMenu() {
   } else if (m.kind === 'list') {
     const l = data.lists.find((x) => x.id === m.id)
     if (!l) return null
-    items = [
+    const del = {
+      label: tr('common.delete'),
+      icon: <Icon name="trash" size={15} />,
+      danger: true,
+      onClick: () => {
+        if (confirm(tr('shell.confirm.deleteList', { name: l.name }))) deleteList(l.id)
+      },
+    }
+    items = l.archived
+      ? [{ label: tr('shell.menu.unarchive'), icon: <Icon name="archive" size={15} />, onClick: () => archiveList(l.id, false) }, { divider: true }, del]
+      : [
       { label: tr('common.edit'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: l.id } }) },
       { label: tr(l.view === 'kanban' ? 'shell.menu.listView' : 'shell.menu.kanbanView'), icon: <Icon name={l.view === 'kanban' ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(l.id, { view: l.view === 'kanban' ? 'list' : 'kanban' }) },
       {
@@ -153,15 +173,9 @@ export function ContextMenu() {
           ...data.folders.map((f) => ({ label: f.name, checked: l.folderId === f.id, onClick: () => updateList(l.id, { folderId: f.id }) })),
         ],
       },
+      { label: tr('shell.menu.archive'), icon: <Icon name="archive" size={15} />, onClick: () => archiveList(l.id) },
       { divider: true },
-      {
-        label: tr('common.delete'),
-        icon: <Icon name="trash" size={15} />,
-        danger: true,
-        onClick: () => {
-          if (confirm(tr('shell.confirm.deleteList', { name: l.name }))) deleteList(l.id)
-        },
-      },
+      del,
     ]
   } else if (m.kind === 'tag') {
     items = [

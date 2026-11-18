@@ -44,6 +44,10 @@ export default {
   'shell.subtasks.reordered': 'Subtasks reordered',
   'shell.task.copyLink': 'Copy link',
   'shell.toast.linkCopied': 'Link copied',
+  'shell.menu.archive': 'Archive',
+  'shell.menu.unarchive': 'Unarchive',
+  'shell.toast.listArchived': 'Archived “{name}”',
+  'shell.toast.listUnarchived': '“{name}” is back in your lists',
   'shell.toast.taskNotFound': 'This task no longer exists',
   'shell.detail.editNotes': 'Edit notes',
 } as const

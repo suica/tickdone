@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useRef, useState, type CSSPropert
 import { LIST_COLORS, addList, deleteList, deleteTag, renameTag, setData, setUI, toast, uid, updateList, useData, useUI, getData } from '../store'
 import type { AppData, Settings } from '../types'
 import { isPhone, usePhone } from '../viewport'
+import { LOCALES, setLocale, t, useLocale, useT, type Locale, type MessageKey } from '../i18n'
+import { dayName } from './dateLabels'
 import { Icon } from './Icon'
 import { usePresence } from './motion'
 import './dialogs.css'
@@ -37,7 +39,7 @@ export function Dialogs() {
   return <ClosingContext.Provider value={closing}>{el}</ClosingContext.Provider>
 }
 
-// ---------------- 通用外壳 ----------------
+// ---------------- shared shell ----------------
 function Modal({
   title,
   children,
@@ -57,8 +59,9 @@ function Modal({
   const submitRef = useRef(onSubmit)
   submitRef.current = onSubmit
   const closing = useContext(ClosingContext)
+  const t = useT()
   useEffect(() => {
-    // 自动聚焦第一个输入框
+    // Focus the first input
     const el = ref.current?.querySelector<HTMLElement>('[data-autofocus], input[type=text], input:not([type])')
     el?.focus()
     if (el instanceof HTMLInputElement) el.select()
@@ -67,7 +70,7 @@ function Modal({
     if (closing) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        // 先于全局快捷键处理，避免同时关闭任务详情
+        // Runs before the global shortcuts so the task details don't close as well
         e.stopPropagation()
         e.preventDefault()
         close()
@@ -96,7 +99,7 @@ function Modal({
         {title !== undefined && (
           <div className="modal-head">
             <span>{title}</span>
-            <button className="icon-btn" onClick={close} title="关闭">
+            <button className="icon-btn" onClick={close} title={t('common.close')}>
               <Icon name="close" size={16} />
             </button>
           </div>
@@ -109,9 +112,10 @@ function Modal({
 }
 
 function ColorPicker({ value, onChange }: { value?: string; onChange: (c?: string) => void }) {
+  const t = useT()
   return (
     <div className="dlg-colors">
-      <button type="button" className={'dlg-color none' + (!value ? ' on' : '')} title="无" onClick={() => onChange(undefined)}>
+      <button type="button" className={'dlg-color none' + (!value ? ' on' : '')} title={t('misc.dialog.noColor')} onClick={() => onChange(undefined)}>
         <span />
       </button>
       {LIST_COLORS.map((c) => (
@@ -139,8 +143,9 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-// ---------------- 清单 ----------------
+// ---------------- list ----------------
 function ListDialog({ id }: { id?: string }) {
+  const t = useT()
   const data = useData()
   const list = id ? data.lists.find((l) => l.id === id) : undefined
   const [name, setName] = useState(list?.name ?? '')
@@ -164,7 +169,7 @@ function ListDialog({ id }: { id?: string }) {
 
   return (
     <Modal
-      title={list ? '编辑清单' : '添加清单'}
+      title={list ? t('tasks.menu.editList') : t('tasks.sidebar.addList')}
       onSubmit={submit}
       foot={
         <>
@@ -172,21 +177,21 @@ function ListDialog({ id }: { id?: string }) {
             <button
               className="btn dlg-danger-link"
               onClick={() => {
-                if (confirm(`删除清单「${list.name}」？清单中的任务将移至垃圾桶。`)) {
+                if (confirm(t('shell.confirm.deleteList', { name: list.name }))) {
                   close()
                   deleteList(list.id)
                 }
               }}
             >
-              删除清单
+              {t('misc.list.delete')}
             </button>
           )}
           <span className="dlg-spacer" />
           <button className="btn" onClick={close}>
-            取消
+            {t('common.cancel')}
           </button>
           <button className="btn btn-primary" disabled={!trimmed} onClick={submit}>
-            {list ? '保存' : '添加'}
+            {list ? t('common.save') : t('common.add')}
           </button>
         </>
       }
@@ -196,25 +201,25 @@ function ListDialog({ id }: { id?: string }) {
           <span className="dlg-name-icon" style={{ color: color ?? 'var(--text-3)' }}>
             <Icon name="list" size={18} />
           </span>
-          <input className="input" type="text" placeholder="名称" maxLength={64} value={name} onChange={(e) => setName(e.target.value)} />
+          <input className="input" type="text" placeholder={t('misc.list.name')} maxLength={64} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        {dup && <div className="dlg-hint">已存在同名清单</div>}
-        <Field label="清单颜色">
+        {dup && <div className="dlg-hint">{t('misc.list.duplicate')}</div>}
+        <Field label={t('misc.list.color')}>
           <ColorPicker value={color} onChange={setColor} />
         </Field>
-        <Field label="视图类型">
+        <Field label={t('misc.list.view')}>
           <div className="dlg-seg">
             <button type="button" className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>
-              <Icon name="list" size={15} /> 列表
+              <Icon name="list" size={15} /> {t('misc.list.viewList')}
             </button>
             <button type="button" className={view === 'kanban' ? 'on' : ''} onClick={() => setView('kanban')}>
-              <Icon name="kanban" size={15} /> 看板
+              <Icon name="kanban" size={15} /> {t('misc.list.viewKanban')}
             </button>
           </div>
         </Field>
-        <Field label="文件夹">
+        <Field label={t('misc.list.folder')}>
           <select className="input dlg-select" value={folderId} onChange={(e) => setFolderId(e.target.value)}>
-            <option value="">无</option>
+            <option value="">{t('shell.menu.noFolder')}</option>
             {[...data.folders]
               .sort((a, b) => a.order - b.order)
               .map((f) => (
@@ -229,8 +234,9 @@ function ListDialog({ id }: { id?: string }) {
   )
 }
 
-// ---------------- 文件夹 ----------------
+// ---------------- folder ----------------
 function FolderDialog({ id }: { id?: string }) {
+  const t = useT()
   const data = useData()
   const folder = id ? data.folders.find((f) => f.id === id) : undefined
   const [name, setName] = useState(folder?.name ?? '')
@@ -255,26 +261,26 @@ function FolderDialog({ id }: { id?: string }) {
       lists: d.lists.map((l) => (l.folderId === folder.id ? { ...l, folderId: undefined } : l)),
     }))
     close()
-    toast('文件夹已解散', snap)
+    toast(t('misc.folder.ungrouped'), snap)
   }
 
   return (
     <Modal
-      title={folder ? '重命名文件夹' : '新建文件夹'}
+      title={folder ? t('misc.folder.rename') : t('misc.folder.new')}
       onSubmit={submit}
       foot={
         <>
           {folder && (
             <button className="btn dlg-danger-link" onClick={ungroup}>
-              解散文件夹
+              {t('misc.folder.ungroup')}
             </button>
           )}
           <span className="dlg-spacer" />
           <button className="btn" onClick={close}>
-            取消
+            {t('common.cancel')}
           </button>
           <button className="btn btn-primary" disabled={!trimmed} onClick={submit}>
-            {folder ? '保存' : '添加'}
+            {folder ? t('common.save') : t('common.add')}
           </button>
         </>
       }
@@ -284,30 +290,31 @@ function FolderDialog({ id }: { id?: string }) {
           <span className="dlg-name-icon">
             <Icon name="folder" size={18} />
           </span>
-          <input className="input" type="text" placeholder="文件夹名称" maxLength={64} value={name} onChange={(e) => setName(e.target.value)} />
+          <input className="input" type="text" placeholder={t('misc.folder.name')} maxLength={64} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        {folder && <div className="dlg-hint muted">解散后，文件夹内的清单会保留并移出文件夹。</div>}
+        {folder && <div className="dlg-hint muted">{t('misc.folder.ungroupHint')}</div>}
       </div>
     </Modal>
   )
 }
 
-// ---------------- 标签 ----------------
+// ---------------- tag ----------------
 function TagDialog({ id }: { id?: string }) {
+  const t = useT()
   const data = useData()
-  const tag = id ? data.tags.find((t) => t.name === id) : undefined
+  const tag = id ? data.tags.find((x) => x.name === id) : undefined
   const [name, setName] = useState(tag?.name ?? '')
   const [color, setColor] = useState<string | undefined>(tag?.color)
   const trimmed = name.trim().replace(/^#/, '').replace(/\s+/g, '')
-  const dup = data.tags.some((t) => t.name === trimmed && t.name !== tag?.name)
+  const dup = data.tags.some((x) => x.name === trimmed && x.name !== tag?.name)
   const ok = !!trimmed && !dup
 
   const submit = () => {
     if (!ok) return
     if (tag) {
       renameTag(tag.name, trimmed, color)
-      // renameTag 在 color 为 undefined 时保留旧色，这里显式清除
-      if (!color && tag.color) setData((d) => ({ ...d, tags: d.tags.map((t) => (t.name === trimmed ? { name: t.name } : t)) }))
+      // renameTag keeps the old color when color is undefined, so clear it explicitly
+      if (!color && tag.color) setData((d) => ({ ...d, tags: d.tags.map((x) => (x.name === trimmed ? { name: x.name } : x)) }))
     } else {
       setData((d) => ({ ...d, tags: [...d.tags, { name: trimmed, color }] }))
     }
@@ -316,7 +323,7 @@ function TagDialog({ id }: { id?: string }) {
 
   return (
     <Modal
-      title={tag ? '编辑标签' : '添加标签'}
+      title={tag ? t('misc.tag.edit') : t('misc.tag.add')}
       onSubmit={submit}
       foot={
         <>
@@ -324,21 +331,21 @@ function TagDialog({ id }: { id?: string }) {
             <button
               className="btn dlg-danger-link"
               onClick={() => {
-                if (confirm(`删除标签「${tag.name}」？该标签将从所有任务中移除。`)) {
+                if (confirm(t('misc.tag.confirmDelete', { name: tag.name }))) {
                   close()
                   deleteTag(tag.name)
                 }
               }}
             >
-              删除标签
+              {t('misc.tag.delete')}
             </button>
           )}
           <span className="dlg-spacer" />
           <button className="btn" onClick={close}>
-            取消
+            {t('common.cancel')}
           </button>
           <button className="btn btn-primary" disabled={!ok} onClick={submit}>
-            {tag ? '保存' : '添加'}
+            {tag ? t('common.save') : t('common.add')}
           </button>
         </>
       }
@@ -348,10 +355,10 @@ function TagDialog({ id }: { id?: string }) {
           <span className="dlg-name-icon" style={{ color: color ?? 'var(--text-3)' }}>
             <Icon name="tag" size={18} />
           </span>
-          <input className="input" type="text" placeholder="标签名称" maxLength={64} value={name} onChange={(e) => setName(e.target.value)} />
+          <input className="input" type="text" placeholder={t('misc.tag.name')} maxLength={64} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        {dup && <div className="dlg-hint">已存在同名标签</div>}
-        <Field label="标签颜色">
+        {dup && <div className="dlg-hint">{t('misc.tag.duplicate')}</div>}
+        <Field label={t('misc.tag.color')}>
           <ColorPicker value={color} onChange={setColor} />
         </Field>
       </div>
@@ -359,48 +366,52 @@ function TagDialog({ id }: { id?: string }) {
   )
 }
 
-// ---------------- 快捷键 ----------------
+// ---------------- keyboard shortcuts ----------------
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 const MOD = isMac ? '⌘' : 'Ctrl'
 
-const SHORTCUTS: { group: string; items: [string, string[]][] }[] = [
-  {
-    group: '通用',
-    items: [
-      ['新建任务', ['N']],
-      ['搜索', [MOD, 'F']],
-      ['撤销', [MOD, 'Z']],
-      ['打开快捷键面板', ['?']],
-      ['关闭弹窗 / 任务详情', ['Esc']],
-    ],
-  },
-  {
-    group: '切换模块',
-    items: [
-      ['任务', ['Alt', '1']],
-      ['日历', ['Alt', '2']],
-      ['四象限', ['Alt', '3']],
-      ['番茄专注', ['Alt', '4']],
-      ['习惯打卡', ['Alt', '5']],
-      ['搜索', ['Alt', '6']],
-    ],
-  },
-  {
-    group: '任务',
-    items: [
-      ['删除选中任务', ['Delete']],
-      ['完成 / 取消完成', [MOD, 'Enter']],
-      ['快速添加：日期', ['明天 / 下周一 / 3点']],
-      ['快速添加：优先级', ['!高 / !中 / !低']],
-      ['快速添加：标签', ['#标签']],
-    ],
-  },
-]
+function shortcuts(): { group: string; items: [string, string[]][] }[] {
+  const priorities = (['high', 'medium', 'low'] as const).map((p) => '!' + t(`tasks.quickAdd.token.${p}`)).join(' / ')
+  return [
+    {
+      group: t('misc.settings.general'),
+      items: [
+        [t('misc.keys.newTask'), ['N']],
+        [t('common.search'), [MOD, 'F']],
+        [t('common.undo'), [MOD, 'Z']],
+        [t('misc.keys.showShortcuts'), ['?']],
+        [t('misc.keys.close'), ['Esc']],
+      ],
+    },
+    {
+      group: t('misc.keys.modules'),
+      items: [
+        [t('common.module.tasks'), ['Alt', '1']],
+        [t('common.module.calendar'), ['Alt', '2']],
+        [t('common.module.matrix'), ['Alt', '3']],
+        [t('common.module.focus'), ['Alt', '4']],
+        [t('common.module.habits'), ['Alt', '5']],
+        [t('common.search'), ['Alt', '6']],
+      ],
+    },
+    {
+      group: t('common.module.tasks'),
+      items: [
+        [t('misc.keys.deleteTask'), ['Delete']],
+        [t('misc.keys.toggleDone'), [MOD, 'Enter']],
+        [t('misc.keys.quickDate'), [t('misc.keys.dateExample')]],
+        [t('misc.keys.quickPriority'), [priorities]],
+        [t('misc.keys.quickTag'), [t('misc.keys.tagExample')]],
+      ],
+    },
+  ]
+}
 
 function ShortcutList() {
+  useLocale()
   return (
     <div className="dlg-keys">
-      {SHORTCUTS.map((g) => (
+      {shortcuts().map((g) => (
         <div key={g.group} className="dlg-keys-group">
           <div className="dlg-keys-title">{g.group}</div>
           {g.items.map(([label, keys]) => (
@@ -420,8 +431,9 @@ function ShortcutList() {
 }
 
 function ShortcutsDialog() {
+  const t = useT()
   return (
-    <Modal title="快捷键" width={480}>
+    <Modal title={t('misc.keys.title')} width={480}>
       <div className="modal-body dlg-scroll">
         <ShortcutList />
       </div>
@@ -429,14 +441,14 @@ function ShortcutsDialog() {
   )
 }
 
-// ---------------- 设置 ----------------
+// ---------------- settings ----------------
 type Tab = 'general' | 'pomo' | 'data' | 'keys' | 'about'
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'general', label: '通用', icon: 'settings' },
-  { id: 'pomo', label: '番茄专注', icon: 'pomo' },
-  { id: 'data', label: '数据', icon: 'inbox' },
-  { id: 'keys', label: '快捷键', icon: 'keyboard' },
-  { id: 'about', label: '关于', icon: 'eye' },
+const TABS: { id: Tab; label: MessageKey; icon: string }[] = [
+  { id: 'general', label: 'misc.settings.general', icon: 'settings' },
+  { id: 'pomo', label: 'common.module.focus', icon: 'pomo' },
+  { id: 'data', label: 'misc.settings.data', icon: 'inbox' },
+  { id: 'keys', label: 'misc.settings.shortcuts', icon: 'keyboard' },
+  { id: 'about', label: 'misc.settings.about', icon: 'eye' },
 ]
 
 function setSettings(p: Partial<Settings>) {
@@ -444,13 +456,14 @@ function setSettings(p: Partial<Settings>) {
 }
 
 function SettingsDialog() {
+  const t = useT()
   const phone = usePhone()
   // On phones settings open on a list of sections; picking one slides its page in (with a back button)
   const [picked, setPicked] = useState<Tab | null>(() => (isPhone() ? null : 'general'))
   const [cameBack, setCameBack] = useState(false)
   const tab = picked ?? (phone ? null : 'general')
   const closeBtn = (
-    <button className="icon-btn" onClick={close} title="关闭">
+    <button className="icon-btn" onClick={close} title={t('common.close')}>
       <Icon name="close" size={16} />
     </button>
   )
@@ -459,11 +472,11 @@ function SettingsDialog() {
       <div className="dlg-set-wrap">
         {!phone && (
           <aside className="dlg-set-nav">
-            <div className="dlg-set-title">设置</div>
-            {TABS.map((t) => (
-              <button key={t.id} className={'dlg-set-tab' + (tab === t.id ? ' on' : '')} onClick={() => setPicked(t.id)}>
-                <Icon name={t.icon} size={16} />
-                {t.label}
+            <div className="dlg-set-title">{t('common.settings')}</div>
+            {TABS.map((x) => (
+              <button key={x.id} className={'dlg-set-tab' + (tab === x.id ? ' on' : '')} onClick={() => setPicked(x.id)}>
+                <Icon name={x.icon} size={16} />
+                {t(x.label)}
               </button>
             ))}
           </aside>
@@ -471,14 +484,14 @@ function SettingsDialog() {
         {tab === null ? (
           <section className={'dlg-set-main dlg-set-home' + (cameBack ? ' from-page' : '')}>
             <div className="dlg-set-head">
-              <span>设置</span>
+              <span>{t('common.settings')}</span>
               {closeBtn}
             </div>
             <div className="dlg-set-body">
-              {TABS.map((t) => (
-                <button key={t.id} className="dlg-set-item" onClick={() => setPicked(t.id)}>
-                  <Icon name={t.icon} size={18} />
-                  <span>{t.label}</span>
+              {TABS.map((x) => (
+                <button key={x.id} className="dlg-set-item" onClick={() => setPicked(x.id)}>
+                  <Icon name={x.icon} size={18} />
+                  <span>{t(x.label)}</span>
                   <Icon name="chevronRight" size={16} className="dlg-set-item-arrow" />
                 </button>
               ))}
@@ -494,12 +507,12 @@ function SettingsDialog() {
                     setCameBack(true)
                     setPicked(null)
                   }}
-                  title="返回"
+                  title={t('common.back')}
                 >
                   <Icon name="chevronLeft" size={20} />
                 </button>
               )}
-              <span>{TABS.find((t) => t.id === tab)!.label}</span>
+              <span>{t(TABS.find((x) => x.id === tab)!.label)}</span>
               {closeBtn}
             </div>
             <div className="dlg-set-body">
@@ -545,15 +558,17 @@ function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 function GeneralTab() {
+  const t = useT()
+  const locale = useLocale()
   const s = useData().settings
   return (
     <>
-      <div className="dlg-sub">外观</div>
+      <div className="dlg-sub">{t('misc.settings.appearance')}</div>
       <div className="dlg-themes">
         {(
           [
-            ['light', '浅色'],
-            ['dark', '深色'],
+            ['light', t('misc.settings.light')],
+            ['dark', t('misc.settings.dark')],
           ] as const
         ).map(([v, l]) => (
           <button key={v} className={'dlg-theme ' + v + (s.theme === v ? ' on' : '')} onClick={() => setSettings({ theme: v })}>
@@ -565,19 +580,28 @@ function GeneralTab() {
           </button>
         ))}
       </div>
-      <div className="dlg-sub">日期与时间</div>
-      <Row label="每周开始于">
+      <Row label={t('misc.settings.language')}>
+        <select className="input dlg-select dlg-lang" value={locale} aria-label={t('misc.settings.language')} onChange={(e) => setLocale(e.target.value as Locale)}>
+          {LOCALES.map((l) => (
+            <option key={l.code} value={l.code} lang={l.code}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+      </Row>
+      <div className="dlg-sub">{t('misc.settings.dateTime')}</div>
+      <Row label={t('misc.settings.weekStart')}>
         <Seg<0 | 1>
           value={s.weekStartsOn}
           options={[
-            [1, '周一'],
-            [0, '周日'],
+            [1, dayName(1, 'long')],
+            [0, dayName(0, 'long')],
           ]}
           onChange={(v) => setSettings({ weekStartsOn: v })}
         />
       </Row>
-      <div className="dlg-sub">任务</div>
-      <Row label="显示已完成任务" desc="在清单中显示已完成的任务">
+      <div className="dlg-sub">{t('common.module.tasks')}</div>
+      <Row label={t('misc.settings.showCompleted')} desc={t('misc.settings.showCompletedDesc')}>
         <Switch checked={s.showCompleted} onChange={(v) => setSettings({ showCompleted: v })} />
       </Row>
     </>
@@ -585,6 +609,7 @@ function GeneralTab() {
 }
 
 function NumInput({ value, min, max, onChange }: { value: number; min: number; max: number; onChange: (v: number) => void }) {
+  const t = useT()
   const [text, setText] = useState(String(value))
   useEffect(() => setText(String(value)), [value])
   const commit = () => {
@@ -597,23 +622,24 @@ function NumInput({ value, min, max, onChange }: { value: number; min: number; m
   return (
     <span className="dlg-num">
       <input className="input" type="number" min={min} max={max} value={text} onChange={(e) => setText(e.target.value)} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && commit()} />
-      <span>分钟</span>
+      <span>{t('misc.settings.minutes')}</span>
     </span>
   )
 }
 
 function PomoTab() {
+  const t = useT()
   const s = useData().settings
   return (
     <>
-      <div className="dlg-sub">番茄计时</div>
-      <Row label="番茄时长">
+      <div className="dlg-sub">{t('misc.settings.pomoTimer')}</div>
+      <Row label={t('misc.settings.pomoLength')}>
         <NumInput value={s.pomoMinutes} min={5} max={180} onChange={(v) => setSettings({ pomoMinutes: v })} />
       </Row>
-      <Row label="短休息时长">
+      <Row label={t('misc.settings.shortBreak')}>
         <NumInput value={s.shortBreak} min={1} max={60} onChange={(v) => setSettings({ shortBreak: v })} />
       </Row>
-      <Row label="长休息时长" desc="每完成 4 个番茄后进入长休息">
+      <Row label={t('misc.settings.longBreak')} desc={t('misc.settings.longBreakDesc')}>
         <NumInput value={s.longBreak} min={1} max={90} onChange={(v) => setSettings({ longBreak: v })} />
       </Row>
     </>
@@ -627,6 +653,7 @@ function isAppData(x: unknown): x is AppData {
 }
 
 function DataTab() {
+  const t = useT()
   const data = useData()
   const fileRef = useRef<HTMLInputElement>(null)
   const [err, setErr] = useState('')
@@ -643,7 +670,7 @@ function DataTab() {
     a.click()
     a.remove()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
-    toast('已导出备份')
+    toast(t('misc.data.exported'))
   }
 
   const importJSON = async (f: File) => {
@@ -651,11 +678,12 @@ function DataTab() {
     try {
       const obj = JSON.parse(await f.text())
       if (!isAppData(obj)) {
-        setErr('文件格式不正确：缺少 version 字段或版本不受支持')
+        setErr(t('misc.data.badFormat'))
         return
       }
-      const n = obj.tasks.filter((t) => !t.deleted).length
-      if (!confirm(`将用备份覆盖当前所有数据（备份中有 ${obj.lists.length} 个清单、${n} 个任务），确定继续？`)) return
+      const n = obj.tasks.filter((x) => !x.deleted).length
+      const summary = [t('misc.count.lists', { count: obj.lists.length }), t('misc.count.tasks', { count: n })].join(t('misc.listSeparator'))
+      if (!confirm(t('misc.data.confirmImport', { summary }))) return
       const snap = getData()
       const cur = getData()
       const merged: AppData = {
@@ -669,32 +697,32 @@ function DataTab() {
       }
       setData(() => merged)
       setUI({ selectedTaskId: undefined, view: 'today' })
-      toast('已导入备份', snap)
+      toast(t('misc.data.imported'), snap)
     } catch {
-      setErr('无法解析文件，请选择有效的 JSON 备份')
+      setErr(t('misc.data.unreadable'))
     }
   }
 
   const clearAll = () => {
-    if (!confirm('确定清空所有数据？清单、任务、标签、习惯和专注记录都将被删除。')) return
-    if (!confirm('此操作无法恢复（除非你已导出备份）。再次确认清空？')) return
+    if (!confirm(t('misc.data.confirmClear'))) return
+    if (!confirm(t('misc.data.confirmClear2'))) return
     const snap = getData()
     setData((d) => ({ ...d, tasks: [], lists: [], folders: [], tags: [], habits: [], focus: [] }))
     setUI({ selectedTaskId: undefined, view: 'inbox' })
-    toast('已清空所有数据', snap)
+    toast(t('misc.data.cleared'), snap)
   }
 
   return (
     <>
-      <div className="dlg-sub">备份与恢复</div>
-      <Row label="导出备份" desc="将所有数据导出为 JSON 文件">
+      <div className="dlg-sub">{t('misc.data.backup')}</div>
+      <Row label={t('misc.data.exportTitle')} desc={t('misc.data.exportDesc')}>
         <button className="btn" onClick={exportJSON}>
-          导出
+          {t('misc.data.export')}
         </button>
       </Row>
-      <Row label="导入备份" desc="从 JSON 备份恢复，会覆盖当前数据">
+      <Row label={t('misc.data.importTitle')} desc={t('misc.data.importDesc')}>
         <button className="btn" onClick={() => fileRef.current?.click()}>
-          导入
+          {t('misc.data.import')}
         </button>
         <input
           ref={fileRef}
@@ -709,14 +737,19 @@ function DataTab() {
         />
       </Row>
       {err && <div className="dlg-hint">{err}</div>}
-      <div className="dlg-sub">危险操作</div>
-      <Row label="清空所有数据" desc="删除本地保存的全部内容">
+      <div className="dlg-sub">{t('misc.data.danger')}</div>
+      <Row label={t('misc.data.clearTitle')} desc={t('misc.data.clearDesc')}>
         <button className="btn dlg-danger" onClick={clearAll}>
-          清空
+          {t('misc.clear')}
         </button>
       </Row>
       <div className="dlg-stats">
-        当前共 {data.lists.length} 个清单 · {data.tasks.filter((t) => !t.deleted).length} 个任务 · {data.tags.length} 个标签 · {data.habits.length} 个习惯
+        {[
+          t('misc.count.lists', { count: data.lists.length }),
+          t('misc.count.tasks', { count: data.tasks.filter((x) => !x.deleted).length }),
+          t('misc.count.tags', { count: data.tags.length }),
+          t('misc.count.habits', { count: data.habits.length }),
+        ].join(' · ')}
       </div>
     </>
   )
@@ -754,12 +787,13 @@ function ExternalGlyph() {
 }
 
 function AboutTab() {
+  const t = useT()
   return (
     <div className="dlg-about">
       <div className="dlg-logo">T</div>
       <div className="dlg-about-name">TickDone</div>
-      {APP_VERSION && <div className="dlg-about-ver">版本 {APP_VERSION}</div>}
-      <p>一个轻量的待办与时间管理工具：任务清单、日历、四象限、番茄专注与习惯打卡。</p>
+      {APP_VERSION && <div className="dlg-about-ver">{t('misc.about.version', { version: APP_VERSION })}</div>}
+      <p>{t('misc.about.tagline')}</p>
       <div className="dlg-links">
         <a className="dlg-link" href={REPO_URL} target="_blank" rel="noopener noreferrer">
           <GithubMark />
@@ -769,12 +803,12 @@ function AboutTab() {
         </a>
         <a className="dlg-link" href={SITE_URL} target="_blank" rel="noopener noreferrer">
           <GlobeGlyph />
-          <span className="dlg-link-label">在线地址</span>
+          <span className="dlg-link-label">{t('misc.about.website')}</span>
           <span className="dlg-link-url">tickdone.pages.dev</span>
           <ExternalGlyph />
         </a>
       </div>
-      <p className="muted">所有数据仅保存在本机浏览器（localStorage），建议定期在「数据」中导出备份。</p>
+      <p className="muted">{t('misc.about.storage', { data: t('misc.settings.data') })}</p>
     </div>
   )
 }

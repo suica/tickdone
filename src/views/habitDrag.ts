@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom'
 import { getData, setData, toast } from '../store'
 import type { HabitSection } from '../types'
 import { dur, ease, reducedMotion } from '../components/motion'
+import { t, type MessageKey } from '../i18n'
 
 /**
  * Drag-to-reorder for the habit list, with Pointer Events so mouse and touch both work.
@@ -14,7 +15,15 @@ import { dur, ease, reducedMotion } from '../components/motion'
  * - Rows opt in with data-drag-id / data-section; headers with data-drop-section.
  */
 
-export const SECTION_NAMES: Record<HabitSection, string> = { morning: '上午', afternoon: '下午', night: '晚上', other: '其他' }
+const SECTION_KEYS: Record<HabitSection, MessageKey> = {
+  morning: 'misc.habit.section.morning',
+  afternoon: 'misc.habit.section.afternoon',
+  night: 'misc.habit.section.night',
+  other: 'misc.habit.section.other',
+}
+
+/** The name of a habit section (time of day) in the current language. */
+export const sectionName = (s: HabitSection) => t(SECTION_KEYS[s])
 
 const LONG_PRESS = 350
 const MOUSE_SLOP = 4
@@ -257,19 +266,19 @@ function swallowClick() {
 }
 
 /** Moves habit `id` to the target position (and section); returns false when nothing changes. */
-function drop(id: string, t: Target): boolean {
+function drop(id: string, target: Target): boolean {
   const snap = getData()
   const all = [...snap.habits].sort((a, b) => a.order - b.order)
   const moving = all.find((h) => h.id === id)
   if (!moving) return false
   const fromSection = moving.section ?? 'other'
-  const section = t.section
+  const section = target.section
   const rest = all.filter((h) => h.id !== id)
   let idx: number
-  if (t.kind === 'row') {
-    idx = rest.findIndex((h) => h.id === t.id)
+  if (target.kind === 'row') {
+    idx = rest.findIndex((h) => h.id === target.id)
     if (idx < 0) return false
-    if (t.after) idx++
+    if (target.after) idx++
   } else {
     let last = -1
     rest.forEach((h, i) => {
@@ -288,6 +297,6 @@ function drop(id: string, t: Target): boolean {
       habits: d.habits.map((h) => ({ ...h, order: pos.get(h.id) ?? h.order, ...(h.id === id ? { section } : {}) })),
     })),
   )
-  toast(fromSection !== section ? `已将「${moving.name}」移到${SECTION_NAMES[section]}` : `已调整「${moving.name}」的顺序`, snap)
+  toast(fromSection !== section ? t('misc.habit.moved', { name: moving.name, section: sectionName(section) }) : t('misc.habit.reordered', { name: moving.name }), snap)
   return true
 }

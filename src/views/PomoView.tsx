@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { format, isSameDay, isToday, isYesterday } from 'date-fns'
+import { t, useT } from '../i18n'
+import { fmtFullDate, fmtMonthDay, fmtTime, fmtWeekday } from '../i18n/format'
 import { Icon } from '../components/Icon'
 import { Popover, anchorOf, type Anchor } from '../components/Popover'
 import { bounce, burst, dur, ease, reducedMotion } from '../components/motion'
@@ -23,18 +25,11 @@ import {
   usePomo,
   type PomoSnapshot,
 } from '../pomo'
+import { fmtDur } from './focusFormat'
 import './pomo.css'
 
-const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-
-/** 时长：1h25m / 25m / 0m */
-export function fmtDur(ms: number) {
-  const m = Math.floor(ms / 60000)
-  const h = Math.floor(m / 60)
-  return h ? `${h}h${m % 60 ? `${m % 60}m` : ''}` : `${m}m`
-}
-
 function DurBig({ ms }: { ms: number }) {
+  const t = useT()
   const m = Math.floor(ms / 60000)
   const h = Math.floor(m / 60)
   return (
@@ -42,14 +37,17 @@ function DurBig({ ms }: { ms: number }) {
       {h > 0 && (
         <>
           {h}
-          <small>h</small>
+          <small>{t('misc.focus.unitH')}</small>
         </>
       )}
       {m % 60}
-      <small>m</small>
+      <small>{t('misc.focus.unitM')}</small>
     </span>
   )
 }
+
+/** "09:00 – 09:25" for a focus record, in the current language. */
+const recordTime = (start: number, end: number) => t('calendar.timeRange', { start: fmtTime(format(start, 'HH:mm')), end: fmtTime(format(end, 'HH:mm')) })
 
 // Ring geometry in the 300x300 viewBox
 const R = 130
@@ -77,6 +75,7 @@ function PlayPause({ playing }: { playing: boolean }) {
 }
 
 export default function PomoView() {
+  const t = useT()
   const data = useData()
   const p = usePomo()
   const phone = usePhone()
@@ -97,7 +96,7 @@ export default function PomoView() {
   const playing = p.phase !== 'idle' && p.running
 
   // Smooth ring: while running, a rAF loop writes the exact progress every frame (the clock text still ticks
-  // once a second). When stopped, the value is written once and CSS eases it (e.g. rewinding after 放弃).
+  // once a second). When stopped, the value is written once and CSS eases it (e.g. rewinding after "Give up").
   const { phase, mode, running, segStart, elapsed, duration } = p
   useLayoutEffect(() => {
     const el = fgRef.current
@@ -152,19 +151,34 @@ export default function PomoView() {
   )
 
   const status =
-    p.phase === 'idle' ? '' : isBreak ? (p.running ? (p.breakKind === 'long' ? '长休息' : '短休息') : '休息已暂停') : p.running ? '专注中' : '已暂停'
+    p.phase === 'idle'
+      ? ''
+      : isBreak
+        ? p.running
+          ? p.breakKind === 'long'
+            ? t('misc.focus.longBreak')
+            : t('misc.focus.shortBreak')
+          : t('misc.focus.breakPaused')
+        : p.running
+          ? t('misc.focus.focusing')
+          : t('misc.focus.paused')
 
-  const primary = p.phase === 'idle' ? { label: '开始', on: () => startFocus() } : p.running ? { label: '暂停', on: pausePomo } : { label: '继续', on: resumePomo }
+  const primary =
+    p.phase === 'idle'
+      ? { label: t('misc.focus.start'), on: () => startFocus() }
+      : p.running
+        ? { label: t('misc.focus.pause'), on: pausePomo }
+        : { label: t('misc.focus.resume'), on: resumePomo }
   const secondary =
     p.phase === 'idle'
       ? null
       : isBreak
-        ? { label: '跳过', on: skipBreak, title: undefined }
+        ? { label: t('misc.focus.skip'), on: skipBreak, title: undefined }
         : p.running
           ? stopwatch
-            ? { label: '结束', on: finishPomo, title: undefined }
-            : { label: '放弃', on: abandonPomo, title: undefined }
-          : { label: '结束', on: finishPomo, title: stopwatch ? undefined : '提前结束，满 1 分钟会记录为专注时长' }
+            ? { label: t('misc.focus.end'), on: finishPomo, title: undefined }
+            : { label: t('misc.focus.giveUp'), on: abandonPomo, title: undefined }
+          : { label: t('misc.focus.end'), on: finishPomo, title: stopwatch ? undefined : t('misc.focus.endEarly') }
 
   // The primary button slides aside when the second button appears (FLIP on its x position).
   const split = !!secondary
@@ -182,7 +196,7 @@ export default function PomoView() {
     <div className={'module pomo-view' + (isBreak ? ' is-break' : '')}>
       <section className="pomo-main">
         <header className="pomo-head">
-          <h2>番茄专注</h2>
+          <h2>{t('common.module.focus')}</h2>
         </header>
         <div className="pomo-center">
           <div className="pomo-tabs" role="tablist">
@@ -192,20 +206,20 @@ export default function PomoView() {
                 role="tab"
                 className={'pomo-tab' + (p.mode === m ? ' active' : '')}
                 disabled={p.phase !== 'idle' && p.mode !== m}
-                title={p.phase !== 'idle' && p.mode !== m ? '计时进行中，无法切换' : undefined}
+                title={p.phase !== 'idle' && p.mode !== m ? t('misc.focus.locked') : undefined}
                 onClick={() => setPomoMode(m)}
               >
-                {m === 'pomo' ? '番茄钟' : '正计时'}
+                {m === 'pomo' ? t('misc.focus.pomodoro') : t('misc.focus.stopwatch')}
               </button>
             ))}
           </div>
 
           <button className={'pomo-task' + (task ? ' bound' : '')} onClick={(e) => setPicker(anchorOf(e.currentTarget))}>
             {isBreak ? (
-              <span>{p.breakKind === 'long' ? '长休息一下吧' : '休息一下吧'}</span>
+              <span>{p.breakKind === 'long' ? t('misc.focus.takeLongBreak') : t('misc.focus.takeBreak')}</span>
             ) : (
               <>
-                <span className="pomo-task-name">{task ? task.title || '无标题' : '专注'}</span>
+                <span className="pomo-task-name">{task ? task.title || t('common.untitled') : t('misc.focus.chooseTask')}</span>
                 <Icon name="chevronRight" size={14} />
               </>
             )}
@@ -237,7 +251,7 @@ export default function PomoView() {
             )}
           </div>
           {p.mode === 'pomo' && (
-            <div className="pomo-cycle" title="每 4 个番茄后长休息" ref={cycleRef}>
+            <div className="pomo-cycle" title={t('misc.focus.cycle')} ref={cycleRef}>
               {[0, 1, 2, 3].map((i) => (
                 <span key={i} className={'dot' + (i < p.count % 4 || (p.count > 0 && p.count % 4 === 0 && isBreak) ? ' on' : '')} />
               ))}
@@ -253,22 +267,24 @@ export default function PomoView() {
   )
 }
 
-// ---------------- 任务选择浮层 ----------------
+// ---------------- task picker ----------------
 function TaskPicker({ anchor, data, currentId, wide, onClose }: { anchor: Anchor; data: AppData; currentId?: string; wide: boolean; onClose: () => void }) {
+  const t = useT()
   const [q, setQ] = useState('')
   const today = todayStr()
-  const groups = useMemo(() => {
+  const matched = useMemo(() => {
     const kw = q.trim().toLowerCase()
-    const open = data.tasks.filter((t) => !t.deleted && t.status === 0 && (!kw || t.title.toLowerCase().includes(kw)))
+    const open = data.tasks.filter((x) => !x.deleted && x.status === 0 && (!kw || x.title.toLowerCase().includes(kw)))
     const byOrder = (a: (typeof open)[0], b: (typeof open)[0]) => a.order - b.order
-    const todayT = open.filter((t) => t.dueDate && t.dueDate <= today).sort(byOrder)
-    const rest = open.filter((t) => !(t.dueDate && t.dueDate <= today)).sort(byOrder)
-    return [
-      { name: '今天', items: todayT },
-      { name: '未完成', items: rest },
-    ].filter((g) => g.items.length)
+    const todayT = open.filter((x) => x.dueDate && x.dueDate <= today).sort(byOrder)
+    const rest = open.filter((x) => !(x.dueDate && x.dueDate <= today)).sort(byOrder)
+    return { todayT, rest }
   }, [data.tasks, q, today])
-  const listName = (id: string) => (id === 'inbox' ? '收集箱' : data.lists.find((l) => l.id === id)?.name ?? '')
+  const groups = [
+    { id: 'today', name: t('common.today'), items: matched.todayT },
+    { id: 'open', name: t('misc.focus.openTasks'), items: matched.rest },
+  ].filter((g) => g.items.length)
+  const listName = (id: string) => (id === 'inbox' ? t('common.list.inbox') : (data.lists.find((l) => l.id === id)?.name ?? ''))
 
   const pick = (id?: string) => {
     setPomoTask(id)
@@ -280,18 +296,18 @@ function TaskPicker({ anchor, data, currentId, wide, onClose }: { anchor: Anchor
     <Popover anchor={{ ...anchor, x: anchor.x - 60 }} onClose={onClose} width={wide ? 320 : undefined} className="pomo-picker">
       <div className="pomo-picker-search">
         <Icon name="search" size={15} />
-        <input autoFocus placeholder="搜索任务" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input autoFocus placeholder={t('misc.focus.searchTasks')} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <div className="pomo-picker-list">
-        {groups.length === 0 && <div className="pomo-picker-empty">没有匹配的任务</div>}
+        {groups.length === 0 && <div className="pomo-picker-empty">{t('misc.focus.noMatch')}</div>}
         {groups.map((g) => (
-          <div key={g.name}>
+          <div key={g.id}>
             <div className="pomo-picker-group">{g.name}</div>
-            {g.items.map((t) => (
-              <div key={t.id} className={'pomo-picker-item' + (t.id === currentId ? ' active' : '')} onClick={() => pick(t.id)}>
-                <span className="pomo-picker-title">{t.title || '无标题'}</span>
-                <span className="pomo-picker-list-name">{listName(t.listId)}</span>
-                {t.id === currentId && <Icon name="check" size={14} />}
+            {g.items.map((x) => (
+              <div key={x.id} className={'pomo-picker-item' + (x.id === currentId ? ' active' : '')} onClick={() => pick(x.id)}>
+                <span className="pomo-picker-title">{x.title || t('common.untitled')}</span>
+                <span className="pomo-picker-list-name">{listName(x.listId)}</span>
+                {x.id === currentId && <Icon name="check" size={14} />}
               </div>
             ))}
           </div>
@@ -300,7 +316,7 @@ function TaskPicker({ anchor, data, currentId, wide, onClose }: { anchor: Anchor
       {currentId && (
         <div className="pomo-picker-foot">
           <button onClick={() => pick(undefined)}>
-            <Icon name="close" size={14} /> 清除关联任务
+            <Icon name="close" size={14} /> {t('misc.focus.unlink')}
           </button>
         </div>
       )}
@@ -308,8 +324,9 @@ function TaskPicker({ anchor, data, currentId, wide, onClose }: { anchor: Anchor
   )
 }
 
-// ---------------- 右侧概览 & 记录 ----------------
+// ---------------- overview and records ----------------
 function FocusSide({ data }: { data: AppData }) {
+  const t = useT()
   const records = data.focus ?? []
   const stats = useMemo(() => {
     const now = new Date()
@@ -343,41 +360,41 @@ function FocusSide({ data }: { data: AppData }) {
 
   const dayLabel = (k: string) => {
     const d = new Date(k + 'T00:00:00')
-    if (isToday(d)) return '今天'
-    if (isYesterday(d)) return '昨天'
+    if (isToday(d)) return t('common.today')
+    if (isYesterday(d)) return t('common.yesterday')
     const sameYear = d.getFullYear() === new Date().getFullYear()
-    return format(d, sameYear ? 'M月d日' : 'yyyy年M月d日') + ' ' + WEEK[d.getDay()]
+    return t('calendar.dateWithWeekday', { date: sameYear ? fmtMonthDay(d) : fmtFullDate(d), weekday: fmtWeekday(d) })
   }
 
   return (
     <aside className="pomo-side">
-      <div className="pomo-side-title">概览</div>
+      <div className="pomo-side-title">{t('misc.focus.overview')}</div>
       <div className="pomo-stats">
         <div className="pomo-stat">
-          <div className="pomo-stat-label">今日番茄</div>
+          <div className="pomo-stat-label">{t('misc.focus.todayPomos')}</div>
           <span className="pomo-stat-num">{stats.todayPomo}</span>
         </div>
         <div className="pomo-stat">
-          <div className="pomo-stat-label">今日专注时长</div>
+          <div className="pomo-stat-label">{t('misc.focus.todayTime')}</div>
           <DurBig ms={stats.todayMs} />
         </div>
         <div className="pomo-stat">
-          <div className="pomo-stat-label">总番茄</div>
+          <div className="pomo-stat-label">{t('misc.focus.totalPomos')}</div>
           <span className="pomo-stat-num">{stats.totalPomo}</span>
         </div>
         <div className="pomo-stat">
-          <div className="pomo-stat-label">总专注时长</div>
+          <div className="pomo-stat-label">{t('misc.focus.totalTime')}</div>
           <DurBig ms={stats.totalMs} />
         </div>
       </div>
 
-      <div className="pomo-side-title">专注记录</div>
+      <div className="pomo-side-title">{t('misc.focus.records')}</div>
       <div className="pomo-records">
         {days.length === 0 && (
           <div className="pomo-records-empty">
             <Icon name="pomo" size={36} />
-            <div>还没有专注记录</div>
-            <div className="sub">完成一个番茄或正计时满 1 分钟后会显示在这里</div>
+            <div>{t('misc.focus.noRecords')}</div>
+            <div className="sub">{t('misc.focus.noRecordsHint')}</div>
           </div>
         )}
         {days.map(([k, rs]) => (
@@ -387,7 +404,7 @@ function FocusSide({ data }: { data: AppData }) {
               <span className="pomo-day-sum">{fmtDur(rs.reduce((s, r) => s + (r.end - r.start), 0))}</span>
             </div>
             {rs.map((r) => {
-              const t = r.taskId ? data.tasks.find((x) => x.id === r.taskId) : undefined
+              const task = r.taskId ? data.tasks.find((x) => x.id === r.taskId) : undefined
               return (
                 <div key={r.id} className="pomo-rec">
                   <span className={'pomo-rec-dot' + (r.mode === 'pomo' ? ' pomo' : '')}>
@@ -395,16 +412,18 @@ function FocusSide({ data }: { data: AppData }) {
                   </span>
                   <div className="pomo-rec-body">
                     <div className="pomo-rec-time">
-                      {format(new Date(r.start), 'HH:mm')} - {format(new Date(r.end), 'HH:mm')}
+                      {recordTime(r.start, r.end)}
                       <span className="pomo-rec-dur">{fmtDur(r.end - r.start)}</span>
                     </div>
-                    <div className="pomo-rec-task">{t ? t.title || '无标题' : r.taskId ? '任务已删除' : r.mode === 'pomo' ? '番茄专注' : '正计时专注'}</div>
+                    <div className="pomo-rec-task">
+                      {task ? task.title || t('common.untitled') : r.taskId ? t('misc.focus.taskDeleted') : r.mode === 'pomo' ? t('misc.focus.pomoSession') : t('misc.focus.stopwatchSession')}
+                    </div>
                   </div>
                   <button
                     className="icon-btn pomo-rec-del"
-                    title="删除记录"
+                    title={t('misc.focus.deleteRecord')}
                     onClick={() => {
-                      if (confirm('删除这条专注记录？')) deleteFocusRecord(r.id)
+                      if (confirm(t('misc.focus.confirmDelete'))) deleteFocusRecord(r.id)
                     }}
                   >
                     <Icon name="trash" size={14} />

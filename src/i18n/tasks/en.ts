@@ -13,7 +13,7 @@ export default {
   'tasks.header.showSidebar': 'Show sidebar',
   'tasks.header.hideSidebar': 'Hide sidebar',
   'tasks.menu.listView': 'Switch to list view',
-  'tasks.menu.kanbanView': 'Switch to kanban view',
+  'tasks.menu.kanbanView': 'Switch to Kanban view',
   'tasks.menu.addSection': 'Add section',
   'tasks.menu.groupBy': 'Group by',
   'tasks.menu.sortBy': 'Sort by',

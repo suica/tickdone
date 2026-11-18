@@ -60,7 +60,37 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
 
 ## 📸 Capturas de tela
 
-As capturas em português chegam com a [#14](https://github.com/suica/tickdone/issues/14), que passa todas as telas para a camada de tradução. Até lá, parte da interface continua em chinês simplificado, por isso o banner acima mostra o layout como ilustração. Para ver a interface de verdade, [abra o app](https://tickdone.pages.dev): é um clique, sem cadastro.
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/pt-BR/desktop-tasks.png" alt="Tarefas"></td>
+  </tr>
+  <tr>
+    <th>Calendário</th>
+    <th>Matriz</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/pt-BR/desktop-calendar.png" alt="Calendário"></td>
+    <td><img src="docs/screenshots/pt-BR/desktop-matrix.png" alt="Matriz"></td>
+  </tr>
+  <tr>
+    <th>Foco</th>
+    <th>Hábitos</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/pt-BR/desktop-focus.png" alt="Foco"></td>
+    <td><img src="docs/screenshots/pt-BR/desktop-habits.png" alt="Hábitos"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/pt-BR/phone-tasks.png" alt="no celular: Tarefas"></td>
+    <td><img src="docs/screenshots/pt-BR/phone-calendar.png" alt="no celular: Calendário"></td>
+    <td><img src="docs/screenshots/pt-BR/phone-matrix.png" alt="no celular: Matriz"></td>
+    <td><img src="docs/screenshots/pt-BR/phone-focus.png" alt="no celular: Foco"></td>
+    <td><img src="docs/screenshots/pt-BR/phone-habits.png" alt="no celular: Hábitos"></td>
+  </tr>
+</table>
 
 ## 🚀 Começo rápido
 
@@ -88,7 +118,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 Idiomas
 
-Este README está disponível em 10 idiomas: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) e Русский. O app segue o idioma do seu navegador e tem uma camada de tradução para esses mesmos 10 idiomas. A migração de todas as telas para ela está em andamento na [#14](https://github.com/suica/tickdone/issues/14): algumas já estão traduzidas e o restante continua em chinês simplificado até a conclusão. A adição rápida já entende inglês e chinês.
+Este README está disponível em 10 idiomas: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) e Русский. Toda a interface está traduzida para esses mesmos 10 idiomas. O TickDone segue o idioma do seu navegador, e você pode trocá-lo quando quiser em Configurações. A adição rápida entende datas escritas em inglês ou chinês e palavras de prioridade nos 10 idiomas.
 
 Encontrou uma tradução estranha? O inglês é o idioma de origem: corrija o texto em `src/i18n/` ou em `README.<locale>.md` e abra um pull request.
 
@@ -103,7 +133,7 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [ ] Arrastar e soltar em todo o app ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Animações ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] Link do GitHub e seção Sobre no app ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] Interface em 10 idiomas ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] Interface em 10 idiomas ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Refinamento da interface, tela por tela ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Seleção múltipla e edição em lote ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] Navegação pelo teclado nas listas de tarefas ([#16](https://github.com/suica/tickdone/issues/16))

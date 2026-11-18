@@ -11,7 +11,7 @@ These rules apply to everyone working on this repository, people and coding agen
 
 - **English is the working language.** Identifiers, comments, commit messages, issues, pull requests and docs are written in English.
 - **Every user-facing string is translated.** Supported languages: English (`en`, the source and default), Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-TW`), Japanese (`ja`), Korean (`ko`), Spanish (`es`), French (`fr`), German (`de`), Brazilian Portuguese (`pt-BR`) and Russian (`ru`).
-  - UI text goes through the i18n layer (`t()`); English messages are the source of truth. A change that adds or edits a string updates every locale in the same pull request; the type checker and unit tests fail when a locale is missing a key. (The existing UI is being moved onto this layer in #14.)
+  - UI text goes through the i18n layer (`t()`); English messages are the source of truth. A change that adds or edits a string updates every locale in the same pull request; the type checker and unit tests fail when a locale is missing a key.
   - Dates, weekdays, months and counts are formatted for the active locale, never hard-coded.
 - **The README exists in every supported language.** `README.md` is the English source; `README.<locale>.md` are the translations, all linked from the language bar at the top. A pull request that changes the README updates all of them.
 

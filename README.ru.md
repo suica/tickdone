@@ -60,7 +60,37 @@ TickDone — бесплатный список дел и планировщик 
 
 ## 📸 Скриншоты
 
-Скриншоты на русском появятся вместе с [#14](https://github.com/suica/tickdone/issues/14): в этой задаче все экраны переводят на систему локализации. До тех пор часть интерфейса остаётся на упрощённом китайском, поэтому баннер выше показывает макет в виде иллюстрации. Чтобы увидеть приложение вживую, [откройте его](https://tickdone.pages.dev): один клик, без регистрации.
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/ru/desktop-tasks.png" alt="Задачи"></td>
+  </tr>
+  <tr>
+    <th>Календарь</th>
+    <th>Матрица</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ru/desktop-calendar.png" alt="Календарь"></td>
+    <td><img src="docs/screenshots/ru/desktop-matrix.png" alt="Матрица"></td>
+  </tr>
+  <tr>
+    <th>Фокус</th>
+    <th>Привычки</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ru/desktop-focus.png" alt="Фокус"></td>
+    <td><img src="docs/screenshots/ru/desktop-habits.png" alt="Привычки"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/ru/phone-tasks.png" alt="на телефоне: Задачи"></td>
+    <td><img src="docs/screenshots/ru/phone-calendar.png" alt="на телефоне: Календарь"></td>
+    <td><img src="docs/screenshots/ru/phone-matrix.png" alt="на телефоне: Матрица"></td>
+    <td><img src="docs/screenshots/ru/phone-focus.png" alt="на телефоне: Фокус"></td>
+    <td><img src="docs/screenshots/ru/phone-habits.png" alt="на телефоне: Привычки"></td>
+  </tr>
+</table>
 
 ## 🚀 Быстрый старт
 
@@ -88,7 +118,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 Языки
 
-Этот README доступен на 10 языках: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) и Русский. Приложение следует языку браузера, и в нём есть система локализации для тех же 10 языков. Перенос на неё всех экранов идёт в [#14](https://github.com/suica/tickdone/issues/14): часть экранов уже переведена, остальные до завершения остаются на упрощённом китайском. Быстрое добавление уже понимает английский и китайский.
+Этот README доступен на 10 языках: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) и Русский. Весь интерфейс переведён на те же 10 языков. TickDone берёт язык браузера, а сменить его можно в любой момент в настройках. Быстрое добавление понимает даты на английском или китайском и слова приоритета на всех 10 языках.
 
 Нашли неуклюжий перевод? Исходный язык — английский: поправьте текст в `src/i18n/` или в `README.<locale>.md` и откройте pull request.
 
@@ -103,7 +133,7 @@ npm run dev        # http://localhost:5173
 - [ ] Перетаскивание во всём приложении ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Анимации ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] Ссылка на GitHub и раздел «О программе» в приложении ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] Интерфейс на 10 языках ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] Интерфейс на 10 языках ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Шлифовка интерфейса, экран за экраном ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Множественный выбор и массовое редактирование ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] Навигация с клавиатуры в списках задач ([#16](https://github.com/suica/tickdone/issues/16))

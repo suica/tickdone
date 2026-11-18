@@ -16,7 +16,7 @@
 // --force                  write screenshots even where the interface does not look translated into the locale yet
 //
 // The app starts with its own demo data. PW_CHROMIUM_PATH uses an installed Chromium, as for `npm run e2e`.
-// Until the interface is translated (#14), only zh-CN has real screenshots; the other banners use --mode illustration.
+// --mode illustration is kept for locales whose interface is not translated yet.
 import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'

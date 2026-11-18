@@ -63,14 +63,14 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
 
 <table>
   <tr>
-    <td colspan="2"><img src="docs/screenshots/zh-CN/desktop-tasks.png" alt="任务列表和任务详情"></td>
+    <td colspan="2"><img src="docs/screenshots/zh-CN/desktop-tasks.png" alt="任务"></td>
   </tr>
   <tr>
     <th>日历</th>
     <th>四象限</th>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/zh-CN/desktop-calendar.png" alt="日历月视图"></td>
+    <td><img src="docs/screenshots/zh-CN/desktop-calendar.png" alt="日历"></td>
     <td><img src="docs/screenshots/zh-CN/desktop-matrix.png" alt="四象限"></td>
   </tr>
   <tr>
@@ -79,13 +79,13 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
   </tr>
   <tr>
     <td><img src="docs/screenshots/zh-CN/desktop-focus.png" alt="番茄专注"></td>
-    <td><img src="docs/screenshots/zh-CN/desktop-habits.png" alt="习惯打卡和统计"></td>
+    <td><img src="docs/screenshots/zh-CN/desktop-habits.png" alt="习惯打卡"></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/zh-CN/phone-tasks.png" alt="手机上的任务列表"></td>
+    <td><img src="docs/screenshots/zh-CN/phone-tasks.png" alt="手机上的任务"></td>
     <td><img src="docs/screenshots/zh-CN/phone-calendar.png" alt="手机上的日历"></td>
     <td><img src="docs/screenshots/zh-CN/phone-matrix.png" alt="手机上的四象限"></td>
     <td><img src="docs/screenshots/zh-CN/phone-focus.png" alt="手机上的番茄专注"></td>
@@ -119,7 +119,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 语言
 
-本 README 提供 10 种语言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。应用会跟随浏览器的语言，并内置了支持同样 10 种语言的翻译层。把所有界面迁移到翻译层的工作正在 [#14](https://github.com/suica/tickdone/issues/14) 中进行：部分界面已经翻译，其余界面在完成之前仍显示简体中文。快速添加已经同时支持中文和英文输入。
+本 README 提供 10 种语言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。整个界面已翻译成同样的 10 种语言。TickDone 默认跟随浏览器语言，也可以随时在设置里切换。快速添加能识别用中文或英文写的日期，以及 10 种语言的优先级词。
 
 发现翻译不够地道？英文是源语言：直接修改 `src/i18n/` 或对应的 `README.<locale>.md`，然后提交 Pull Request。
 
@@ -134,7 +134,7 @@ npm run dev        # http://localhost:5173
 - [ ] 全面支持拖放 ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] 动效 ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] 应用内的 GitHub 链接和“关于”页面 ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] 界面支持 10 种语言 ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] 界面支持 10 种语言 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 逐个页面打磨界面 ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 多选和批量编辑 ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] 任务列表的键盘导航 ([#16](https://github.com/suica/tickdone/issues/16))

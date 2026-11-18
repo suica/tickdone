@@ -60,7 +60,37 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 
 ## 📸 스크린샷
 
-한국어 스크린샷은 모든 화면을 번역 레이어로 옮기는 [#14](https://github.com/suica/tickdone/issues/14)와 함께 공개할 예정입니다. 그전까지는 인터페이스 일부가 중국어 간체로 남아 있어, 위의 배너는 레이아웃을 그린 그림입니다. 실제 화면은 [앱을 열어](https://tickdone.pages.dev) 확인해 보세요. 클릭 한 번이면 되고 가입도 필요 없습니다.
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/ko/desktop-tasks.png" alt="할 일"></td>
+  </tr>
+  <tr>
+    <th>캘린더</th>
+    <th>매트릭스</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ko/desktop-calendar.png" alt="캘린더"></td>
+    <td><img src="docs/screenshots/ko/desktop-matrix.png" alt="매트릭스"></td>
+  </tr>
+  <tr>
+    <th>집중</th>
+    <th>습관</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ko/desktop-focus.png" alt="집중"></td>
+    <td><img src="docs/screenshots/ko/desktop-habits.png" alt="습관"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/ko/phone-tasks.png" alt="휴대폰의 할 일"></td>
+    <td><img src="docs/screenshots/ko/phone-calendar.png" alt="휴대폰의 캘린더"></td>
+    <td><img src="docs/screenshots/ko/phone-matrix.png" alt="휴대폰의 매트릭스"></td>
+    <td><img src="docs/screenshots/ko/phone-focus.png" alt="휴대폰의 집중"></td>
+    <td><img src="docs/screenshots/ko/phone-habits.png" alt="휴대폰의 습관"></td>
+  </tr>
+</table>
 
 ## 🚀 빠르게 시작하기
 
@@ -88,7 +118,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 언어
 
-이 README는 10개 언어로 제공됩니다: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil), Русский. 앱은 브라우저 언어를 따르며, 같은 10개 언어를 지원하는 번역 레이어가 있습니다. 모든 화면을 이 레이어로 옮기는 작업은 [#14](https://github.com/suica/tickdone/issues/14)에서 진행 중이라, 이미 번역된 화면도 있고 완료 전까지 중국어 간체로 남아 있는 화면도 있습니다. 빠른 추가는 이미 영어와 중국어 입력을 모두 이해합니다.
+이 README는 10개 언어로 제공됩니다: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil), Русский. 인터페이스 전체가 같은 10개 언어로 번역되어 있습니다. TickDone은 브라우저 언어를 따르며, 설정에서 언제든 바꿀 수 있습니다. 빠른 추가는 영어나 중국어로 쓴 날짜와 10개 언어의 우선순위 단어를 알아듣습니다.
 
 어색한 번역을 발견했나요? 원문은 영어입니다. `src/i18n/` 또는 해당 `README.<locale>.md`를 고친 뒤 풀 리퀘스트를 보내 주세요.
 
@@ -103,7 +133,7 @@ npm run dev        # http://localhost:5173
 - [ ] 어디서나 드래그 앤 드롭 ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] 모션 ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] 앱 내 GitHub 링크와 정보 화면 ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] 10개 언어 인터페이스 ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] 10개 언어 인터페이스 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 화면별 UI 다듬기 ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 다중 선택과 일괄 편집 ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] 작업 목록 키보드 탐색 ([#16](https://github.com/suica/tickdone/issues/16))

@@ -61,37 +61,35 @@ TickDone 是一款免費、開源的待辦清單與時間管理工具，直接�
 
 ## 📸 截圖
 
-目前介面仍有部分為簡體中文，繁體中文介面會隨 [#14](https://github.com/suica/tickdone/issues/14) 推出，所以上方的橫幅是版面示意圖。以下是目前的簡體中文介面：
-
 <table>
   <tr>
-    <td colspan="2"><img src="docs/screenshots/zh-CN/desktop-tasks.png" alt="任務列表和任務詳情"></td>
+    <td colspan="2"><img src="docs/screenshots/zh-TW/desktop-tasks.png" alt="任務"></td>
   </tr>
   <tr>
     <th>行事曆</th>
     <th>四象限</th>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/zh-CN/desktop-calendar.png" alt="行事曆月檢視"></td>
-    <td><img src="docs/screenshots/zh-CN/desktop-matrix.png" alt="四象限"></td>
+    <td><img src="docs/screenshots/zh-TW/desktop-calendar.png" alt="行事曆"></td>
+    <td><img src="docs/screenshots/zh-TW/desktop-matrix.png" alt="四象限"></td>
   </tr>
   <tr>
     <th>番茄專注</th>
     <th>習慣打卡</th>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/zh-CN/desktop-focus.png" alt="番茄專注"></td>
-    <td><img src="docs/screenshots/zh-CN/desktop-habits.png" alt="習慣打卡和統計"></td>
+    <td><img src="docs/screenshots/zh-TW/desktop-focus.png" alt="番茄專注"></td>
+    <td><img src="docs/screenshots/zh-TW/desktop-habits.png" alt="習慣打卡"></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/zh-CN/phone-tasks.png" alt="手機上的任務列表"></td>
-    <td><img src="docs/screenshots/zh-CN/phone-calendar.png" alt="手機上的行事曆"></td>
-    <td><img src="docs/screenshots/zh-CN/phone-matrix.png" alt="手機上的四象限"></td>
-    <td><img src="docs/screenshots/zh-CN/phone-focus.png" alt="手機上的番茄專注"></td>
-    <td><img src="docs/screenshots/zh-CN/phone-habits.png" alt="手機上的習慣打卡"></td>
+    <td><img src="docs/screenshots/zh-TW/phone-tasks.png" alt="手機上的任務"></td>
+    <td><img src="docs/screenshots/zh-TW/phone-calendar.png" alt="手機上的行事曆"></td>
+    <td><img src="docs/screenshots/zh-TW/phone-matrix.png" alt="手機上的四象限"></td>
+    <td><img src="docs/screenshots/zh-TW/phone-focus.png" alt="手機上的番茄專注"></td>
+    <td><img src="docs/screenshots/zh-TW/phone-habits.png" alt="手機上的習慣打卡"></td>
   </tr>
 </table>
 
@@ -121,7 +119,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 語言
 
-本 README 提供 10 種語言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。應用程式會跟隨瀏覽器的語言，並內建支援同樣 10 種語言的翻譯層。把所有畫面移到翻譯層的工作正在 [#14](https://github.com/suica/tickdone/issues/14) 中進行：部分畫面已經翻譯，其餘畫面在完成前仍顯示簡體中文。快速新增已經同時支援中文和英文輸入。
+本 README 提供 10 種語言版本：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil) 和 Русский。整個介面已翻譯成同樣的 10 種語言。TickDone 預設跟隨瀏覽器語言，也可以隨時在設定裡切換。快速新增能辨識用中文或英文寫的日期，以及 10 種語言的優先順序詞。
 
 發現翻譯不夠道地？英文是來源語言：直接修改 `src/i18n/` 或對應的 `README.<locale>.md`，再送出 Pull Request。
 
@@ -136,7 +134,7 @@ npm run dev        # http://localhost:5173
 - [ ] 全面支援拖放 ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] 動畫 ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] App 內的 GitHub 連結與「關於」頁面 ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] 介面支援 10 種語言 ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] 介面支援 10 種語言 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 逐一打磨每個畫面 ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 多選與批次編輯 ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] 任務列表的鍵盤導覽 ([#16](https://github.com/suica/tickdone/issues/16))

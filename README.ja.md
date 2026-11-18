@@ -60,7 +60,37 @@ TickDone は、ブラウザで動く無料・オープンソースの ToDo リ�
 
 ## 📸 スクリーンショット
 
-日本語のスクリーンショットは、すべての画面を翻訳レイヤーに移す [#14](https://github.com/suica/tickdone/issues/14) とあわせて公開する予定です。それまでは UI の一部が簡体字中国語のままなので、上のバナーはレイアウトのイメージ図になっています。実際の画面は[アプリを開いて](https://tickdone.pages.dev)ご覧ください。ワンクリックで、登録も要りません。
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/ja/desktop-tasks.png" alt="タスク"></td>
+  </tr>
+  <tr>
+    <th>カレンダー</th>
+    <th>マトリクス</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ja/desktop-calendar.png" alt="カレンダー"></td>
+    <td><img src="docs/screenshots/ja/desktop-matrix.png" alt="マトリクス"></td>
+  </tr>
+  <tr>
+    <th>集中</th>
+    <th>習慣</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/ja/desktop-focus.png" alt="集中"></td>
+    <td><img src="docs/screenshots/ja/desktop-habits.png" alt="習慣"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/ja/phone-tasks.png" alt="スマホのタスク"></td>
+    <td><img src="docs/screenshots/ja/phone-calendar.png" alt="スマホのカレンダー"></td>
+    <td><img src="docs/screenshots/ja/phone-matrix.png" alt="スマホのマトリクス"></td>
+    <td><img src="docs/screenshots/ja/phone-focus.png" alt="スマホの集中"></td>
+    <td><img src="docs/screenshots/ja/phone-habits.png" alt="スマホの習慣"></td>
+  </tr>
+</table>
 
 ## 🚀 クイックスタート
 
@@ -88,7 +118,7 @@ npm run dev        # http://localhost:5173
 
 ## 🌍 言語
 
-この README は 10 言語で読めます：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский。アプリはブラウザの言語に合わせて表示され、同じ 10 言語に対応した翻訳レイヤーを備えています。すべての画面をこのレイヤーに移す作業は [#14](https://github.com/suica/tickdone/issues/14) で進行中で、すでに翻訳済みの画面もあれば、完了までは簡体字中国語のままの画面もあります。クイック追加はすでに英語と中国語の入力を理解します。
+この README は 10 言語で読めます：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский。インターフェースはすべて同じ 10 言語に翻訳されています。TickDone はブラウザの言語に合わせて表示され、設定からいつでも切り替えられます。クイック追加は英語・中国語で書いた日付と、10 言語の優先度キーワードを認識します。
 
 不自然な訳を見つけたら：原文は英語です。`src/i18n/` か該当する `README.<locale>.md` を直して、プルリクエストを送ってください。
 
@@ -103,7 +133,7 @@ npm run dev        # http://localhost:5173
 - [ ] あらゆる場面でドラッグ＆ドロップ ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] モーション ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] アプリ内の GitHub リンクと「このアプリについて」 ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] UI の 10 言語対応 ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] UI の 10 言語対応 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 画面ごとの UI のブラッシュアップ ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 複数選択と一括編集 ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] タスクリストのキーボード操作 ([#16](https://github.com/suica/tickdone/issues/16))

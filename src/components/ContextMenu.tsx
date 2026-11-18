@@ -164,7 +164,9 @@ export function ContextMenu() {
       ? [{ label: tr('shell.menu.unarchive'), icon: <Icon name="archive" size={15} />, onClick: () => archiveList(l.id, false) }, { divider: true }, del]
       : [
       { label: tr('common.edit'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: l.id } }) },
-      { label: tr(l.view === 'kanban' ? 'shell.menu.listView' : 'shell.menu.kanbanView'), icon: <Icon name={l.view === 'kanban' ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(l.id, { view: l.view === 'kanban' ? 'list' : 'kanban' }) },
+      ...(['list', 'kanban', 'timeline'] as const)
+        .filter((v) => v !== (l.view ?? 'list'))
+        .map((v) => ({ label: tr(v === 'list' ? 'shell.menu.listView' : v === 'kanban' ? 'shell.menu.kanbanView' : 'shell.menu.timelineView'), icon: <Icon name={v} size={15} />, onClick: () => updateList(l.id, { view: v }) })),
       {
         label: tr('shell.menu.moveToFolder'),
         icon: <Icon name="folder" size={15} />,

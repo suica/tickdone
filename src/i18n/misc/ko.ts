@@ -67,6 +67,7 @@ export default {
   'misc.list.view': '보기',
   'misc.list.viewList': '목록',
   'misc.list.viewKanban': '칸반',
+  'misc.list.viewTimeline': '타임라인',
   'misc.list.folder': '폴더',
   'misc.folder.new': '새 폴더',
   'misc.folder.rename': '폴더 이름 변경',

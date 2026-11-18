@@ -67,6 +67,7 @@ export default {
   'misc.list.view': 'Visualização',
   'misc.list.viewList': 'Lista',
   'misc.list.viewKanban': 'Kanban',
+  'misc.list.viewTimeline': 'Linha do tempo',
   'misc.list.folder': 'Pasta',
   'misc.folder.new': 'Nova pasta',
   'misc.folder.rename': 'Renomear pasta',

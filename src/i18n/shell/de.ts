@@ -36,6 +36,7 @@ export default {
   'shell.menu.moveTo': 'Verschieben nach',
   'shell.menu.listView': 'Listenansicht',
   'shell.menu.kanbanView': 'Kanban-Ansicht',
+  'shell.menu.timelineView': 'Zeitleistenansicht',
   'shell.menu.moveToFolder': 'In Ordner verschieben',
   'shell.menu.noFolder': 'Keiner',
   'shell.menu.deleteSection': 'Abschnitt löschen',

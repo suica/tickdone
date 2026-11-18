@@ -1,0 +1,524 @@
+/* Timeline view of a list (Timeline.tsx). One scroll container moves both ways: the header sticks to the
+   top, the title column to the left. Columns are drawn only around what is on screen. */
+.tl {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tl-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 20px 10px;
+}
+.tl-zoom {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 7px;
+  background: var(--bg-input);
+}
+.tl-zoom button {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--text-2);
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.tl-zoom button.on {
+  background: var(--bg-pop);
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.tl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.tl-btn:hover {
+  background: var(--bg-hover);
+}
+.tl-panel-btn.on {
+  color: var(--primary);
+  border-color: var(--primary-soft2);
+  background: var(--primary-soft);
+}
+.tl-count {
+  font-size: 11px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.tl-panel-btn .tl-count {
+  color: inherit;
+}
+
+.tl-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+.tl-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  position: relative;
+}
+.tl-canvas {
+  position: relative;
+  min-height: 100%;
+}
+
+/* header */
+.tl-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  height: var(--tl-head);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.tl-corner {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  flex: 0 0 var(--tl-label);
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+}
+.tl-head-track {
+  position: relative;
+  flex: 0 0 auto;
+}
+.tl-hcell {
+  position: absolute;
+  /* clip, not hidden: hidden would make the cell the scroll box its sticky label sticks to */
+  overflow: clip;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.tl-hcell.upper {
+  top: 0;
+  height: 22px;
+  border-left: 1px solid var(--border);
+  padding-top: 4px;
+}
+.tl-hcell.upper .tl-hlabel {
+  position: sticky;
+  left: calc(var(--tl-label) + 8px);
+  padding-left: 8px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.tl-hcell.lower {
+  top: 22px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+}
+.tl[data-zoom='week'] .tl-hcell.lower,
+.tl[data-zoom='month'] .tl-hcell.lower {
+  justify-content: flex-start;
+  padding-left: 6px;
+}
+.tl-hday {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.tl-hday small {
+  font-size: 10px;
+}
+.tl-hday b {
+  font-weight: 500;
+  color: var(--text-2);
+}
+.tl-hcell.today .tl-hday b {
+  color: var(--on-primary, #fff);
+  background: var(--primary);
+  border-radius: 9px;
+  min-width: 18px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+/* body: columns behind the rows */
+.tl-body {
+  position: relative;
+}
+.tl-cols {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--tl-label);
+  pointer-events: none;
+}
+.tl-col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border);
+}
+.tl-col.weekend {
+  background: var(--bg-hover);
+}
+.tl-today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--primary);
+  opacity: 0.7;
+  z-index: 1;
+}
+.tl-drop-col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--primary-soft2);
+  outline: 1px dashed var(--primary);
+  z-index: 1;
+}
+
+.tl-row {
+  position: relative;
+  display: flex;
+  height: var(--tl-row);
+  border-bottom: 1px solid var(--border);
+}
+.tl-label {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  flex: 0 0 var(--tl-label);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 12px 0 20px;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  text-align: left;
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+button.tl-title {
+  display: block;
+  line-height: var(--tl-row);
+}
+button.tl-title:hover {
+  background-image: linear-gradient(var(--bg-hover), var(--bg-hover));
+  background-color: var(--bg);
+}
+.tl-row.selected .tl-label {
+  background-image: linear-gradient(var(--bg-selected), var(--bg-selected));
+}
+.tl-group-head .tl-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.tl-group-head {
+  background: var(--bg-hint);
+}
+.tl-empty .tl-label {
+  position: sticky;
+  white-space: normal;
+  flex-basis: auto;
+  width: min(520px, 80vw);
+  height: auto;
+  padding: 24px 20px;
+  border-right: 0;
+  background: transparent;
+  color: var(--text-3);
+}
+.tl-track {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+/* bars */
+.tl-item {
+  position: absolute;
+  top: 7px;
+  height: calc(var(--tl-row) - 14px);
+  z-index: 1;
+}
+.tl-bar-body {
+  height: 100%;
+  border-radius: 6px;
+  cursor: grab;
+  touch-action: pan-x pan-y;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.tl-item.bar .tl-bar-body {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bar) 24%, var(--bg));
+  border-left: 3px solid var(--bar);
+}
+.tl-bar-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text);
+}
+.tl-item.milestone .tl-bar-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tl-diamond {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  background: var(--bar);
+  transform: rotate(45deg);
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.tl-ms-title {
+  position: absolute;
+  left: calc(100% + 4px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.tl-item.lifted {
+  z-index: 4;
+}
+.tl-item.lifted .tl-bar-body {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-soft);
+  cursor: grabbing;
+}
+.tl-bar-body:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.tl-row.selected .tl-bar-body {
+  box-shadow: 0 0 0 2px var(--primary-soft2);
+}
+
+/* resize handles at both ends of a bar (and either side of a diamond) */
+.tl-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 2;
+}
+.tl-handle.start {
+  left: -4px;
+}
+.tl-handle.end {
+  right: -4px;
+}
+.tl-handle::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--bar);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.tl-item:hover .tl-handle::after,
+.tl-item.lifted .tl-handle::after {
+  opacity: 0.9;
+}
+.tl-item.milestone .tl-handle.start {
+  left: -10px;
+}
+.tl-item.milestone .tl-handle.end {
+  right: -10px;
+}
+.tl-tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--on-primary, #fff);
+  background: var(--primary);
+  box-shadow: var(--shadow-soft);
+  pointer-events: none;
+  animation: tl-pop var(--dur-fast) var(--ease-out);
+}
+@keyframes tl-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* No date panel */
+.tl-nodate {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--border);
+  background: var(--bg-side);
+  animation: tl-panel var(--dur) var(--ease-out);
+}
+@keyframes tl-panel {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+.tl-nodate-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tl-nodate-hint {
+  margin: 0;
+  padding: 0 16px 8px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.tl-nodate-list {
+  flex: 1;
+  overflow: auto;
+  padding: 0 8px 16px;
+}
+.tl-nodate-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  transition: opacity var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.tl-nodate-item:hover {
+  background: var(--bg-hover);
+}
+.tl-nodate-item.selected {
+  background: var(--bg-selected);
+}
+.tl-nodate-item.lifted-src {
+  opacity: 0.4;
+}
+.tl-nodate-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tl-dot {
+  flex: 0 0 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.tl-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 280px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg-pop);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tl-ghost-date {
+  color: var(--primary);
+  font-weight: 600;
+}
+.tl-dragging,
+.tl-dragging * {
+  user-select: none;
+}
+
+/* Phones: the list is shown instead, with this note */
+.tl-phone-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 4px 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+  background: var(--bg-card);
+}
+.tl-phone-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--primary);
+}
+
+/* Tablets: a narrower panel */
+@media (max-width: 1199px) {
+  .tl-nodate {
+    flex-basis: 200px;
+  }
+  .tl-bar {
+    padding: 4px 16px 10px;
+  }
+}
+/* Touch: bigger handles and targets */
+@media (pointer: coarse) {
+  .tl-handle {
+    width: 22px;
+  }
+  .tl-handle.start {
+    left: -11px;
+  }
+  .tl-handle.end {
+    right: -11px;
+  }
+  .tl-zoom button,
+  .tl-btn {
+    min-height: 40px;
+  }
+  .tl-nodate-item {
+    min-height: 44px;
+  }
+}

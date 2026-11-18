@@ -45,6 +45,7 @@ export function pressToDrag(down: PointerEvent, h: DragHandlers, scroller?: HTML
   let started = false
   let timer = 0
   let raf = 0
+  let xArmed = false
 
   const stop = () => {
     clearTimeout(timer)
@@ -111,10 +112,21 @@ export function pressToDrag(down: PointerEvent, h: DragHandlers, scroller?: HTML
       let v = 0
       if (last.y < r.top + EDGE) v = -MAX_SPEED * Math.min(1, (r.top + EDGE - last.y) / EDGE)
       else if (last.y > r.bottom - EDGE) v = MAX_SPEED * Math.min(1, (last.y - (r.bottom - EDGE)) / EDGE)
-      if (v) {
-        const before = scroller.scrollTop
+      // Sideways too, for containers that scroll horizontally (the timeline)
+      let vx = 0
+      // Only once the pointer has been well inside it, so a drag coming in from a panel beside it
+      // does not scroll it on the way past the edge.
+      if (last.x > r.left + EDGE && last.x < r.right - EDGE && last.y > r.top && last.y < r.bottom) xArmed = true
+      if (xArmed && scroller.scrollWidth > scroller.clientWidth && last.x >= r.left && last.x <= r.right) {
+        if (last.x < r.left + EDGE) vx = -MAX_SPEED * Math.min(1, (r.left + EDGE - last.x) / EDGE)
+        else if (last.x > r.right - EDGE) vx = MAX_SPEED * Math.min(1, (last.x - (r.right - EDGE)) / EDGE)
+      }
+      if (v || vx) {
+        const top = scroller.scrollTop
+        const left = scroller.scrollLeft
         scroller.scrollTop += v
-        if (scroller.scrollTop !== before) h.onMove(last)
+        scroller.scrollLeft += vx
+        if (scroller.scrollTop !== top || scroller.scrollLeft !== left) h.onMove(last)
       }
     }
     raf = requestAnimationFrame(autoScroll)

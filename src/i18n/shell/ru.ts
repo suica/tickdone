@@ -36,6 +36,7 @@ export default {
   'shell.menu.moveTo': 'Переместить в',
   'shell.menu.listView': 'Вид списка',
   'shell.menu.kanbanView': 'Вид канбан',
+  'shell.menu.timelineView': 'Вид таймлайна',
   'shell.menu.moveToFolder': 'Переместить в папку',
   'shell.menu.noFolder': 'Без папки',
   'shell.menu.deleteSection': 'Удалить раздел',

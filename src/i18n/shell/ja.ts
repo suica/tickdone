@@ -36,6 +36,7 @@ export default {
   'shell.menu.moveTo': '移動先',
   'shell.menu.listView': 'リスト表示',
   'shell.menu.kanbanView': 'かんばん表示',
+  'shell.menu.timelineView': 'タイムライン表示',
   'shell.menu.moveToFolder': 'フォルダに移動',
   'shell.menu.noFolder': 'なし',
   'shell.menu.deleteSection': 'セクションを削除',

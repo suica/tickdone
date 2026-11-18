@@ -67,6 +67,7 @@ export default {
   'misc.list.view': '檢視類型',
   'misc.list.viewList': '清單',
   'misc.list.viewKanban': '看板',
+  'misc.list.viewTimeline': '時間軸',
   'misc.list.folder': '資料夾',
   'misc.folder.new': '新增資料夾',
   'misc.folder.rename': '重新命名資料夾',

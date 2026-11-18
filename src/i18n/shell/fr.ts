@@ -36,6 +36,7 @@ export default {
   'shell.menu.moveTo': 'Déplacer vers',
   'shell.menu.listView': 'Vue liste',
   'shell.menu.kanbanView': 'Vue Kanban',
+  'shell.menu.timelineView': 'Vue chronologique',
   'shell.menu.moveToFolder': 'Déplacer dans un dossier',
   'shell.menu.noFolder': 'Aucun',
   'shell.menu.deleteSection': 'Supprimer la section',

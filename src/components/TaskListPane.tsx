@@ -16,6 +16,8 @@ import { PhoneQuickAdd } from './QuickAddSheet'
 import { SMART_NAME, startCardDrag, startColumnDrag, startListDrag, TaskDragContext, type KanbanEnv, type ListEnv, type TaskDragApi } from './taskDnd'
 import { buildTree, countTree, type TaskTree } from './taskTree'
 import { TaskRow } from './TaskRow'
+import { Timeline } from './Timeline'
+import './timeline.css'
 import { BatchBar, BatchPops, type BatchPop } from './BatchPanel'
 import { batchIds, completeSelected, deleteSelected, quickDate, rowEl, setPriority, startSelecting, visibleOrder } from './batchActions'
 import './tasks.css'
@@ -28,6 +30,7 @@ const GROUP_NAMES: Record<GroupBy, MessageKey> = {
   none: 'tasks.groupBy.none',
   section: 'tasks.groupBy.section',
 }
+const VIEW_NAMES: Record<TaskList['view'], MessageKey> = { list: 'tasks.menu.viewList', kanban: 'tasks.menu.viewKanban', timeline: 'tasks.menu.viewTimeline' }
 const SORT_NAMES: Record<SortBy, MessageKey> = { date: 'tasks.sortBy.date', title: 'tasks.sortBy.title', priority: 'common.priority', custom: 'tasks.sortBy.custom' }
 
 /** The heading of a view: smart list name, list name or #tag. */
@@ -96,6 +99,9 @@ export function TaskListPane() {
   const canAdd = !isTrash && !isDoneView && !archived
   const showList = !view.startsWith('list:') && view !== 'inbox'
   const kanban = list?.view === 'kanban' && !archived
+  // The timeline needs room for its columns and edge handles; phones show the list with a note instead.
+  const timelineList = list?.view === 'timeline' && !archived
+  const timeline = timelineList && !phone
   const batch = isBatch(getSelection(ui))
 
   const setPrefs = (p: Partial<ViewPrefs>) => setUI((u) => ({ prefs: { ...u.prefs, [view]: { ...(u.prefs[view] ?? defaultPrefs(view)), ...p } } }))
@@ -160,13 +166,13 @@ export function TaskListPane() {
             render: (
               <div className="menu-btn-row list-view-row">
                 <span className="menu-row-label">{t('tasks.menu.view')}</span>
-                {(['list', 'kanban'] as const).map((v) => (
+                {(['list', 'kanban', 'timeline'] as const).map((v) => (
                   <button
                     key={v}
                     type="button"
                     data-view={v}
-                    title={t(v === 'list' ? 'tasks.menu.viewList' : 'tasks.menu.viewKanban')}
-                    aria-label={t(v === 'list' ? 'tasks.menu.viewList' : 'tasks.menu.viewKanban')}
+                    title={t(VIEW_NAMES[v])}
+                    aria-label={t(VIEW_NAMES[v])}
                     aria-pressed={(list.view ?? 'list') === v}
                     onClick={() => updateList(list.id, { view: v })}
                   >
@@ -255,7 +261,9 @@ export function TaskListPane() {
         </Popover>
       )}
 
-      {kanban && list ? (
+      {timeline && list ? (
+        <Timeline list={list} data={data} />
+      ) : kanban && list ? (
         <Kanban list={list} data={data} sortBy={prefs.sortBy} setCustomSort={() => setPrefs({ sortBy: 'custom' })} boardRef={exitRef} />
       ) : (
         <div
@@ -279,6 +287,12 @@ export function TaskListPane() {
                 </button>
               </div>
             )}
+            {timelineList && phone && (
+              <div className="tl-phone-note" role="note">
+                <Icon name="timeline" size={18} />
+                <span>{t('tasks.timeline.phoneNote')}</span>
+              </div>
+            )}
             {canAdd && !phone && (
               <div className="list-add">
                 <QuickAdd defaults={viewDefaults(view, data)} key={view} />
@@ -297,7 +311,7 @@ export function TaskListPane() {
           </div>
         </div>
       )}
-      {phone && canAdd && !batch && <PhoneQuickAdd defaults={kanban && list ? { listId: list.id } : viewDefaults(view, data)} />}
+      {phone && canAdd && !batch && <PhoneQuickAdd defaults={(kanban || timelineList) && list ? { listId: list.id } : viewDefaults(view, data)} />}
       {phone && batch && <BatchBar />}
       {datePop && <BatchPops pop={datePop.pop} ids={datePop.ids} data={raw} onClose={() => setDatePop(null)} />}
     </main>

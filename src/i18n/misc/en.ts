@@ -70,6 +70,7 @@ export default {
   'misc.list.view': 'View',
   'misc.list.viewList': 'List',
   'misc.list.viewKanban': 'Kanban',
+  'misc.list.viewTimeline': 'Timeline',
   'misc.list.folder': 'Folder',
   'misc.folder.new': 'New folder',
   'misc.folder.rename': 'Rename folder',

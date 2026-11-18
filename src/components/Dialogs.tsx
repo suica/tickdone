@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { LIST_COLORS, addFilter, addList, deleteFilter, deleteList, deleteTag, renameTag, updateFilter, setData, setUI, toast, uid, updateList, useData, useUI, getData, migrateData } from '../store'
-import type { AppData, FilterDate, Priority, SavedFilter, Settings } from '../types'
+import type { AppData, FilterDate, Priority, SavedFilter, Settings, TaskList } from '../types'
 import { FILTER_DATES, FILTER_ICONS, FILTER_PREFIX, filterClock, filterMatcher, conditionCount } from '../filters'
 import { PRIORITY } from '../views'
 import { isPhone, useMedia, usePhone } from '../viewport'
@@ -161,7 +161,7 @@ function ListDialog({ id }: { id?: string }) {
   const [name, setName] = useState(list?.name ?? '')
   const [color, setColor] = useState<string | undefined>(list?.color)
   const [folderId, setFolderId] = useState<string>(list?.folderId ?? '')
-  const [view, setView] = useState<'list' | 'kanban'>(list?.view ?? 'list')
+  const [view, setView] = useState<TaskList['view']>(list?.view ?? 'list')
   const trimmed = name.trim()
   const dup = data.lists.some((l) => l.name === trimmed && l.id !== id)
 
@@ -224,6 +224,9 @@ function ListDialog({ id }: { id?: string }) {
             </button>
             <button type="button" className={view === 'kanban' ? 'on' : ''} onClick={() => setView('kanban')}>
               <Icon name="kanban" size={15} /> {t('misc.list.viewKanban')}
+            </button>
+            <button type="button" className={view === 'timeline' ? 'on' : ''} onClick={() => setView('timeline')}>
+              <Icon name="timeline" size={15} /> {t('misc.list.viewTimeline')}
             </button>
           </div>
         </Field>

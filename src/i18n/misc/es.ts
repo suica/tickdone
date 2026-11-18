@@ -67,6 +67,7 @@ export default {
   'misc.list.view': 'Vista',
   'misc.list.viewList': 'Lista',
   'misc.list.viewKanban': 'Kanban',
+  'misc.list.viewTimeline': 'Cronograma',
   'misc.list.folder': 'Carpeta',
   'misc.folder.new': 'Nueva carpeta',
   'misc.folder.rename': 'Cambiar nombre de la carpeta',

@@ -67,6 +67,7 @@ export default {
   'misc.list.view': 'Ansicht',
   'misc.list.viewList': 'Liste',
   'misc.list.viewKanban': 'Kanban',
+  'misc.list.viewTimeline': 'Zeitleiste',
   'misc.list.folder': 'Ordner',
   'misc.folder.new': 'Neuer Ordner',
   'misc.folder.rename': 'Ordner umbenennen',

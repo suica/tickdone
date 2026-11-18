@@ -67,6 +67,7 @@ export default {
   'misc.list.view': '表示',
   'misc.list.viewList': 'リスト',
   'misc.list.viewKanban': 'かんばん',
+  'misc.list.viewTimeline': 'タイムライン',
   'misc.list.folder': 'フォルダ',
   'misc.folder.new': '新しいフォルダ',
   'misc.folder.rename': 'フォルダ名を変更',

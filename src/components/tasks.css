@@ -58,8 +58,17 @@
   white-space: nowrap;
 }
 .side-count {
+  min-width: 20px;
   color: var(--text-3);
   font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-align: right;
+  line-height: 1;
+}
+.side-item.active .side-count {
+  color: var(--text-2);
 }
 .dot {
   display: inline-block;
@@ -368,8 +377,9 @@
 }
 .group-count {
   color: var(--text-3);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 .group-action {
   margin-left: auto;

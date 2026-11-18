@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TickDone banner</title>
+    <!--
+      Banner template for scripts/promo/render.mjs (1280 × 640 CSS px, rendered at 2x).
+      Everything here is drawn with CSS. The only images are the app's own logo and, in screenshot mode,
+      screenshots of the app. render.mjs calls window.renderHero({ locale, mode, strings, shots }).
+    -->
+    <style>
+      :root {
+        --primary: #4772fa;
+        --p-high: #d52b24;
+        --p-med: #faa80c;
+        --p-low: #4772fa;
+        --p-none: #c3c7cf;
+        --sans: 'Inter', 'Ubuntu Sans', 'Noto Sans', 'Segoe UI', 'Helvetica Neue', Arial;
+        --cjk: 'Noto Sans CJK SC', 'PingFang SC', 'Microsoft YaHei';
+        --emoji: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji';
+      }
+      :lang(zh-TW) {
+        --cjk: 'Noto Sans CJK TC', 'PingFang TC', 'Microsoft JhengHei';
+      }
+      :lang(ja) {
+        --cjk: 'Noto Sans CJK JP', 'Hiragino Sans', 'Yu Gothic UI', Meiryo;
+      }
+      :lang(ko) {
+        --cjk: 'Noto Sans CJK KR', 'Apple SD Gothic Neo', 'Malgun Gothic';
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #0a0f2e;
+      }
+      body {
+        font-family: var(--sans), var(--cjk), var(--emoji), sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ---------- canvas and background ---------- */
+      .hero {
+        position: relative;
+        width: 1280px;
+        height: 640px;
+        overflow: hidden;
+        isolation: isolate;
+        color: #fff;
+        background: linear-gradient(135deg, #0b1033 0%, #111a4d 48%, #0c1235 100%);
+      }
+      .bg,
+      .bg > i {
+        position: absolute;
+        display: block;
+      }
+      .bg {
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+      }
+      .blob {
+        border-radius: 50%;
+        filter: blur(80px);
+      }
+      .b1 {
+        width: 640px;
+        height: 500px;
+        left: 600px;
+        top: -230px;
+        background: #4772fa;
+        opacity: 0.85;
+      }
+      .b2 {
+        width: 560px;
+        height: 460px;
+        left: 930px;
+        top: 330px;
+        background: #7b4dff;
+        opacity: 0.75;
+      }
+      .b3 {
+        width: 520px;
+        height: 400px;
+        left: -200px;
+        top: 410px;
+        background: #0ea5e9;
+        opacity: 0.42;
+      }
+      .b4 {
+        width: 420px;
+        height: 320px;
+        left: 120px;
+        top: -230px;
+        background: #e0479e;
+        opacity: 0.32;
+      }
+      .grid {
+        inset: 0;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 32px 32px;
+        background-position: -1px -1px;
+        -webkit-mask-image: radial-gradient(ellipse 55% 75% at 26% 48%, #000 25%, transparent 78%);
+        mask-image: radial-gradient(ellipse 55% 75% at 26% 48%, #000 25%, transparent 78%);
+      }
+      .glow {
+        position: absolute;
+        left: 600px;
+        top: 130px;
+        width: 640px;
+        height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(120, 150, 255, 0.55), transparent);
+        filter: blur(30px);
+        z-index: -1;
+      }
+
+      /* ---------- copy ---------- */
+      .copy {
+        position: absolute;
+        left: 64px;
+        top: 50%;
+        width: 408px;
+        transform: translateY(-50%);
+      }
+      :lang(ko) .copy {
+        word-break: keep-all;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .logo {
+        width: 60px;
+        height: 60px;
+        filter: drop-shadow(0 10px 24px rgba(71, 114, 250, 0.6));
+      }
+      .name {
+        font-size: 58px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        background: linear-gradient(180deg, #ffffff 35%, #c9d4ff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding-bottom: 4px;
+      }
+      .tagline {
+        margin: 22px 0 0;
+        font-size: var(--tag-size, 23px);
+        line-height: 1.42;
+        font-weight: 500;
+        color: rgba(232, 237, 255, 0.88);
+        text-wrap: balance;
+        white-space: pre-line;
+      }
+      .chips {
+        list-style: none;
+        margin: 24px 0 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 13px 6px 10px;
+        border-radius: 999px;
+        font-size: var(--chip-size, 14.5px);
+        font-weight: 600;
+        line-height: 1.35;
+        color: #eef2ff;
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.17);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        white-space: nowrap;
+      }
+      .chip .e {
+        font-family: var(--emoji), sans-serif;
+        font-size: 1.05em;
+      }
+      .cta {
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px 10px 16px;
+        border-radius: 12px;
+        background: #fff;
+        color: #1c2a6b;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 12px 30px rgba(71, 114, 250, 0.5);
+        white-space: nowrap;
+      }
+      .cta-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+      .cta-url {
+        color: rgba(220, 228, 255, 0.75);
+        font-size: 15px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      /* ---------- devices ---------- */
+      .browser {
+        position: absolute;
+        left: 556px;
+        top: 84px;
+        width: 672px;
+        margin: 0;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.16),
+          0 40px 90px -12px rgba(2, 6, 30, 0.7),
+          0 14px 32px rgba(2, 6, 30, 0.35);
+      }
+      .bar {
+        position: relative;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        background: linear-gradient(#f8f9fc, #eef0f6);
+        border-bottom: 1px solid #e2e5ee;
+      }
+      .dots {
+        display: flex;
+        gap: 7px;
+      }
+      .dots i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #ff6a5f;
+      }
+      .dots i:nth-child(2) {
+        background: #fdbd41;
+      }
+      .dots i:nth-child(3) {
+        background: #35cb6a;
+      }
+      .address {
+        position: absolute;
+        left: 50%;
+        top: 6px;
+        transform: translateX(-50%);
+        height: 22px;
+        padding: 0 16px 0 12px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        border: 1px solid #e2e5ee;
+        font: 500 11.5px/1 var(--sans), sans-serif;
+        color: #5a6274;
+        letter-spacing: 0.01em;
+      }
+      .address svg {
+        width: 10px;
+        height: 10px;
+      }
+      .screen {
+        position: relative;
+        overflow: hidden;
+        background: #fff;
+      }
+      .screen > img {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .browser .screen {
+        width: 672px;
+        height: 420px;
+      }
+      .phone {
+        position: absolute;
+        left: 490px;
+        top: 196px;
+        width: 186px;
+        padding: 7px;
+        border-radius: 35px;
+        background: linear-gradient(150deg, #3a405c 0%, #151a2c 45%, #0b0e1a 100%);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+          0 32px 70px -8px rgba(2, 6, 30, 0.75),
+          0 10px 24px rgba(2, 6, 30, 0.4);
+      }
+      .phone-screen {
+        position: relative;
+        border-radius: 28px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .status {
+        position: relative;
+        height: 20px;
+        background: #fff;
+      }
+      .island {
+        position: absolute;
+        left: 50%;
+        top: 5px;
+        width: 50px;
+        height: 13px;
+        margin-left: -25px;
+        border-radius: 7px;
+        background: #0b0e1a;
+      }
+      .phone .screen {
+        width: 172px;
+        height: 372px;
+      }
+      /* the home indicator sits in its own strip below the app, like a safe area */
+      .home {
+        position: relative;
+        display: block;
+        height: 13px;
+        background: #fff;
+      }
+      .home::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 4px;
+        width: 60px;
+        height: 4px;
+        margin-left: -30px;
+        border-radius: 2px;
+        background: rgba(10, 14, 26, 0.78);
+      }
+
+      /* focus card: a small floating widget with a progress ring */
+      .focus {
+        position: absolute;
+        left: 1120px;
+        top: 438px;
+        width: 112px;
+        height: 112px;
+        border-radius: 28px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(160deg, rgba(36, 46, 110, 0.92), rgba(16, 21, 58, 0.94));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.16),
+          0 24px 50px -10px rgba(2, 6, 30, 0.7),
+          0 8px 18px rgba(2, 6, 30, 0.35);
+      }
+      .focus svg {
+        position: absolute;
+        width: 86px;
+        height: 86px;
+      }
+      .focus .e {
+        font-family: var(--emoji), sans-serif;
+        font-size: 30px;
+        line-height: 1;
+      }
+
+      /* ---------- illustration mode: the app's layout drawn without text ---------- */
+      .ill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform-origin: 0 0;
+        background: #fff;
+        overflow: hidden;
+      }
+      .ill i,
+      .ill b {
+        display: block;
+        flex: none;
+      }
+      .fill {
+        flex: 1;
+      }
+      .ill .t {
+        height: 10px;
+        border-radius: 5px;
+        background: #d9dde6;
+      }
+      .ill .t.lo {
+        background: #e9ecf2;
+      }
+      .ill .t.hi {
+        background: #c4c9d5;
+      }
+      .ill .t.blue {
+        background: rgba(71, 114, 250, 0.55);
+      }
+      .ill .ic {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: #cdd2dc;
+      }
+      .ill .ic.sm {
+        width: 15px;
+        height: 15px;
+        border-radius: 4px;
+      }
+      .ill .ic.round {
+        border-radius: 50%;
+      }
+      .ill .ic.on {
+        background: var(--primary);
+      }
+      .ill .cb {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 2px solid var(--c, var(--p-none));
+        position: relative;
+      }
+      .ill .cb.done {
+        background: var(--c, #b9bfcb);
+        border-color: var(--c, #b9bfcb);
+      }
+      .ill .cb.done::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 0px;
+        width: 4px;
+        height: 8px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .ill .pill {
+        height: 18px;
+        border-radius: 9px;
+        background: color-mix(in srgb, var(--c) 18%, transparent);
+      }
+      .ill .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--c);
+      }
+      .ill .tag {
+        width: 13px;
+        height: 13px;
+        border-radius: 3px 50% 50% 50%;
+        border: 2px solid var(--c);
+        transform: rotate(-45deg);
+      }
+
+      /* desktop: rail | sidebar | list | detail, at the app's 1440 × 900 */
+      .ill-d {
+        width: 1440px;
+        height: 900px;
+        display: flex;
+      }
+      .d-rail {
+        width: 56px;
+        background: #f3f3f3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        padding: 14px 0 18px;
+      }
+      .d-rail .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6b8dff, #4772fa 60%, #5a3df0);
+        margin-bottom: 8px;
+      }
+      .d-rail .ic {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+      }
+      .d-side {
+        width: 300px;
+        background: #f9f9f9;
+        border-right: 1px solid #ececec;
+        padding: 12px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .row {
+        height: 40px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 14px;
+      }
+      .row.on {
+        background: rgba(71, 114, 250, 0.1);
+      }
+      .row.on .ic {
+        background: rgba(71, 114, 250, 0.75);
+      }
+      .row.on .t {
+        background: rgba(71, 114, 250, 0.45);
+      }
+      .row .n {
+        width: 8px;
+        height: 8px;
+        border-radius: 4px;
+        background: #d3d7df;
+        margin-left: auto;
+      }
+      .d-side .sep {
+        height: 1px;
+        background: #e8e8e8;
+        margin: 8px 12px;
+      }
+      .d-side .hd {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 34px;
+        padding: 0 16px;
+      }
+      .chev {
+        width: 7px;
+        height: 7px;
+        border: solid #b4bac6;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg) translate(-2px, -2px);
+      }
+      .d-list {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0 28px;
+        min-width: 0;
+      }
+      .d-head {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .d-head .title {
+        height: 16px;
+        border-radius: 8px;
+        background: #2f3443;
+      }
+      .dots3 {
+        display: flex;
+        gap: 4px;
+      }
+      .dots3 i {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #9aa1ae;
+      }
+      .quick {
+        height: 48px;
+        border-radius: 8px;
+        background: #f3f4f7;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 18px;
+        margin-bottom: 18px;
+      }
+      .plus {
+        width: 12px;
+        height: 12px;
+        position: relative;
+      }
+      .plus::before,
+      .plus::after {
+        content: '';
+        position: absolute;
+        background: #a8afbd;
+        border-radius: 1px;
+      }
+      .plus::before {
+        left: 5px;
+        top: 0;
+        width: 2px;
+        height: 12px;
+      }
+      .plus::after {
+        left: 0;
+        top: 5px;
+        width: 12px;
+        height: 2px;
+      }
+      .grp {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 6px;
+        border-bottom: 1px solid #efefef;
+      }
+      .grp .t {
+        background: #9ea5b3;
+        height: 9px;
+      }
+      .task {
+        height: 54px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 10px;
+        border-bottom: 1px solid #f2f2f2;
+        border-radius: 6px;
+      }
+      .task.sel {
+        background: rgba(71, 114, 250, 0.08);
+      }
+      .task .meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+      }
+      .task.done .t {
+        background: #e7e9ee;
+      }
+      .d-detail {
+        width: 450px;
+        border-left: 1px solid #ececec;
+        display: flex;
+        flex-direction: column;
+        padding: 0 30px 0;
+      }
+      .dt-top {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid #efefef;
+        margin: 0 -30px;
+        padding: 0 30px;
+      }
+      .date-chip {
+        width: 92px;
+        height: 22px;
+        border-radius: 6px;
+        background: rgba(71, 114, 250, 0.12);
+      }
+      .flag {
+        width: 14px;
+        height: 18px;
+        background: var(--p-med);
+        clip-path: polygon(0 0, 100% 0, 75% 40%, 100% 80%, 15% 80%, 15% 100%, 0 100%);
+        margin-left: auto;
+      }
+      .dt-title {
+        height: 20px !important;
+        border-radius: 10px !important;
+        background: #2f3443 !important;
+        margin: 30px 0 22px;
+      }
+      .para {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 26px;
+      }
+      .sub {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .sub .cb {
+        width: 15px;
+        height: 15px;
+      }
+      .dt-foot {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border-top: 1px solid #efefef;
+        margin: auto -30px 0;
+        padding: 0 30px;
+      }
+
+      /* phone: calendar month and the picked day's tasks, at the app's 390 × 844 */
+      .ill-p {
+        width: 390px;
+        height: 844px;
+        display: flex;
+        flex-direction: column;
+      }
+      .p-head {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 18px;
+      }
+      .p-head .title {
+        height: 16px;
+        border-radius: 8px;
+        background: #2f3443;
+      }
+      .navc {
+        width: 9px;
+        height: 9px;
+        border: solid #8f97a6;
+        border-width: 0 2px 2px 0;
+      }
+      .navc.l {
+        transform: rotate(135deg);
+      }
+      .navc.r {
+        transform: rotate(-45deg);
+      }
+      .seg {
+        margin: 0 16px 10px;
+        height: 40px;
+        border-radius: 10px;
+        background: #f1f2f6;
+        display: flex;
+        padding: 4px;
+        gap: 4px;
+      }
+      .seg b {
+        flex: 1;
+        border-radius: 7px;
+        display: grid !important;
+        place-items: center;
+      }
+      .seg b::after {
+        content: '';
+        width: 26px;
+        height: 8px;
+        border-radius: 4px;
+        background: #c9ced8;
+      }
+      .seg b.on {
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .seg b.on::after {
+        background: rgba(71, 114, 250, 0.7);
+      }
+      .wk,
+      .mgrid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        padding: 0 10px;
+      }
+      .wk {
+        height: 26px;
+        align-items: center;
+        justify-items: center;
+      }
+      .wk i {
+        width: 12px;
+        height: 7px;
+        border-radius: 4px;
+        background: #d5d9e1;
+      }
+      .mgrid {
+        row-gap: 2px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eef0f4;
+      }
+      .day {
+        height: 44px;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+      .day .num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: grid !important;
+        place-items: center;
+      }
+      .day .num::after {
+        content: '';
+        width: var(--w, 12px);
+        height: 7px;
+        border-radius: 4px;
+        background: #b9bfcb;
+      }
+      .day.muted .num::after {
+        background: #e3e6ec;
+      }
+      .day.today .num {
+        background: var(--primary);
+      }
+      .day.today .num::after {
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .day .ds {
+        display: flex !important;
+        gap: 3px;
+        height: 5px;
+      }
+      .day .ds i {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--c);
+      }
+      .p-day {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 18px;
+      }
+      .p-day .t {
+        background: #3a3f4d;
+        height: 11px;
+      }
+      .p-day .plus::before,
+      .p-day .plus::after {
+        background: var(--primary);
+      }
+      .p-task {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        padding: 12px 18px 12px 20px;
+        border-bottom: 1px solid #f1f2f5;
+        margin: 0 4px;
+      }
+      .p-task .l1,
+      .p-task .l2 {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .p-task .l2 {
+        padding-left: 30px;
+        gap: 10px;
+      }
+      .tabbar {
+        margin-top: auto;
+        height: 58px;
+        border-top: 1px solid #eceef2;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 10px;
+        background: #fbfbfc;
+      }
+      .tabbar .ic {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="hero" id="hero">
+      <div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i><i class="grid"></i></div>
+      <div class="glow"></div>
+
+      <section class="copy" id="copy">
+        <div class="brand"><img class="logo" src="../../public/favicon.svg" alt="" /><span class="name">TickDone</span></div>
+        <p class="tagline" id="tagline"></p>
+        <ul class="chips" id="chips"></ul>
+        <div class="cta">
+          <span class="cta-btn"
+            ><span id="cta"></span
+            ><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg
+          ></span>
+          <span class="cta-url">tickdone.pages.dev</span>
+        </div>
+      </section>
+
+      <figure class="browser">
+        <div class="bar">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="address"
+            ><svg viewBox="0 0 10 10" fill="none" stroke="#7a8296" stroke-width="1.3"><rect x="1.5" y="4.3" width="7" height="5" rx="1.2" fill="#7a8296" stroke="none" /><path d="M3 4.5V3.2a2 2 0 0 1 4 0v1.3" /></svg
+            >tickdone.pages.dev</span
+          >
+        </div>
+        <div class="screen" id="desktop"></div>
+      </figure>
+
+      <figure class="phone">
+        <div class="phone-screen">
+          <div class="status"><i class="island"></i></div>
+          <div class="screen" id="phone"></div>
+          <i class="home"></i>
+        </div>
+      </figure>
+
+      <div class="focus">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fa3ff" /><stop offset="1" stop-color="#c08bff" /></linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="8" />
+          <circle cx="50" cy="50" r="42" fill="none" stroke="url(#ring)" stroke-width="8" stroke-linecap="round" stroke-dasharray="185 264" transform="rotate(-90 50 50)" />
+        </svg>
+        <span class="e">🍅</span>
+      </div>
+    </main>
+
+    <template id="ill-desktop">
+      <div class="ill ill-d">
+        <div class="d-rail">
+          <i class="avatar"></i>
+          <i class="ic on"></i><i class="ic"></i><i class="ic"></i><i class="ic"></i><i class="ic"></i><i class="ic"></i>
+          <span class="fill"></span>
+          <i class="ic round"></i>
+        </div>
+        <div class="d-side">
+          <div class="row on"><i class="ic sm"></i><b class="t" style="width: 58px"></b><i class="n"></i></div>
+          <div class="row"><i class="ic sm"></i><b class="t" style="width: 72px"></b><i class="n"></i></div>
+          <div class="row"><i class="ic sm"></i><b class="t" style="width: 96px"></b><i class="n"></i></div>
+          <div class="row"><i class="ic sm"></i><b class="t" style="width: 64px"></b><i class="n"></i></div>
+          <i class="sep"></i>
+          <div class="hd"><i class="chev"></i><b class="t lo" style="width: 44px"></b></div>
+          <div class="row"><i class="dot" style="--c: #4ca1ff"></i><b class="t" style="width: 54px"></b><i class="n"></i></div>
+          <div class="row"><i class="dot" style="--c: #35d870"></i><b class="t" style="width: 70px"></b><i class="n"></i></div>
+          <div class="row"><i class="dot" style="--c: #b37feb"></i><b class="t" style="width: 88px"></b><i class="n"></i></div>
+          <div class="hd"><i class="chev"></i><b class="t lo" style="width: 36px"></b></div>
+          <div class="row"><i class="tag" style="--c: #ff6161"></i><b class="t" style="width: 50px"></b><i class="n"></i></div>
+          <div class="row"><i class="tag" style="--c: #6e75f4"></i><b class="t" style="width: 66px"></b><i class="n"></i></div>
+          <i class="sep"></i>
+          <div class="row"><i class="ic sm round"></i><b class="t lo" style="width: 70px"></b></div>
+          <div class="row"><i class="ic sm round"></i><b class="t lo" style="width: 58px"></b></div>
+          <div class="row"><i class="ic sm"></i><b class="t lo" style="width: 62px"></b></div>
+        </div>
+        <div class="d-list">
+          <div class="d-head"><i class="ic sm"></i><b class="title" style="width: 118px"></b><span class="fill"></span><span class="dots3"><i></i><i></i><i></i></span></div>
+          <div class="quick"><i class="plus"></i><b class="t lo" style="width: 280px"></b></div>
+          <div class="grp"><i class="chev"></i><b class="t" style="width: 48px"></b></div>
+          <div class="task">
+            <i class="cb" style="--c: var(--p-high)"></i><b class="t hi" style="width: 300px"></b>
+            <span class="meta"><b class="pill" style="--c: #ff6161; width: 46px"></b><b class="t lo" style="width: 44px"></b><b class="t blue" style="width: 38px"></b></span>
+          </div>
+          <div class="task sel">
+            <i class="cb" style="--c: var(--p-med)"></i><b class="t hi" style="width: 210px"></b>
+            <span class="meta"><b class="t lo" style="width: 26px"></b><i class="dot" style="--c: #4ca1ff; width: 7px; height: 7px"></i><b class="t lo" style="width: 38px"></b><b class="t blue" style="width: 64px"></b></span>
+          </div>
+          <div class="task">
+            <i class="cb"></i><b class="t hi" style="width: 170px"></b>
+            <span class="meta"><b class="t lo" style="width: 44px"></b><b class="t blue" style="width: 38px"></b></span>
+          </div>
+          <div class="grp"><i class="chev"></i><b class="t" style="width: 64px"></b></div>
+          <div class="task">
+            <i class="cb" style="--c: var(--p-low)"></i><b class="t hi" style="width: 240px"></b>
+            <span class="meta"><b class="pill" style="--c: #6e75f4; width: 40px"></b><i class="dot" style="--c: #35d870; width: 7px; height: 7px"></i><b class="t lo" style="width: 38px"></b><b class="t lo" style="width: 40px"></b></span>
+          </div>
+          <div class="task">
+            <i class="cb"></i><b class="t hi" style="width: 120px"></b>
+            <span class="meta"><i class="dot" style="--c: #35d870; width: 7px; height: 7px"></i><b class="t lo" style="width: 38px"></b></span>
+          </div>
+          <div class="task done">
+            <i class="cb done"></i><b class="t" style="width: 190px"></b>
+            <span class="meta"><b class="t lo" style="width: 40px"></b></span>
+          </div>
+          <div class="grp"><i class="chev"></i><b class="t" style="width: 40px"></b></div>
+          <div class="task">
+            <i class="cb" style="--c: var(--p-med)"></i><b class="t hi" style="width: 270px"></b>
+            <span class="meta"><b class="pill" style="--c: #35d870; width: 52px"></b><b class="t lo" style="width: 44px"></b><b class="t lo" style="width: 40px"></b></span>
+          </div>
+          <div class="task">
+            <i class="cb"></i><b class="t hi" style="width: 150px"></b>
+            <span class="meta"><i class="dot" style="--c: #b37feb; width: 7px; height: 7px"></i><b class="t lo" style="width: 38px"></b><b class="t lo" style="width: 40px"></b></span>
+          </div>
+        </div>
+        <div class="d-detail">
+          <div class="dt-top"><i class="cb" style="--c: var(--p-med)"></i><b class="date-chip"></b><i class="flag"></i></div>
+          <b class="t dt-title" style="width: 250px"></b>
+          <div class="para"><b class="t lo" style="width: 360px"></b><b class="t lo" style="width: 330px"></b><b class="t lo" style="width: 200px"></b></div>
+          <div class="sub"><i class="cb done" style="--c: var(--primary)"></i><b class="t lo" style="width: 150px"></b></div>
+          <div class="sub"><i class="cb"></i><b class="t" style="width: 170px"></b></div>
+          <div class="sub"><i class="cb"></i><b class="t" style="width: 120px"></b></div>
+          <div class="sub"><i class="plus"></i><b class="t lo" style="width: 90px"></b></div>
+          <div class="dt-foot"><i class="ic sm"></i><b class="t lo" style="width: 54px"></b><span class="fill"></span><i class="ic sm"></i><i class="ic sm"></i><span class="dots3"><i></i><i></i><i></i></span></div>
+        </div>
+      </div>
+    </template>
+
+    <template id="ill-phone">
+      <div class="ill ill-p">
+        <div class="p-head"><b class="title" style="width: 104px"></b><span class="fill"></span><i class="navc l"></i><b class="t blue" style="width: 30px"></b><i class="navc r"></i></div>
+        <div class="seg"><b class="on"></b><b></b><b></b><b></b></div>
+        <div class="wk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="mgrid" id="mgrid"></div>
+        <div class="p-day"><b class="t" style="width: 112px"></b><b class="t lo" style="width: 14px"></b><span class="fill"></span><i class="plus"></i></div>
+        <div class="p-task">
+          <div class="l1"><i class="cb" style="--c: var(--p-high)"></i><b class="t hi" style="width: 236px"></b></div>
+          <div class="l2"><b class="pill" style="--c: #ff6161; width: 34px; height: 15px"></b><b class="t lo" style="width: 40px; height: 8px"></b><b class="t blue" style="width: 30px; height: 8px"></b></div>
+        </div>
+        <div class="p-task">
+          <div class="l1"><i class="cb"></i><b class="t hi" style="width: 150px"></b></div>
+          <div class="l2"><b class="t lo" style="width: 40px; height: 8px"></b><b class="t blue" style="width: 30px; height: 8px"></b></div>
+        </div>
+        <div class="p-task">
+          <div class="l1"><i class="cb" style="--c: var(--p-med)"></i><b class="t hi" style="width: 190px"></b></div>
+          <div class="l2"><i class="dot" style="--c: #4ca1ff; width: 7px; height: 7px"></i><b class="t lo" style="width: 34px; height: 8px"></b><b class="t blue" style="width: 46px; height: 8px"></b></div>
+        </div>
+        <div class="tabbar"><i class="ic"></i><i class="ic on"></i><i class="ic"></i><i class="ic"></i><i class="ic"></i></div>
+      </div>
+    </template>
+
+    <script>
+      // Days of the illustrated month: 6 weeks, today on the 3rd row, a few days with tasks (dots in list colors).
+      function fillMonth(grid) {
+        const dots = { 9: ['#4ca1ff'], 15: ['#4772fa', '#35d870'], 16: ['#4772fa', '#4772fa'], 17: ['#4ca1ff'], 19: ['#35d870'], 23: ['#ff6161'], 26: ['#4ca1ff'], 30: ['#b37feb'] }
+        for (let i = 0; i < 42; i++) {
+          const day = document.createElement('span')
+          const date = i < 3 ? 28 + i : i > 32 ? i - 32 : i - 2
+          day.className = 'day' + (i < 3 || i > 32 ? ' muted' : '') + (i === 16 ? ' today' : '')
+          day.style.setProperty('--w', date < 10 ? '7px' : '13px')
+          day.innerHTML = '<i class="num"></i><i class="ds">' + (dots[i] || []).map((c) => `<i style="--c:${c}"></i>`).join('') + '</i>'
+          grid.appendChild(day)
+        }
+      }
+
+      // Puts a screenshot or the illustration into a device screen, scaled from the app's own viewport size.
+      function fillScreen(el, src, template, logicalWidth) {
+        el.textContent = ''
+        if (src) {
+          const img = new Image()
+          img.src = src
+          img.alt = ''
+          el.appendChild(img)
+          return img.decode()
+        }
+        const node = document.getElementById(template).content.firstElementChild.cloneNode(true)
+        node.style.transform = `scale(${el.clientWidth / logicalWidth})`
+        el.appendChild(node)
+        const grid = node.querySelector('#mgrid')
+        if (grid) fillMonth(grid)
+      }
+
+      // Shrinks the tagline and chips until the copy fits the banner (long languages wrap to more lines).
+      function fit() {
+        const copy = document.getElementById('copy')
+        const root = document.documentElement
+        let tag = 23
+        let chip = 14.5
+        const right = copy.getBoundingClientRect().right
+        const tooTall = () => copy.offsetHeight > 560 || [...copy.querySelectorAll('.chip, .cta')].some((c) => c.getBoundingClientRect().right > right + 1)
+        while (tooTall() && tag > 17) {
+          tag -= 0.5
+          chip = Math.max(12.5, chip - 0.25)
+          root.style.setProperty('--tag-size', tag + 'px')
+          root.style.setProperty('--chip-size', chip + 'px')
+        }
+      }
+
+      window.renderHero = async ({ locale, mode, strings, shots }) => {
+        document.documentElement.lang = locale
+        document.getElementById('tagline').textContent = strings.tagline
+        document.getElementById('cta').textContent = strings.cta
+        const chips = document.getElementById('chips')
+        chips.textContent = ''
+        for (const [emoji, label] of strings.chips) {
+          const li = document.createElement('li')
+          li.className = 'chip'
+          li.innerHTML = '<span class="e"></span><span></span>'
+          li.firstChild.textContent = emoji
+          li.lastChild.textContent = label
+          chips.appendChild(li)
+        }
+        const shot = mode === 'screenshot'
+        await Promise.all([
+          fillScreen(document.getElementById('desktop'), shot && shots.desktop, 'ill-desktop', 1440),
+          fillScreen(document.getElementById('phone'), shot && shots.phone, 'ill-phone', 390),
+        ])
+        await document.fonts.ready
+        await Promise.all([...document.images].map((i) => (i.complete ? null : i.decode())))
+        fit()
+      }
+    </script>
+  </body>
+</html>

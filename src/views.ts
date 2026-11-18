@@ -27,11 +27,17 @@ export const PRIORITY: { v: Priority; name: MessageKey; color: string }[] = [
 ]
 export const priorityColor = (p: Priority) => PRIORITY.find((x) => x.v === p)!.color
 
+// Memoised by the arrays they read: the data is immutable, so a result stays right until the array changes.
+const archivedCache = new WeakMap<object, Set<string>>()
 /** The ids of archived lists. */
-export const archivedListIds = (d: Pick<AppData, 'lists'>): Set<string> => new Set(d.lists.filter((l) => l.archived).map((l) => l.id))
+export function archivedListIds(d: Pick<AppData, 'lists'>): Set<string> {
+  let s = archivedCache.get(d.lists)
+  if (!s) archivedCache.set(d.lists, (s = new Set(d.lists.filter((l) => l.archived).map((l) => l.id))))
+  return s
+}
 
 /** Whether a task belongs to an archived list. */
-export const inArchivedList = (t: Pick<Task, 'listId'>, d: Pick<AppData, 'lists'>) => d.lists.some((l) => l.archived && l.id === t.listId)
+export const inArchivedList = (t: Pick<Task, 'listId'>, d: Pick<AppData, 'lists'>) => archivedListIds(d).has(t.listId)
 
 /** A task that cannot be changed where it is shown: in the trash, or in an archived list. */
 export const isLocked = (t: Pick<Task, 'listId' | 'deleted'>, d: Pick<AppData, 'lists'>) => !!t.deleted || inArchivedList(t, d)
@@ -40,9 +46,48 @@ export const isLocked = (t: Pick<Task, 'listId' | 'deleted'>, d: Pick<AppData, '
  * The tasks views outside a list work with: not deleted and not in an archived list
  * (smart lists, tags, filters, the calendar, the matrix and the counts).
  */
+let activeMemo: { tasks: Task[]; lists: AppData['lists']; out: Task[] } | undefined
 export function activeTasks(d: Pick<AppData, 'tasks' | 'lists'>): Task[] {
+  if (activeMemo?.tasks === d.tasks && activeMemo.lists === d.lists) return activeMemo.out
   const archived = archivedListIds(d)
-  return d.tasks.filter((t) => !t.deleted && !archived.has(t.listId))
+  const out = d.tasks.filter((t) => !t.deleted && !archived.has(t.listId))
+  activeMemo = { tasks: d.tasks, lists: d.lists, out }
+  return out
+}
+
+/**
+ * The number of open tasks in each of `views`, as `tasksForView(view, d).open.length` would count them, in one
+ * pass over the tasks (the sidebar shows dozens of counts and updates them on every change).
+ */
+export function openCounts(views: string[], d: AppData): Record<string, number> {
+  const c: Record<string, number> = {}
+  for (const v of views) c[v] = 0
+  const today = todayStr()
+  const week = fmt(addDays(new Date(), 6))
+  const tomorrow = fmt(addDays(new Date(), 1))
+  const archived = archivedListIds(d)
+  const bump = (v: string) => {
+    if (v in c) c[v]++
+  }
+  const filters = views.filter((v) => v.startsWith(FILTER_PREFIX)).flatMap((v) => {
+    const f = filterOf(v, d)
+    return f ? [[v, filterMatcher(f, filterClock(new Date(), d.settings?.weekStartsOn ?? 1))] as const] : []
+  })
+  for (const t of d.tasks) {
+    if (t.deleted || t.status !== 0) continue
+    // a list's own view counts its tasks even when the list is archived
+    bump(t.listId === 'inbox' ? 'inbox' : 'list:' + t.listId)
+    if (archived.has(t.listId)) continue
+    if (t.dueDate) {
+      if (t.dueDate <= today) bump('today')
+      if (t.dueDate === tomorrow) bump('tomorrow')
+      if (t.dueDate <= week) bump('week')
+    }
+    bump('all')
+    for (const tag of new Set(t.tags)) bump('tag:' + tag)
+    for (const [v, match] of filters) if (match(t)) c[v]++
+  }
+  return c
 }
 
 /** Lists in the sidebar's lists section and in "move to" menus: the ones not archived. */
@@ -123,16 +168,20 @@ export function tasksForView(view: string, d: AppData): { open: Task[]; done: Ta
 
 export function sortTasks(tasks: Task[], sortBy: ViewPrefs['sortBy']): Task[] {
   const arr = [...tasks]
-  const dateKey = (t: Task) => (t.dueDate ? t.dueDate + (t.dueTime ?? '99:99') : '9999')
+  // the date keys are built once per task, not once per comparison
+  const keys = new Map<Task, string>()
+  if (sortBy === 'date' || sortBy === 'priority') for (const t of arr) keys.set(t, t.dueDate ? t.dueDate + (t.dueTime ?? '99:99') : '9999')
+  const dateKey = (t: Task) => keys.get(t)!
+  const cmp = (x: string, y: string) => (x < y ? -1 : x > y ? 1 : 0)
   arr.sort((a, b) => {
     if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
     switch (sortBy) {
       case 'title':
         return a.title.localeCompare(b.title, getLocale())
       case 'priority':
-        return b.priority - a.priority || dateKey(a).localeCompare(dateKey(b)) || a.order - b.order
+        return b.priority - a.priority || cmp(dateKey(a), dateKey(b)) || a.order - b.order
       case 'date':
-        return dateKey(a).localeCompare(dateKey(b)) || b.priority - a.priority || a.order - b.order
+        return cmp(dateKey(a), dateKey(b)) || b.priority - a.priority || a.order - b.order
       default:
         return a.order - b.order
     }
@@ -160,10 +209,14 @@ export const PINNED_GROUP = 'pinned'
 
 export function groupTasks(tasks: Task[], groupBy: GroupBy, d: AppData, view: string): Group[] {
   const map = new Map<string, Group>()
-  const push = (key: string, name: string, t: Task, patch?: Partial<Task>, overdue?: boolean) => {
-    if (!map.has(key)) map.set(key, { key, name, tasks: [], patch, overdue })
-    map.get(key)!.tasks.push(t)
+  // a group's name and patch are worked out once, when its first task arrives (not once per task)
+  const push = (key: string, name: string | (() => string), t: Task, patch?: Partial<Task> | (() => Partial<Task>), overdue?: boolean) => {
+    let g = map.get(key)
+    if (!g) map.set(key, (g = { key, name: typeof name === 'function' ? name() : name, tasks: [], patch: typeof patch === 'function' ? patch() : patch, overdue }))
+    g.tasks.push(t)
   }
+  const listIndex = groupBy === 'list' ? new Map(d.lists.map((l, i) => [l.id, i])) : undefined
+  const viewList = groupBy === 'section' ? d.lists.find((x) => 'list:' + x.id === view) : undefined
   const pinGroup = pinGrouped(groupBy, view) && tasks.some((t) => t.pinned)
   if (groupBy === 'none' && !pinGroup) return [{ key: 'all', name: '', tasks }]
   for (const t of tasks) {
@@ -173,33 +226,32 @@ export function groupTasks(tasks: Task[], groupBy: GroupBy, d: AppData, view: st
     }
     if (groupBy === 'none') push('all', '', t, {})
     else if (groupBy === 'date') {
-      if (!t.dueDate) push('9-none', tr('common.noDate'), t, { dueDate: undefined, dueTime: undefined })
+      if (!t.dueDate) push('9-none', () => tr('common.noDate'), t, { dueDate: undefined, dueTime: undefined })
       else {
         const diff = dayDiff(t.dueDate)
-        if (diff < 0) push('0-overdue', tr('common.overdue'), t, undefined, true)
-        else if (diff === 0) push('1-today', tr('common.today'), t, { dueDate: todayStr() })
-        else if (diff === 1) push('2-tomorrow', tr('common.tomorrow'), t, { dueDate: fmt(addDays(new Date(), 1)) })
+        if (diff < 0) push('0-overdue', () => tr('common.overdue'), t, undefined, true)
+        else if (diff === 0) push('1-today', () => tr('common.today'), t, () => ({ dueDate: todayStr() }))
+        else if (diff === 1) push('2-tomorrow', () => tr('common.tomorrow'), t, () => ({ dueDate: fmt(addDays(new Date(), 1)) }))
         else if (diff < 7 && view === 'week') {
-          const dd = addDays(new Date(), diff)
-          push('3-' + diff, fmtMonthDay(dd) + ' ' + fmtWeekday(dd), t, { dueDate: fmt(dd) })
-        } else if (diff < 7) push('3-week', tr('common.list.next7Days'), t)
-        else push('4-later', tr('common.later'), t)
+          const dd = () => addDays(new Date(), diff)
+          push('3-' + diff, () => fmtMonthDay(dd()) + ' ' + fmtWeekday(dd()), t, () => ({ dueDate: fmt(dd()) }))
+        } else if (diff < 7) push('3-week', () => tr('common.list.next7Days'), t)
+        else push('4-later', () => tr('common.later'), t)
       }
     } else if (groupBy === 'priority') {
-      const name = PRIORITY.find((p) => p.v === t.priority)!.name
-      push(String(9 - t.priority), tr(name), t, { priority: t.priority })
+      push(String(9 - t.priority), () => tr(PRIORITY.find((p) => p.v === t.priority)!.name), t, { priority: t.priority })
     } else if (groupBy === 'list') {
-      const l = d.lists.find((x) => x.id === t.listId)
-      const idx = l ? d.lists.indexOf(l) + 1 : 0
-      push(String(idx).padStart(4, '0'), l?.name ?? tr('common.list.inbox'), t, { listId: t.listId })
+      const i = listIndex!.get(t.listId)
+      const l = i === undefined ? undefined : d.lists[i]
+      push(String(i === undefined ? 0 : i + 1).padStart(4, '0'), () => l?.name ?? tr('common.list.inbox'), t, { listId: t.listId })
     } else if (groupBy === 'tag') {
       const tag = t.tags[0]
-      push(tag ? '0' + tag : '9', tag ? '#' + tag : tr('tasks.group.noTag'), t)
+      push(tag ? '0' + tag : '9', () => (tag ? '#' + tag : tr('tasks.group.noTag')), t)
     } else if (groupBy === 'section') {
-      const l = d.lists.find((x) => 'list:' + x.id === view)
-      const s = l?.sections.find((x) => x.id === t.sectionId)
-      const idx = s ? l!.sections.indexOf(s) + 1 : 0
-      push(String(idx).padStart(4, '0'), s?.name ?? '', t, { sectionId: s?.id })
+      const l = viewList
+      const i = t.sectionId && l ? l.sections.findIndex((x) => x.id === t.sectionId) : -1
+      const s = i >= 0 ? l!.sections[i] : undefined
+      push(String(i + 1).padStart(4, '0'), s?.name ?? '', t, { sectionId: s?.id })
     }
   }
   // List sections: include the empty ones too

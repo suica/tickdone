@@ -11,6 +11,7 @@ import { startSelecting, visibleOrder } from './batchActions'
 import type { AppData, GroupBy, SortBy, Task } from '../types'
 import { hideLine, highlight, hitAt, pressToDrag, showLine, type DragState } from './dnd'
 import { flip, measure, quietExits } from './taskMotion'
+import { pinRows } from './listWindow'
 import { descendantIds, project, type Projection } from './taskTree'
 
 // Drag controllers for tasks: list rows (reorder, regroup, nest), kanban cards and columns, and dropping a task on
@@ -270,11 +271,14 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
       source: node,
       ghostOf: row,
       onStart: (s) => {
+        // the dragged rows stay in the document while the list scrolls under the pointer (see listWindow)
+        pinRows(selGroup ?? [task.id])
         if (!selGroup) return
         countBadge(s.ghost, selGroup.length)
         for (const x of others) x.classList.add('dnd-source')
       },
       onEnd: () => {
+        pinRows([])
         for (const x of others) x.classList.remove('dnd-source')
       },
       onMove: (s) => {

@@ -1,5 +1,5 @@
 import { differenceInCalendarDays, format, parseISO } from 'date-fns'
-import { t as tr } from './i18n'
+import { getLocale, t as tr } from './i18n'
 import { fmtFullDate, fmtMonthDay, fmtTime, fmtWeekday } from './i18n/format'
 import { nextMatch } from './repeat'
 import type { RepeatRule, Task } from './types'
@@ -7,7 +7,30 @@ import type { RepeatRule, Task } from './types'
 export const fmt = (d: Date) => format(d, 'yyyy-MM-dd')
 export const todayStr = () => fmt(new Date())
 export const parse = (s: string) => parseISO(s)
-export const dayDiff = (s: string) => differenceInCalendarDays(parseISO(s), new Date())
+// Day differences and row date labels are asked for once per task row and per grouping; they are kept for the
+// day (and the language) they were worked out for.
+let cacheDay = -1
+let cacheLocale = ''
+const diffCache = new Map<string, number>()
+const labelCache = new Map<string, string>()
+function freshCaches(now: Date) {
+  const day = now.getFullYear() * 10000 + now.getMonth() * 100 + now.getDate()
+  const locale = getLocale()
+  if (day === cacheDay && locale === cacheLocale) return
+  cacheDay = day
+  cacheLocale = locale
+  diffCache.clear()
+  labelCache.clear()
+}
+
+/** Calendar days from today to `s` (yyyy-MM-dd): 0 today, 1 tomorrow, -1 yesterday. */
+export function dayDiff(s: string): number {
+  const now = new Date()
+  freshCaches(now)
+  let v = diffCache.get(s)
+  if (v === undefined) diffCache.set(s, (v = differenceInCalendarDays(parseISO(s), now)))
+  return v
+}
 
 /** The short weekday name in the current language ("Wed", "Mi.", "ср"). */
 export const weekdayName = (d: Date) => fmtWeekday(d)
@@ -15,6 +38,15 @@ export const weekdayName = (d: Date) => fmtWeekday(d)
 /** The date text on the right of a task row: Today / Tomorrow / weekday / month and day, plus the time. */
 export function dueLabel(t: Pick<Task, 'dueDate' | 'dueTime'>): string {
   if (!t.dueDate) return ''
+  freshCaches(new Date())
+  const key = t.dueDate + ' ' + (t.dueTime ?? '')
+  let label = labelCache.get(key)
+  if (label === undefined) labelCache.set(key, (label = makeDueLabel(t.dueDate, t.dueTime)))
+  return label
+}
+
+function makeDueLabel(dueDate: string, dueTime: string | undefined): string {
+  const t = { dueDate, dueTime }
   const d = parseISO(t.dueDate)
   const diff = dayDiff(t.dueDate)
   let s: string

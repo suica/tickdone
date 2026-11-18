@@ -55,6 +55,9 @@ export function flip(root: ParentNode | null | undefined, before: Rects, attr = 
 }
 
 // ---------------- collapse / expand ----------------
+/** Elements whose height is being animated (their measured height is not their real one yet). */
+export const resizing = new WeakSet<Element>()
+
 /** Shrink an element to nothing (height + fade). The end state is held until the returned animation is cancelled. */
 export function collapseEl(el: HTMLElement, ms = dur('--dur')): Animation | null {
   if (!ms || !el.isConnected) return null
@@ -83,7 +86,11 @@ export function expandEl(el: HTMLElement, ms = dur('--dur')) {
   const ease = easing('--ease-out')
   const a = el.animate([{ height: '0px', minHeight: '0px', opacity: 0 }, { height: h + 'px', minHeight: '0px', opacity: 1 }], { duration: ms, easing: ease })
   ;(el.firstElementChild as HTMLElement | null)?.animate([{ transform: 'translateY(-70%)' }, { transform: 'translateY(0)' }], { duration: ms, easing: ease })
-  settle(a).then(() => (el.style.overflow = overflow))
+  resizing.add(el)
+  settle(a).then(() => {
+    el.style.overflow = overflow
+    resizing.delete(el)
+  })
 }
 
 // ---------------- new rows ----------------
@@ -327,6 +334,8 @@ const lingerSubscribe = (f: () => void) => {
   return () => lingerSubs.delete(f)
 }
 export const useLinger = () => useSyncExternalStore(lingerSubscribe, () => lingering, () => lingering)
+/** One task's completion hold: a row renders again only when its own task starts or ends one. */
+export const useLingerOf = (id: string) => useSyncExternalStore(lingerSubscribe, () => lingering.get(id), () => lingering.get(id))
 
 /** The data as the task lists should draw it: tasks still animating their completion keep their old state. */
 export function withLinger(d: AppData, l: ReadonlyMap<string, Linger>): AppData {

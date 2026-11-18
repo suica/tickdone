@@ -69,6 +69,7 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
 - ⏰ **提醒**：到了任务的提醒时间，TickDone 会弹出提醒卡片，可以完成、稍后提醒（5 分钟、15 分钟、1 小时、明天）或打开任务；允许通知后还会弹出系统通知。TickDone 没有服务器，所以提醒只在它于标签页中打开、或已安装并正在运行时触发；关闭期间到时的提醒，会在下次打开时显示。
 - 📲 **安装为应用**：在「设置 → 关于」中把 TickDone 添加到主屏幕或程序坞，首次访问后即可离线打开。有新版本时，会弹出提示让你重新加载。
 - 💾 **备份与恢复**：把全部数据导出为 JSON 文件，随时再导入。
+- 🚀 **上千条任务也流畅**：长列表和搜索结果只绘制屏幕上的行，5,000 条任务的列表滚动、切换和响应都和短列表一样快，拖拽、键盘、多选和完成动画照常可用。修改会在后台保存。
 
 ## 📸 截图
 
@@ -171,7 +172,7 @@ npm run dev        # http://localhost:5173
 - [ ] 更多重复规则 ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] 归档清单 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 无障碍 ([#25](https://github.com/suica/tickdone/issues/25))
-- [ ] 上千个任务依然流畅 ([#26](https://github.com/suica/tickdone/issues/26))
+- [x] 上千个任务依然流畅 ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] 主题和强调色 ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] 日历：安排无日期的任务、日程视图 ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] 订阅日历 ([#51](https://github.com/suica/tickdone/issues/51))

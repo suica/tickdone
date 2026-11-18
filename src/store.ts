@@ -5,6 +5,7 @@ import { advance, migrateTask } from './repeat'
 import { t } from './i18n'
 import { EMPTY_SELECTION, type Selection } from './selection'
 import type { AppData, Habit, SavedFilter, Task, TaskList, ViewPrefs } from './types'
+import { bigData } from './dev/seed'
 
 const KEY = 'tickdone:data:v1'
 const UI_KEY = 'tickdone:ui:v1'
@@ -90,7 +91,18 @@ export function migrateData(d: AppData): AppData {
   return changed ? { ...d, tasks } : d
 }
 
+/** Development only: `?seed=5000` starts with that many generated tasks (see dev/seed.ts), to try the app at scale. */
+function devSeed(): AppData | undefined {
+  if (!import.meta.env.DEV || typeof location === 'undefined') return undefined
+  const n = Number(new URLSearchParams(location.search).get('seed'))
+  if (!(n > 0)) return undefined
+  history.replaceState(null, '', location.pathname + location.hash)
+  return bigData({ tasks: n })
+}
+
 function load(): AppData {
+  const dev = devSeed()
+  if (dev) return dev
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) return migrateData(JSON.parse(raw) as AppData)
@@ -106,23 +118,39 @@ const subscribe = (f: () => void) => {
   subs.add(f)
   return () => subs.delete(f)
 }
+// Saves are throttled: the first change schedules one write a moment later and the changes after it join that
+// write, so typing or dragging writes at most a few times a second. The write (JSON of every task) runs when the
+// browser is idle, outside the frame that handled the input, and is skipped when nothing changed.
+const SAVE_AFTER = 150
+const SAVE_IDLE = 100
 let saveTimer: number | undefined
+let idleId: number | undefined
+let saved: AppData | undefined
+const idle: (f: () => void, o: { timeout: number }) => number = (window.requestIdleCallback as typeof window.requestIdleCallback | undefined)?.bind(window) ?? ((f) => window.setTimeout(f, 0))
+const cancelIdle: (id: number) => void = (window.cancelIdleCallback as typeof window.cancelIdleCallback | undefined)?.bind(window) ?? ((id) => clearTimeout(id))
 function save() {
   saveTimer = undefined
+  idleId = undefined
+  if (saved === data) return
   try {
     localStorage.setItem(KEY, JSON.stringify(data))
+    saved = data
   } catch {
     /* ignore */
   }
 }
 function persist() {
-  clearTimeout(saveTimer)
-  saveTimer = window.setTimeout(save, 150)
+  if (saveTimer !== undefined || idleId !== undefined) return
+  saveTimer = window.setTimeout(() => {
+    saveTimer = undefined
+    idleId = idle(save, { timeout: SAVE_IDLE })
+  }, SAVE_AFTER)
 }
 /** Writes pending changes right away when the page is hidden, reloaded or closed. */
 function flush() {
-  if (saveTimer === undefined) return
+  if (saveTimer === undefined && idleId === undefined) return
   clearTimeout(saveTimer)
+  if (idleId !== undefined) cancelIdle(idleId)
   save()
 }
 window.addEventListener('pagehide', flush)
@@ -137,6 +165,11 @@ export function setData(fn: (d: AppData) => AppData) {
   subs.forEach((f) => f())
 }
 export const useData = () => useSyncExternalStore(subscribe, getData)
+/**
+ * A part of the data: the component renders again only when `select` returns something else (compared with
+ * Object.is), so return a value or a part of the data as it is, not a new object.
+ */
+export const useDataSel = <T,>(select: (d: AppData) => T) => useSyncExternalStore(subscribe, () => select(data))
 /** Calls `f` after every data change. */
 export const subscribeData = subscribe
 
@@ -216,6 +249,8 @@ export function setUI(p: Partial<UIState> | ((u: UIState) => Partial<UIState>)) 
   uiSubs.forEach((f) => f())
 }
 export const useUI = () => useSyncExternalStore(uiSubscribe, getUI)
+/** A part of the UI state; see useDataSel. */
+export const useUISel = <T,>(select: (u: UIState) => T) => useSyncExternalStore(uiSubscribe, () => select(ui))
 
 // ---------------- Selection ----------------
 export const getSelection = (u: UIState = ui): Selection => ({ ids: u.selectedIds, cursor: u.selectedTaskId, anchor: u.selectAnchor, mode: u.selectMode })
@@ -318,10 +353,25 @@ export function toggleTask(id: string) {
     updateTask(id, { status: 2, completedAt: Date.now(), ...(step ? { repeat: step.repeat } : {}) })
     text = t('core.toast.completed', { title: task.title || t('common.untitled') })
   }
-  // The first ding creates the AudioContext, which can take seconds on a busy machine; start the
-  // undo toast's countdown only after that.
-  playDing()
   toast(text, snap)
+  dingAfterPaint()
+}
+
+/**
+ * The completion sound, after the frame that shows the change: the first ding creates the AudioContext, which can
+ * take a moment (seconds on a busy machine). The undo toast's countdown starts again after it.
+ */
+export function dingAfterPaint() {
+  const later = (f: () => void) => (typeof requestAnimationFrame === 'function' ? requestAnimationFrame(() => setTimeout(f, 0)) : setTimeout(f, 0))
+  later(() => {
+    playDing()
+    const shown = ui.toast
+    if (!shown) return
+    clearTimeout(toastTimer)
+    toastTimer = window.setTimeout(() => {
+      if (ui.toast === shown) setUI({ toast: undefined })
+    }, 4000)
+  })
 }
 
 /** Whether a task repeats and has an occurrence after the current one, so it can be skipped. */

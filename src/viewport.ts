@@ -10,12 +10,19 @@ export const LARGE = '(min-width: 1920px)'
 
 type Subscribe = (cb: () => void) => () => void
 const subscribers = new Map<string, Subscribe>()
+// One MediaQueryList per query: every task row asks, and creating one is not free.
+const lists = new Map<string, MediaQueryList>()
+function mql(query: string): MediaQueryList {
+  let m = lists.get(query)
+  if (!m) lists.set(query, (m = window.matchMedia(query)))
+  return m
+}
 
 function subscriber(query: string): Subscribe {
   let s = subscribers.get(query)
   if (!s) {
     s = (cb) => {
-      const m = window.matchMedia(query)
+      const m = mql(query)
       m.addEventListener('change', cb)
       return () => m.removeEventListener('change', cb)
     }
@@ -25,7 +32,7 @@ function subscriber(query: string): Subscribe {
 }
 
 export function useMedia(query: string): boolean {
-  return useSyncExternalStore(subscriber(query), () => window.matchMedia(query).matches, () => false)
+  return useSyncExternalStore(subscriber(query), () => mql(query).matches, () => false)
 }
 
 export const usePhone = () => useMedia(PHONE)

@@ -3,7 +3,7 @@ import { useT } from '../i18n'
 import { setData, setUI, useData, useUI } from '../store'
 import type { TaskList } from '../types'
 import { isPhone } from '../viewport'
-import { activeLists, SMART, SMART_BOTTOM, tasksForView } from '../views'
+import { activeLists, openCounts, SMART, SMART_BOTTOM } from '../views'
 import { pressToDrag } from './dnd'
 import { Icon } from './Icon'
 import { startFilterDrag, startFolderDrag, startListItemDrag } from './sideDnd'
@@ -120,17 +120,21 @@ export function Sidebar() {
   const t = useT()
   const data = useData()
   const ui = useUI()
-  const counts = useMemo(() => {
-    const c: Record<string, number> = {}
-    const views = [
-      ...SMART.map((s) => s.id),
-      ...activeLists(data).map((l) => 'list:' + l.id),
-      ...data.tags.map((tag) => 'tag:' + tag.name),
-      ...(data.filters ?? []).map((f) => FILTER_PREFIX + f.id),
-    ]
-    for (const v of views) c[v] = tasksForView(v, data).open.length
-    return c
-  }, [data])
+  // counted in one pass, and only again when tasks, lists, tags or filters change
+  const counts = useMemo(
+    () =>
+      openCounts(
+        [
+          ...SMART.map((s) => s.id),
+          ...activeLists(data).map((l) => 'list:' + l.id),
+          ...data.tags.map((tag) => 'tag:' + tag.name),
+          ...(data.filters ?? []).map((f) => FILTER_PREFIX + f.id),
+        ],
+        data,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data.tasks, data.lists, data.tags, data.filters, data.settings.weekStartsOn],
+  )
   const [addMenu, setAddMenu] = useState(false)
 
   const lists = activeLists(data)

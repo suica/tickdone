@@ -5,6 +5,7 @@ import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast
 import { PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
+import './ctxmenu.css'
 
 export function ContextMenu() {
   const ui = useUI()

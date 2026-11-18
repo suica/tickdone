@@ -130,6 +130,8 @@ export interface UIState {
   prefs: Record<string, ViewPrefs>
   collapsed: Record<string, boolean>
   sidebarHidden: boolean
+  /** 手机上侧栏抽屉是否打开（不持久化） */
+  drawerOpen: boolean
   toast?: Toast
   menu?: Menu
   dialog?: { kind: 'list' | 'tag' | 'folder' | 'settings' | 'habit' | 'shortcuts'; id?: string }
@@ -137,7 +139,7 @@ export interface UIState {
 }
 
 function loadUI(): UIState {
-  const base: UIState = { module: 'tasks', view: 'today', prefs: {}, collapsed: {}, sidebarHidden: false, search: '' }
+  const base: UIState = { module: 'tasks', view: 'today', prefs: {}, collapsed: {}, sidebarHidden: false, drawerOpen: false, search: '' }
   try {
     const raw = localStorage.getItem(UI_KEY)
     if (raw) {

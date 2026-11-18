@@ -27,6 +27,13 @@
   /* 手机底部模块栏高度与安全区 */
   --tabbar-h: 56px;
   --safe-b: env(safe-area-inset-bottom, 0px);
+  /* 动效：统一的时长与缓动（prefers-reduced-motion 下时长归零） */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
 
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -325,4 +332,12 @@ select {
   padding: 60px 20px;
   text-align: center;
   font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
 }

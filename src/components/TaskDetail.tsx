@@ -9,6 +9,7 @@ import { DatePicker, reminderText, repeatText } from './DatePicker'
 import { Flag, Icon } from './Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { Checkbox } from './TaskRow'
+import './detail.css'
 
 function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, autoFocus, readOnly }: { value: string; onChange: (v: string) => void; className?: string; placeholder?: string; onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void; autoFocus?: boolean; readOnly?: boolean }) {
   const ref = useRef<HTMLTextAreaElement>(null)

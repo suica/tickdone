@@ -2,6 +2,11 @@ import { addDays, addMonths, getDay, setDate } from 'date-fns'
 import { fmt } from './dates'
 import type { Priority } from './types'
 
+// Quick-add parser: picks dates, times, priorities, #tags and ~lists out of a task title.
+// It understands Chinese and English in full; for the other UI languages it knows today / tomorrow /
+// the day after tomorrow, times like 15:00 and the priority words in `tasks.quickAdd.token.*`.
+// The CJK and other non-English words in this file are the words users type, so they stay as they are.
+
 export interface Span {
   start: number
   end: number
@@ -22,23 +27,71 @@ const CN_WEEK: Record<string, number> = { 日: 0, 天: 0, 一: 1, 二: 2, 三: 3
 const EN_WEEK: Record<string, number> = {
   sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
 }
+const EN_MONTH = 'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?'
+const EN_MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 const CN_NUM: Record<string, number> = {
-  一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10, 十一: 11, 十二: 12,
+  一: 1, 二: 2, 两: 2, 兩: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10, 十一: 11, 十二: 12,
 }
+
+/** Words for today (0), tomorrow (1) and the day after tomorrow (2) in the other UI languages. */
+const DAY_WORDS: Record<string, number> = {
+  // Japanese
+  今日: 0, きょう: 0, 明日: 1, あした: 1, 明後日: 2, あさって: 2,
+  // Korean
+  오늘: 0, 내일: 1, 모레: 2,
+  // Spanish
+  hoy: 0, mañana: 1, 'pasado mañana': 2,
+  // French
+  "aujourd'hui": 0, 'aujourd’hui': 0, demain: 1, 'après-demain': 2, 'apres-demain': 2,
+  // German
+  heute: 0, morgen: 1, übermorgen: 2,
+  // Portuguese
+  hoje: 0, amanhã: 1, amanha: 1, 'depois de amanhã': 2, 'depois de amanha': 2,
+  // Russian
+  сегодня: 0, завтра: 1, послезавтра: 2,
+}
+
+/**
+ * Priority words after "!", in every UI language (lower case). Keep in sync with the
+ * `tasks.quickAdd.token.*` messages, which the quick-add suggestions insert.
+ */
+export const PRIORITY_WORDS: Record<string, Priority> = {
+  '3': 5, '2': 3, '1': 1, '0': 0,
+  high: 5, medium: 3, med: 3, low: 1, none: 0,
+  // Chinese (simplified and traditional), Japanese
+  高: 5, 中: 3, 低: 1, 无: 0, 無: 0, なし: 0,
+  // Korean
+  높음: 5, 보통: 3, 낮음: 1, 없음: 0,
+  // Spanish, Portuguese
+  alta: 5, media: 3, média: 3, baja: 1, baixa: 1, ninguna: 0, nenhuma: 0,
+  // French
+  haute: 5, moyenne: 3, basse: 1, aucune: 0,
+  // German
+  hoch: 5, mittel: 3, niedrig: 1, keine: 0,
+  // Russian
+  высокий: 5, средний: 3, низкий: 1, нет: 0,
+}
+
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+')
+const alternation = (words: string[]) => [...words].sort((a, b) => b.length - a.length).map(escape).join('|')
+// Latin and Cyrillic words need a word boundary; Japanese and Korean words may touch other letters (no spaces in Japanese, particles in Korean).
+const WORD = '\\p{Script=Latin}\\p{Script=Cyrillic}\\p{N}'
+const DAY_WORDS_RE = new RegExp(`(?<![${WORD}])(${alternation(Object.keys(DAY_WORDS))})(?![${WORD}]|['’-])`, 'iu')
+const PRIORITY_RE = new RegExp(`(?:^|(?<=\\s))!(${alternation(Object.keys(PRIORITY_WORDS))})(?=\\s|$)`, 'iu')
 
 function num(s: string): number {
   return /^\d+$/.test(s) ? Number(s) : (CN_NUM[s] ?? NaN)
 }
 
-/** 下一个星期 wd（含今天） */
+/** The next weekday `wd`, today included. */
 function upcoming(wd: number, base = new Date()): Date {
   const diff = (wd - getDay(base) + 7) % 7
   return addDays(base, diff)
 }
 
-/** 下周的星期 wd（周一为一周开始） */
+/** Weekday `wd` of next week (weeks start on Monday). */
 function nextWeek(wd: number, base = new Date()): Date {
-  const dow = (getDay(base) + 6) % 7 // 周一=0
+  const dow = (getDay(base) + 6) % 7 // Monday = 0
   const monday = addDays(base, 7 - dow)
   return addDays(monday, (wd + 6) % 7)
 }
@@ -71,52 +124,57 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
   const setDue = (d: Date) => {
     if (!dueDate) dueDate = fmt(d)
   }
+  /** Month (1-12) and day this year, or next year when that day has passed. */
+  const monthDay = (month: number, day: number, year?: number) => {
+    if (month < 1 || month > 12 || day < 1 || day > 31) return false
+    let d = new Date(year ?? now.getFullYear(), month - 1, day)
+    if (!year && fmt(d) < fmt(now)) d = new Date(now.getFullYear() + 1, month - 1, day)
+    setDue(d)
+  }
 
-  // ---- 日期 ----
-  take(/(\d{4})[年/-](\d{1,2})[月/-](\d{1,2})[日号]?/, 'date', (m) => {
+  // ---- dates: Chinese ----
+  take(/(\d{4})[年/-](\d{1,2})[月/-](\d{1,2})[日号號]?/, 'date', (m) => {
     if (dueDate) return false
     setDue(new Date(+m[1], +m[2] - 1, +m[3]))
   })
-  take(/(\d{1,2}|十[一二]?|[一二三四五六七八九])月(\d{1,2})[日号]?/, 'date', (m) => {
+  take(/(\d{1,2}|十[一二]?|[一二三四五六七八九])月(\d{1,2})[日号號]?/, 'date', (m) => {
     if (dueDate) return false
-    let d = new Date(now.getFullYear(), num(m[1]) - 1, +m[2])
-    if (fmt(d) < fmt(now)) d = new Date(now.getFullYear() + 1, num(m[1]) - 1, +m[2])
-    setDue(d)
+    return monthDay(num(m[1]), +m[2])
   })
-  take(/(大后天|后天|明天|今天|明晚|今晚|明早|今早)/, 'date', (m) => {
+  take(/(大[后後]天|[后後]天|明天|今天|明晚|今晚|明早|今早)/, 'date', (m) => {
     if (dueDate) return false
     const k = m[1]
-    const off = k === '大后天' ? 3 : k === '后天' ? 2 : k.startsWith('明') ? 1 : 0
+    const off = k.startsWith('大') ? 3 : /^[后後]/.test(k) ? 2 : k.startsWith('明') ? 1 : 0
     if (k.endsWith('晚')) ampm = 'pm'
     if (k.endsWith('早')) ampm = 'am'
     setDue(addDays(now, off))
   })
-  take(/(下+)(?:个)?(?:周|星期|礼拜)([一二三四五六日天])/, 'date', (m) => {
+  take(/(下+)(?:个|個)?(?:周|週|星期|礼拜|禮拜)([一二三四五六日天])/, 'date', (m) => {
     if (dueDate) return false
     let d = nextWeek(CN_WEEK[m[2]])
     for (let i = 1; i < m[1].length; i++) d = addDays(d, 7)
     setDue(d)
   })
-  take(/(?:这个?|本)?(?:周|星期|礼拜)([一二三四五六日天])/, 'date', (m) => {
+  take(/(?:这个?|這個?|本)?(?:周|週|星期|礼拜|禮拜)([一二三四五六日天])/, 'date', (m) => {
     if (dueDate) return false
     setDue(upcoming(CN_WEEK[m[1]]))
   })
-  take(/下(?:个)?(?:周|星期|礼拜)/, 'date', () => {
+  take(/下(?:个|個)?(?:周|週|星期|礼拜|禮拜)/, 'date', () => {
     if (dueDate) return false
     setDue(nextWeek(1))
   })
-  take(/下个?月(?:(\d{1,2})[号日])?/, 'date', (m) => {
+  take(/下[个個]?月(?:(\d{1,2})[号號日])?/, 'date', (m) => {
     if (dueDate) return false
     let d = addMonths(now, 1)
     if (m[1]) d = setDate(d, +m[1])
     setDue(d)
   })
-  take(/(\d+|[一二两三四五六七八九十])\s*(天|周|个月)(?:后|以后|之后)/, 'date', (m) => {
+  take(/(\d+|[一二两兩三四五六七八九十])\s*(天|周|週|个月|個月)(?:[后後]|以[后後]|之[后後])/, 'date', (m) => {
     if (dueDate) return false
     const n = num(m[1])
-    setDue(m[2] === '天' ? addDays(now, n) : m[2] === '周' ? addDays(now, 7 * n) : addMonths(now, n))
+    setDue(m[2] === '天' ? addDays(now, n) : /[周週]/.test(m[2]) ? addDays(now, 7 * n) : addMonths(now, n))
   })
-  take(/(?<![\d月])(\d{1,2})[号日](?!\d)/, 'date', (m) => {
+  take(/(?<![\d月])(\d{1,2})[号號日](?!\d)/, 'date', (m) => {
     if (dueDate) return false
     const day = +m[1]
     if (day < 1 || day > 31) return false
@@ -124,14 +182,27 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
     if (fmt(d) < fmt(now)) d = setDate(addMonths(now, 1), day)
     setDue(d)
   })
-  // English
+
+  // ---- dates: English ----
+  take(/\b(?:the\s+)?day\s+after\s+tomorrow\b/i, 'date', () => {
+    if (dueDate) return false
+    setDue(addDays(now, 2))
+  })
   take(/\b(today|tonight|tomorrow|tmr)\b/i, 'date', (m) => {
     if (dueDate) return false
     const k = m[1].toLowerCase()
     if (k === 'tonight') ampm = 'pm'
     setDue(addDays(now, k === 'today' || k === 'tonight' ? 0 : 1))
   })
-  take(/\bnext\s+(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b/i, 'date', (m) => {
+  take(new RegExp(`\\b(?:on\\s+)?(${EN_MONTH})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?\\b`, 'i'), 'date', (m) => {
+    if (dueDate) return false
+    return monthDay(EN_MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()) + 1, +m[2], m[3] ? +m[3] : undefined)
+  })
+  take(new RegExp(`\\b(?:on\\s+)?(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?(${EN_MONTH})\\b(?:,?\\s+(\\d{4})\\b)?`, 'i'), 'date', (m) => {
+    if (dueDate) return false
+    return monthDay(EN_MONTHS.indexOf(m[2].slice(0, 3).toLowerCase()) + 1, +m[1], m[3] ? +m[3] : undefined)
+  })
+  take(/\bnext\s+(mon|tue|wed|thu|fri|sat|sun)(?:day|sday|nesday|rsday|urday)?\b/i, 'date', (m) => {
     if (dueDate) return false
     setDue(nextWeek(EN_WEEK[m[1].toLowerCase()]))
   })
@@ -139,31 +210,29 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
     if (dueDate) return false
     setDue(nextWeek(1))
   })
+  take(/\bnext\s+month\b/i, 'date', () => {
+    if (dueDate) return false
+    setDue(addMonths(now, 1))
+  })
   take(/\b(?:on\s+)?(mon|tue|wed|thu|fri|sat|sun)(?:day|sday|nesday|rsday|urday)?\b/i, 'date', (m) => {
     if (dueDate) return false
     setDue(upcoming(EN_WEEK[m[1].toLowerCase()]))
   })
-  take(/\bin\s+(\d+)\s+days?\b/i, 'date', (m) => {
+  take(/\bin\s+(\d+)\s+(days?|weeks?|months?)\b/i, 'date', (m) => {
     if (dueDate) return false
-    setDue(addDays(now, +m[1]))
+    const n = +m[1]
+    const unit = m[2].toLowerCase()
+    setDue(unit.startsWith('day') ? addDays(now, n) : unit.startsWith('week') ? addDays(now, 7 * n) : addMonths(now, n))
   })
 
-  // ---- 时间 ----
-  take(
-    /(上午|早上|早晨|中午|下午|傍晚|晚上)?\s?(\d{1,2}|十[一二]?|[一二两三四五六七八九])(?:[:：](\d{2})|点(?:(半)|(\d{1,2})分?)?)/,
-    'date',
-    (m) => {
-      if (dueTime) return false
-      let h = num(m[2])
-      const min = m[3] ? +m[3] : m[4] ? 30 : m[5] ? +m[5] : 0
-      if (isNaN(h) || h > 23 || min > 59) return false
-      const p = m[1]
-      if (p && /下午|傍晚|晚上/.test(p) && h < 12) h += 12
-      else if (p === '中午' && h < 6) h += 12
-      else if (!p && ampm === 'pm' && h < 12) h += 12
-      dueTime = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
-    },
-  )
+  // ---- dates: today / tomorrow in the other languages ----
+  take(DAY_WORDS_RE, 'date', (m) => {
+    if (dueDate) return false
+    setDue(addDays(now, DAY_WORDS[m[1].toLowerCase().replace(/\s+/g, ' ')] ?? 0))
+  })
+
+  // ---- times ----
+  // English first, so "3:30pm" and "at 15:00" are taken whole
   take(/\b(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i, 'date', (m) => {
     if (dueTime) return false
     let h = +m[1]
@@ -172,32 +241,52 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
     if (m[3].toLowerCase() === 'am' && h === 12) h = 0
     dueTime = `${String(h).padStart(2, '0')}:${m[2] ?? '00'}`
   })
+  take(/\bat\s+(\d{1,2}):(\d{2})\b/i, 'date', (m) => {
+    if (dueTime) return false
+    const h = +m[1]
+    const min = +m[2]
+    if (h > 23 || min > 59) return false
+    dueTime = `${String(h).padStart(2, '0')}:${m[2]}`
+  })
+  // Chinese, Japanese and Korean hours (3点, 3點, 3時, 3시) and plain HH:mm
+  take(
+    /(上午|早上|早晨|中午|下午|傍晚|晚上|午前|午後|오전|오후)?\s?(\d{1,2}|十[一二]?|[一二两兩三四五六七八九])(?:[:：](\d{2})|[点點時시](?:(半|반)|(\d{1,2})[分분]?)?(?![간間]))/,
+    'date',
+    (m) => {
+      if (dueTime) return false
+      let h = num(m[2])
+      const min = m[3] ? +m[3] : m[4] ? 30 : m[5] ? +m[5] : 0
+      if (isNaN(h) || h > 23 || min > 59) return false
+      const p = m[1]
+      if (p && /下午|傍晚|晚上|午後|오후/.test(p) && h < 12) h += 12
+      else if (p === '中午' && h < 6) h += 12
+      else if (!p && ampm === 'pm' && h < 12) h += 12
+      dueTime = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+    },
+  )
   if (dueTime && !dueDate) {
-    // 只写了时间：今天；若时间已过则为明天
+    // Only a time: today, or tomorrow when that time has passed
     const [h, mm] = dueTime.split(':').map(Number)
     const passed = now.getHours() * 60 + now.getMinutes() > h * 60 + mm
     dueDate = fmt(addDays(now, passed ? 1 : 0))
   }
 
-  // ---- 优先级 ----
-  take(/(?:^|(?<=\s))!(高|中|低|无|high|medium|med|low|none|[0-3])(?=\s|$)/i, 'priority', (m) => {
+  // ---- priority ----
+  take(PRIORITY_RE, 'priority', (m) => {
     if (priority !== undefined) return false
-    const v = m[1].toLowerCase()
-    priority = (
-      { 高: 5, high: 5, '3': 5, 中: 3, medium: 3, med: 3, '2': 3, 低: 1, low: 1, '1': 1, 无: 0, none: 0, '0': 0 } as Record<string, Priority>
-    )[v]
+    priority = PRIORITY_WORDS[m[1].toLowerCase()]
   })
   take(/(?:^|(?<=\s))(!{1,3})(?=\s|$)/, 'priority', (m) => {
     if (priority !== undefined) return false
     priority = ([0, 1, 3, 5] as Priority[])[m[1].length]
   })
 
-  // ---- 标签 ----
+  // ---- tags ----
   take(/(?:^|(?<=\s))#([^\s#]+)/, 'tag', (m) => {
     if (!tags.includes(m[1])) tags.push(m[1])
   })
 
-  // ---- 清单 ^ 或 ~ ----
+  // ---- list, with ~ or ^ ----
   take(/(?:^|(?<=\s))[~^]([^\s~^]+)/, 'list', (m) => {
     const hit = listNames.find((n) => n === m[1]) ?? listNames.find((n) => n.startsWith(m[1]))
     if (!hit || listName) return false

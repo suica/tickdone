@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { addDays } from 'date-fns'
-import { fmt, nextOccurrence } from './dates'
+import { dueLabel, fmt, nextOccurrence } from './dates'
+import { t } from './i18n'
 import type { AppData, Habit, Task, TaskList, ViewPrefs } from './types'
 
 const KEY = 'tickdone:data:v1'
@@ -10,6 +11,7 @@ export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().to
 
 export const LIST_COLORS = ['#FF6161', '#FFAC38', '#FFD324', '#E6EA49', '#35D870', '#4CA1FF', '#6E75F4', '#B37FEB', '#FF83C3', '#9C9C9C']
 
+/** First-run sample data. */
 function seed(): AppData {
   const now = Date.now()
   const today = fmt(new Date())
@@ -26,47 +28,50 @@ function seed(): AppData {
     subtasks: [],
     ...p,
   })
-  const work: TaskList = { id: uid(), name: '工作', color: '#4CA1FF', sections: [], view: 'list', order: 1 }
-  const life: TaskList = { id: uid(), name: '生活', color: '#35D870', sections: [], view: 'list', order: 2 }
+  // The sample data is written once, in the language the app starts in.
+  const work: TaskList = { id: uid(), name: t('core.seed.list.work'), color: '#4CA1FF', sections: [], view: 'list', order: 1 }
+  const life: TaskList = { id: uid(), name: t('core.seed.list.personal'), color: '#35D870', sections: [], view: 'list', order: 2 }
+  const important = t('core.seed.tag.important')
+  const reading = t('core.seed.tag.reading')
   return {
     version: 1,
     lists: [work, life],
     folders: [],
-    tags: [{ name: '重要', color: '#FF6161' }, { name: '阅读', color: '#6E75F4' }],
+    tags: [{ name: important, color: '#FF6161' }, { name: reading, color: '#6E75F4' }],
     habits: [
-      { id: uid(), name: '早起', icon: '🌅', color: '#FFAC38', checkins: {}, createdAt: now, order: 0 },
-      { id: uid(), name: '喝水', icon: '💧', color: '#4CA1FF', checkins: {}, createdAt: now, order: 1 },
-      { id: uid(), name: '阅读', icon: '📖', color: '#6E75F4', checkins: {}, createdAt: now, order: 2 },
+      { id: uid(), name: t('core.seed.habit.wakeUpEarly'), icon: '🌅', color: '#FFAC38', checkins: {}, createdAt: now, order: 0 },
+      { id: uid(), name: t('core.seed.habit.drinkWater'), icon: '💧', color: '#4CA1FF', checkins: {}, createdAt: now, order: 1 },
+      { id: uid(), name: t('core.seed.habit.read'), icon: '📖', color: '#6E75F4', checkins: {}, createdAt: now, order: 2 },
     ],
     focus: [],
     settings: { pomoMinutes: 25, shortBreak: 5, longBreak: 15, weekStartsOn: 1, theme: 'light', showCompleted: true },
     tasks: [
-      mk({ title: '欢迎使用 TickDone 👋', content: '点击任务查看详情，在右侧可以编辑日期、优先级、子任务和描述。', dueDate: today }, 0),
+      mk({ title: t('core.seed.task.welcome'), content: t('core.seed.task.welcomeNote'), dueDate: today }, 0),
       mk(
         {
-          title: '试试快速添加：在输入框输入「明天下午3点 开会 !高 #重要」',
+          title: t('core.seed.task.quickAdd', { example: t('core.seed.quickAddExample', { tag: important }) }),
           dueDate: today,
           priority: 5,
-          tags: ['重要'],
+          tags: [important],
         },
         1,
       ),
       mk(
         {
-          title: '整理本周工作计划',
+          title: t('core.seed.task.weeklyPlan'),
           listId: work.id,
           dueDate: fmt(addDays(new Date(), 1)),
           dueTime: '10:00',
           priority: 3,
           subtasks: [
-            { id: uid(), title: '回顾上周进展', done: true },
-            { id: uid(), title: '列出本周重点', done: false },
+            { id: uid(), title: t('core.seed.subtask.reviewLastWeek'), done: true },
+            { id: uid(), title: t('core.seed.subtask.listPriorities'), done: false },
           ],
         },
         2,
       ),
-      mk({ title: '读完《原则》第三章', listId: life.id, tags: ['阅读'], priority: 1, dueDate: fmt(addDays(new Date(), 3)) }, 3),
-      mk({ title: '买菜', listId: life.id }, 4),
+      mk({ title: t('core.seed.task.readBook'), listId: life.id, tags: [reading], priority: 1, dueDate: fmt(addDays(new Date(), 3)) }, 3),
+      mk({ title: t('core.seed.task.groceries'), listId: life.id }, 4),
     ],
   }
 }
@@ -100,7 +105,7 @@ function persist() {
   clearTimeout(saveTimer)
   saveTimer = window.setTimeout(save, 150)
 }
-/** 页面隐藏、刷新或关闭时立刻写入还没落盘的修改 */
+/** Writes pending changes right away when the page is hidden, reloaded or closed. */
 function flush() {
   if (saveTimer === undefined) return
   clearTimeout(saveTimer)
@@ -119,7 +124,7 @@ export function setData(fn: (d: AppData) => AppData) {
 }
 export const useData = () => useSyncExternalStore(subscribe, getData)
 
-// ---------------- UI 状态 ----------------
+// ---------------- UI state ----------------
 export type Module = 'tasks' | 'calendar' | 'matrix' | 'pomo' | 'habit' | 'search'
 
 export interface Toast {
@@ -142,7 +147,7 @@ export interface UIState {
   prefs: Record<string, ViewPrefs>
   collapsed: Record<string, boolean>
   sidebarHidden: boolean
-  /** 手机上侧栏抽屉是否打开（不持久化） */
+  /** Whether the sidebar drawer is open on phones (not persisted). */
   drawerOpen: boolean
   /** Desktop task detail width in px after the user dragged the divider; undefined = automatic width. Persisted. */
   detailWidth?: number
@@ -202,7 +207,7 @@ export function undoToast() {
   setUI({ toast: undefined })
 }
 
-// ---------------- 任务操作 ----------------
+// ---------------- Tasks ----------------
 export function addTask(p: Partial<Task> & { title: string }): Task {
   const now = Date.now()
   const minOrder = Math.min(0, ...data.tasks.map((t) => t.order))
@@ -240,18 +245,18 @@ export function updateTask(id: string, p: Partial<Task>) {
 }
 
 export function toggleTask(id: string) {
-  const t = data.tasks.find((x) => x.id === id)
-  if (!t) return
+  const task = data.tasks.find((x) => x.id === id)
+  if (!task) return
   const snap = data
-  if (t.status !== 0) {
+  if (task.status !== 0) {
     updateTask(id, { status: 0, completedAt: undefined })
     return
   }
   let text: string
-  if (t.repeat && t.dueDate) {
-    // 重复任务：生成一条已完成记录，原任务顺延到下一次
-    const done: Task = { ...t, id: uid(), status: 2, completedAt: Date.now(), repeat: null }
-    const next = nextOccurrence(t.dueDate, t.repeat)
+  if (task.repeat && task.dueDate) {
+    // Repeating task: add a completed copy and move the task itself to its next date
+    const done: Task = { ...task, id: uid(), status: 2, completedAt: Date.now(), repeat: null }
+    const next = nextOccurrence(task.dueDate, task.repeat)
     setData((d) => ({
       ...d,
       tasks: [
@@ -261,10 +266,10 @@ export function toggleTask(id: string) {
         done,
       ],
     }))
-    text = `已完成，下次：${next}`
+    text = t('core.toast.completedNext', { date: dueLabel({ dueDate: next }) })
   } else {
     updateTask(id, { status: 2, completedAt: Date.now() })
-    text = `已完成「${t.title || '无标题'}」`
+    text = t('core.toast.completed', { title: task.title || t('common.untitled') })
   }
   // The first ding creates the AudioContext, which can take seconds on a busy machine; start the
   // undo toast's countdown only after that.
@@ -275,19 +280,19 @@ export function toggleTask(id: string) {
 export function wontDo(id: string) {
   const snap = data
   updateTask(id, { status: -1, completedAt: Date.now() })
-  toast('已放弃', snap)
+  toast(t('core.toast.wontDo'), snap)
 }
 
 export function deleteTask(id: string) {
   const snap = data
-  const t = data.tasks.find((x) => x.id === id)
-  if (!t) return
-  if (t.deleted) {
+  const task = data.tasks.find((x) => x.id === id)
+  if (!task) return
+  if (task.deleted) {
     setData((d) => ({ ...d, tasks: d.tasks.filter((x) => x.id !== id) }))
-    toast('已永久删除', snap)
+    toast(t('core.toast.deletedForever'), snap)
   } else {
     updateTask(id, { deleted: true })
-    toast('已删除，可在垃圾桶恢复', snap)
+    toast(t('core.toast.deleted'), snap)
   }
   if (ui.selectedTaskId === id) setUI({ selectedTaskId: undefined })
 }
@@ -300,7 +305,7 @@ export function duplicateTask(id: string) {
   setUI({ selectedTaskId: copy.id })
 }
 
-/** 把 id 移动到 targetId 之前/之后（拖拽排序） */
+/** Moves task `id` before or after `targetId` (drag to reorder). */
 export function reorderTask(id: string, targetId: string, after: boolean, patch: Partial<Task> = {}) {
   setData((d) => {
     const sorted = [...d.tasks].sort((a, b) => a.order - b.order).filter((t) => t.id !== id)
@@ -313,7 +318,7 @@ export function reorderTask(id: string, targetId: string, after: boolean, patch:
   })
 }
 
-// ---------------- 清单 / 标签 ----------------
+// ---------------- Lists and tags ----------------
 export function addList(p: Partial<TaskList> & { name: string }): TaskList {
   const l: TaskList = { id: uid(), sections: [], view: 'list', order: data.lists.length + 1, color: undefined, ...p }
   setData((d) => ({ ...d, lists: [...d.lists, l] }))
@@ -330,7 +335,7 @@ export function deleteList(id: string) {
     tasks: d.tasks.map((t) => (t.listId === id ? { ...t, deleted: true } : t)),
   }))
   if (ui.view === 'list:' + id) setUI({ view: 'inbox' })
-  toast('清单已删除', snap)
+  toast(t('core.toast.listDeleted'), snap)
 }
 export function renameTag(old: string, name: string, color?: string) {
   setData((d) => ({
@@ -348,10 +353,10 @@ export function deleteTag(name: string) {
     tasks: d.tasks.map((t) => (t.tags.includes(name) ? { ...t, tags: t.tags.filter((x) => x !== name) } : t)),
   }))
   if (ui.view === 'tag:' + name) setUI({ view: 'inbox' })
-  toast('标签已删除', snap)
+  toast(t('core.toast.tagDeleted'), snap)
 }
 
-// ---------------- 习惯 ----------------
+// ---------------- Habits ----------------
 export function toggleCheckin(id: string, date: string) {
   setData((d) => ({
     ...d,
@@ -372,7 +377,7 @@ export function upsertHabit(h: Partial<Habit> & { name: string }) {
   })
 }
 
-// ---------------- 声音 ----------------
+// ---------------- Sound ----------------
 let ac: AudioContext | undefined
 export function playDing(freq = 880) {
   try {

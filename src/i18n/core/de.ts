@@ -1,0 +1,67 @@
+import type { Catalog } from '../types'
+import type en from './en'
+
+export default {
+  'core.date.withTime': '{date}, {time}',
+
+  'core.repeat.none': 'Keine',
+  'core.repeat.daily': 'Täglich',
+  'core.repeat.everyNDays': { one: 'Jeden {count}. Tag', other: 'Alle {count} Tage' },
+  'core.repeat.weekdays': 'Jeden Werktag (Mo–Fr)',
+  'core.repeat.weekly': 'Wöchentlich',
+  'core.repeat.weeklyOn': 'Wöchentlich: {days}',
+  'core.repeat.daySeparator': ', ',
+  'core.repeat.everyNWeeks': { one: 'Jede {count}. Woche', other: 'Alle {count} Wochen' },
+  'core.repeat.monthly': 'Monatlich',
+  'core.repeat.everyNMonths': { one: 'Jeden {count}. Monat', other: 'Alle {count} Monate' },
+  'core.repeat.yearly': 'Jährlich',
+  'core.repeat.everyNYears': { one: 'Jedes {count}. Jahr', other: 'Alle {count} Jahre' },
+
+  'core.reminder.none': 'Keine',
+  'core.reminder.onTime': 'Pünktlich',
+  'core.reminder.minutesBefore': { one: '{count} Minute vorher', other: '{count} Minuten vorher' },
+  'core.reminder.hoursBefore': { one: '{count} Stunde vorher', other: '{count} Stunden vorher' },
+  'core.reminder.daysBefore': { one: '{count} Tag vorher', other: '{count} Tage vorher' },
+
+  'core.toast.completed': '„{title}“ erledigt',
+  'core.toast.completedNext': 'Erledigt. Nächstes Mal: {date}',
+  'core.toast.wontDo': 'Als verworfen markiert',
+  'core.toast.deletedForever': 'Endgültig gelöscht',
+  'core.toast.deleted': 'Gelöscht. Im Papierkorb wiederherstellbar',
+  'core.toast.listDeleted': 'Liste gelöscht',
+  'core.toast.tagDeleted': 'Tag gelöscht',
+
+  'core.seed.list.work': 'Arbeit',
+  'core.seed.list.personal': 'Privat',
+  'core.seed.tag.important': 'Wichtig',
+  'core.seed.tag.reading': 'Lesen',
+  'core.seed.habit.wakeUpEarly': 'Früh aufstehen',
+  'core.seed.habit.drinkWater': 'Wasser trinken',
+  'core.seed.habit.read': 'Lesen',
+  'core.seed.task.welcome': 'Willkommen bei TickDone 👋',
+  'core.seed.task.welcomeNote': 'Klicke auf eine Aufgabe, um ihre Details zu öffnen. Dort kannst du Datum, Priorität, Teilaufgaben und Beschreibung bearbeiten.',
+  'core.seed.quickAddExample': 'Meeting morgen 15:00 !hoch #{tag}',
+  'core.seed.task.quickAdd': 'Schnelles Hinzufügen ausprobieren: „{example}“ ins Eingabefeld tippen',
+  'core.seed.task.weeklyPlan': 'Arbeit für diese Woche planen',
+  'core.seed.subtask.reviewLastWeek': 'Fortschritt der letzten Woche durchgehen',
+  'core.seed.subtask.listPriorities': 'Schwerpunkte dieser Woche notieren',
+  'core.seed.task.readBook': 'Kapitel 3 meines Buches zu Ende lesen',
+  'core.seed.task.groceries': 'Lebensmittel einkaufen',
+
+  'core.pomo.phase.focus': 'Fokus',
+  'core.pomo.phase.break': 'Pause',
+  'core.pomo.phase.stopwatch': 'Stoppuhr',
+  'core.pomo.title': '{time} · {phase}',
+  'core.pomo.titlePaused': '{time} (pausiert) · {phase}',
+  'core.pomo.focusDone.title': 'Fokuszeit abgeschlossen 🍅',
+  'core.pomo.focusDone.body': {
+    one: 'Pomodoro geschafft. Mach {count} Minute Pause.',
+    other: 'Pomodoro geschafft. Mach {count} Minuten Pause.',
+  },
+  'core.pomo.focusDone.bodyTask': {
+    one: 'Pomodoro für „{task}“ geschafft. Mach {count} Minute Pause.',
+    other: 'Pomodoro für „{task}“ geschafft. Mach {count} Minuten Pause.',
+  },
+  'core.pomo.breakDone.title': 'Pause vorbei',
+  'core.pomo.breakDone.body': 'Bereit für den nächsten Pomodoro?',
+} satisfies Catalog<typeof en>

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-// 断点（CSS 里用同样的值）：手机 ≤767px；平板 768–1199px；桌面 ≥1200px；大屏 ≥1920px。
+// Breakpoints (CSS uses the same values): phone ≤767px; tablet 768–1199px; desktop ≥1200px; large ≥1920px.
 export const PHONE = '(max-width: 767px)'
 export const TABLET = '(min-width: 768px) and (max-width: 1199px)'
 export const LARGE = '(min-width: 1920px)'

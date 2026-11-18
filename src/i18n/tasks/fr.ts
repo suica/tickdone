@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': 'Filtres',
   'tasks.sidebar.addFilter': 'Ajouter un filtre',
   'tasks.sidebar.filtersHint': 'Les filtres regroupent les tâches qui remplissent vos conditions',
+  'tasks.sidebar.archived': 'Listes archivées',
+  'tasks.archived.banner': 'Cette liste est archivée. Ses tâches sont en lecture seule et n’apparaissent ni dans les listes intelligentes, ni dans le calendrier, la matrice ou la recherche.',
   'tasks.dnd.filtersReordered': 'Filtres réordonnés',
   'tasks.menu.editFilter': 'Modifier le filtre',
   'tasks.empty.filter': 'Aucune tâche ne correspond à ce filtre',

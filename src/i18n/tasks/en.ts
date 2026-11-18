@@ -126,6 +126,8 @@ export default {
   'tasks.sidebar.filters': 'Filters',
   'tasks.sidebar.addFilter': 'Add filter',
   'tasks.sidebar.filtersHint': 'Filters gather the tasks that meet your conditions',
+  'tasks.sidebar.archived': 'Archived lists',
+  'tasks.archived.banner': 'This list is archived. Its tasks are read-only and left out of smart lists, the calendar, the matrix and search.',
   'tasks.dnd.filtersReordered': 'Filters reordered',
   'tasks.menu.editFilter': 'Edit filter',
   'tasks.empty.filter': 'No tasks match this filter',

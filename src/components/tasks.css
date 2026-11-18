@@ -1375,3 +1375,57 @@ body.dnd-active * {
     scroll-snap-type: none;
   }
 }
+
+/* An archived list: a banner over its (read-only) tasks with a button to bring it back */
+.archived-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+  animation: archived-in var(--dur) var(--ease-out) both;
+}
+.archived-banner-ic {
+  flex: none;
+  color: var(--text-3);
+}
+.archived-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+.archived-banner-btn {
+  flex: none;
+  height: 30px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+@keyframes archived-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (max-width: 767px) {
+  /* a card like the task groups below it, with the button on its own line */
+  .archived-banner {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin: 0 0 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: var(--bg-pop);
+    font-size: 14px;
+  }
+  .archived-banner-text {
+    flex-basis: calc(100% - 28px);
+  }
+  .archived-banner-btn {
+    height: 40px;
+    margin-left: 28px;
+  }
+}

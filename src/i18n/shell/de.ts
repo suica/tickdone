@@ -46,6 +46,10 @@ export default {
   'shell.subtasks.reordered': 'Teilaufgaben neu angeordnet',
   'shell.task.copyLink': 'Link kopieren',
   'shell.toast.linkCopied': 'Link kopiert',
+  'shell.menu.archive': 'Archivieren',
+  'shell.menu.unarchive': 'Wiederherstellen',
+  'shell.toast.listArchived': '„{name}“ archiviert',
+  'shell.toast.listUnarchived': '„{name}“ ist wieder in deinen Listen',
   'shell.toast.taskNotFound': 'Diese Aufgabe gibt es nicht mehr',
   'shell.detail.editNotes': 'Notizen bearbeiten',
 } satisfies Catalog<typeof en>

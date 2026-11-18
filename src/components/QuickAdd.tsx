@@ -4,7 +4,7 @@ import { useT, type MessageKey } from '../i18n'
 import { quickParse } from '../quickParse'
 import { addTask, useData } from '../store'
 import type { Priority, Task } from '../types'
-import { PRIORITY } from '../views'
+import { activeLists, PRIORITY } from '../views'
 import { DatePicker, type DateValue } from './DatePicker'
 import { Flag, Icon } from './Icon'
 import { markEnter } from './taskMotion'
@@ -56,7 +56,7 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
   const inputRef = useRef<HTMLInputElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
 
-  const listNames = useMemo(() => data.lists.map((l) => l.name), [data.lists])
+  const listNames = useMemo(() => activeLists(data).map((l) => l.name), [data])
   const parsed = useMemo(() => quickParse(text, listNames), [text, listNames])
 
   const listId = listOverride ?? (parsed.listName ? data.lists.find((l) => l.name === parsed.listName)?.id : undefined) ?? defaults.listId ?? 'inbox'
@@ -78,7 +78,7 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
       return all.map((n) => ({ label: '#' + n, value: n }))
     }
     if (suggest.kind === 'list')
-      return [{ id: 'inbox', name: t('common.list.inbox') }, ...data.lists]
+      return [{ id: 'inbox', name: t('common.list.inbox') }, ...activeLists(data)]
         .filter((l) => l.name.toLowerCase().includes(q))
         .map((l) => ({ label: l.name, value: l.id }))
     return ([5, 3, 1, 0] as Priority[])
@@ -348,9 +348,9 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
               {
                 label: t('tasks.quickAdd.list'),
                 icon: <Icon name="move" size={15} />,
-                hint: data.lists.length ? undefined : '—',
-                children: data.lists.length
-                  ? data.lists.map((l) => ({
+                hint: activeLists(data).length ? undefined : '—',
+                children: activeLists(data).length
+                  ? activeLists(data).map((l) => ({
                       label: l.name,
                       icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name="list" size={14} />,
                       checked: l.id === listId,
@@ -396,7 +396,7 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
         <Popover anchor={pop.anchor} onClose={() => setPop(null)}>
           <MenuList
             onClose={() => setPop(null)}
-            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...data.lists].map((l) => ({
+            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...activeLists(data)].map((l) => ({
               label: l.name,
               icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
               checked: l.id === listId,

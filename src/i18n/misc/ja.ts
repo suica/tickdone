@@ -148,6 +148,8 @@ export default {
   'misc.search.inDescription': '説明',
   'misc.search.inSubtask': 'サブタスク',
   'misc.search.inTag': 'タグ',
+  'misc.search.includeArchived': 'アーカイブ済みリストも含める',
+  'misc.search.archived': 'アーカイブ済み',
 
   'misc.focus.pomodoro': 'ポモドーロ',
   'misc.focus.stopwatch': 'ストップウォッチ',

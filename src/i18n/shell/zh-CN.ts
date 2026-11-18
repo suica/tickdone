@@ -46,6 +46,10 @@ export default {
   'shell.subtasks.reordered': '已调整子任务顺序',
   'shell.task.copyLink': '复制链接',
   'shell.toast.linkCopied': '链接已复制',
+  'shell.menu.archive': '归档',
+  'shell.menu.unarchive': '取消归档',
+  'shell.toast.listArchived': '已归档「{name}」',
+  'shell.toast.listUnarchived': '「{name}」已移回清单',
   'shell.toast.taskNotFound': '该任务已不存在',
   'shell.detail.editNotes': '编辑描述',
 } satisfies Catalog<typeof en>

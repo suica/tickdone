@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': '필터',
   'tasks.sidebar.addFilter': '필터 추가',
   'tasks.sidebar.filtersHint': '조건에 맞는 작업을 모아 보여 줍니다',
+  'tasks.sidebar.archived': '보관된 목록',
+  'tasks.archived.banner': '보관된 목록입니다. 작업은 읽기 전용이며 스마트 목록, 캘린더, 매트릭스, 검색에 표시되지 않습니다.',
   'tasks.dnd.filtersReordered': '필터 순서를 바꿨습니다',
   'tasks.menu.editFilter': '필터 편집',
   'tasks.empty.filter': '이 필터에 맞는 작업이 없습니다',

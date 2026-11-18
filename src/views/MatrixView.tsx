@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactP
 import { addDays, parseISO } from 'date-fns'
 import { getData, setData, toast, updateTask, useData, useUI } from '../store'
 import { fmt, todayStr } from '../dates'
-import { sortTasks } from '../views'
+import { activeTasks, sortTasks } from '../views'
 import type { Priority, Task } from '../types'
 import { usePhone } from '../viewport'
 import { useT, type MessageKey } from '../i18n'
@@ -149,7 +149,8 @@ export default function MatrixView() {
   const byQuad = useMemo(() => {
     const today = todayStr()
     const week = fmt(addDays(parseISO(today), 6))
-    const live = data.tasks.filter((t) => !t.deleted && !t.parentId && (t.status === 0 || (showDone && t.status === 2)))
+    // tasks of archived lists stay out of the matrix
+    const live = activeTasks(data).filter((t) => !t.parentId && (t.status === 0 || (showDone && t.status === 2)))
     const m: Record<number, Task[]> = {}
     for (const q of QUADS) {
       const mine = live.filter((t) => t.priority === q.p && inRange(t, ranges[q.p], today, week))
@@ -158,7 +159,8 @@ export default function MatrixView() {
       m[q.p] = [...sortTasks(mine.filter((t) => t.status === 0), sorts[q.p] === 'custom' ? 'custom' : 'date'), ...done]
     }
     return m
-  }, [data.tasks, ranges, sorts, showDone])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.tasks, data.lists, ranges, sorts, showDone])
   const byQuadRef = useRef(byQuad)
   useLayoutEffect(() => {
     byQuadRef.current = byQuad

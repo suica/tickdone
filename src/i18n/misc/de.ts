@@ -148,6 +148,8 @@ export default {
   'misc.search.inDescription': 'Beschreibung',
   'misc.search.inSubtask': 'Teilaufgabe',
   'misc.search.inTag': 'Tag',
+  'misc.search.includeArchived': 'Archivierte Listen einbeziehen',
+  'misc.search.archived': 'Archiviert',
 
   'misc.focus.pomodoro': 'Pomodoro',
   'misc.focus.stopwatch': 'Stoppuhr',

@@ -4,7 +4,7 @@ import { useT } from '../i18n'
 import { clearSelection, getSelection, setSelection, useData, useUI } from '../store'
 import { inOrder, selectAll, selectedIds } from '../selection'
 import type { AppData } from '../types'
-import { PRIORITY } from '../views'
+import { activeLists, PRIORITY } from '../views'
 import { completeSelected, deleteSelected, moveToList, setDate, setPriority, toggleTag, visibleOrder, wontDoSelected } from './batchActions'
 import { DatePicker } from './DatePicker'
 import { Flag, Icon } from './Icon'
@@ -77,7 +77,7 @@ export function BatchPops({ pop, ids, data, onClose }: { pop: BatchPop; ids: str
       <Popover anchor={pop.anchor} onClose={onClose}>
         <MenuList
           onClose={onClose}
-          items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...data.lists].map((l) => ({
+          items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...activeLists(data)].map((l) => ({
             label: l.name,
             icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
             checked: tasks.length > 0 && tasks.every((x) => x.listId === l.id),

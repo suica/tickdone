@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 
 import { format, parseISO } from 'date-fns'
 import { t as tr, useT, type MessageKey } from '../i18n'
 import { fmtMonthDay, fmtWeekday } from '../i18n/format'
-import { clearSelection, getData, getSelection, getUI, setData, setSelection, setUI, toast, uid, updateList, useData, useUI } from '../store'
+import { archiveList, clearSelection, getData, getSelection, getUI, setData, setSelection, setUI, toast, uid, updateList, useData, useUI } from '../store'
 import { isBatch, prune, selectAll, stepSelect } from '../selection'
 import type { AppData, GroupBy, Priority, SortBy, Task, TaskList, ViewPrefs } from '../types'
 import { usePhone } from '../viewport'
@@ -91,9 +91,11 @@ export function TaskListPane() {
   const title = viewName(view, data)
   const isTrash = view === 'trash'
   const isDoneView = view === 'completed' || view === 'wontdo'
-  const canAdd = !isTrash && !isDoneView
+  // an archived list opens read-only, as a plain list, with a banner to bring it back
+  const archived = !!list?.archived
+  const canAdd = !isTrash && !isDoneView && !archived
   const showList = !view.startsWith('list:') && view !== 'inbox'
-  const kanban = list?.view === 'kanban'
+  const kanban = list?.view === 'kanban' && !archived
   const batch = isBatch(getSelection(ui))
 
   const setPrefs = (p: Partial<ViewPrefs>) => setUI((u) => ({ prefs: { ...u.prefs, [view]: { ...(u.prefs[view] ?? defaultPrefs(view)), ...p } } }))
@@ -241,7 +243,7 @@ export function TaskListPane() {
             {t('tasks.trash.empty')}
           </button>
         )}
-        {!isTrash && !isDoneView && (
+        {!isTrash && !isDoneView && !archived && (
           <button className="icon-btn list-head-btn" title={t('common.more')} onClick={(e) => setMenu(anchorOf(e.currentTarget))}>
             <Icon name="more" size={20} stroke={2.6} />
           </button>
@@ -268,6 +270,15 @@ export function TaskListPane() {
           }}
         >
           <div className="list-content" key={view} data-motion-host>
+            {archived && list && (
+              <div className="archived-banner" role="status">
+                <Icon name="archive" size={18} className="archived-banner-ic" />
+                <span className="archived-banner-text">{t('tasks.archived.banner')}</span>
+                <button className="btn btn-primary archived-banner-btn" onClick={() => archiveList(list.id, false)}>
+                  {t('shell.menu.unarchive')}
+                </button>
+              </div>
+            )}
             {canAdd && !phone && (
               <div className="list-add">
                 <QuickAdd defaults={viewDefaults(view, data)} key={view} />
@@ -326,6 +337,9 @@ function listKeys(e: KeyboardEvent, openDate: (ids: string[], anchor: Anchor) =>
     if (!order.length) return
     return move(selectAll(order, getSelection()))
   }
+
+  // an archived list is read-only: only moving around works there
+  if (u.view.startsWith('list:') && getData().lists.some((l) => l.archived && 'list:' + l.id === u.view)) return
 
   const ids = batchIds()
   if (!ids.length) return

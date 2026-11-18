@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': 'Filter',
   'tasks.sidebar.addFilter': 'Filter hinzufügen',
   'tasks.sidebar.filtersHint': 'Filter sammeln die Aufgaben, die deine Bedingungen erfüllen',
+  'tasks.sidebar.archived': 'Archivierte Listen',
+  'tasks.archived.banner': 'Diese Liste ist archiviert. Ihre Aufgaben sind schreibgeschützt und erscheinen nicht in intelligenten Listen, im Kalender, in der Matrix oder in der Suche.',
   'tasks.dnd.filtersReordered': 'Filter neu angeordnet',
   'tasks.menu.editFilter': 'Filter bearbeiten',
   'tasks.empty.filter': 'Keine Aufgabe passt zu diesem Filter',

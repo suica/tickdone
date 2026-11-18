@@ -46,6 +46,10 @@ export default {
   'shell.subtasks.reordered': 'サブタスクを並べ替えました',
   'shell.task.copyLink': 'リンクをコピー',
   'shell.toast.linkCopied': 'リンクをコピーしました',
+  'shell.menu.archive': 'アーカイブ',
+  'shell.menu.unarchive': 'アーカイブを解除',
+  'shell.toast.listArchived': '「{name}」をアーカイブしました',
+  'shell.toast.listUnarchived': '「{name}」をリストに戻しました',
   'shell.toast.taskNotFound': 'このタスクはもう存在しません',
   'shell.detail.editNotes': 'メモを編集',
 } satisfies Catalog<typeof en>

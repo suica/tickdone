@@ -155,6 +155,8 @@ export default {
   'misc.search.inDescription': 'Description',
   'misc.search.inSubtask': 'Subtask',
   'misc.search.inTag': 'Tag',
+  'misc.search.includeArchived': 'Include archived lists',
+  'misc.search.archived': 'Archived',
 
   // focus timer
   'misc.focus.pomodoro': 'Pomodoro',

@@ -27,6 +27,27 @@ export const PRIORITY: { v: Priority; name: MessageKey; color: string }[] = [
 ]
 export const priorityColor = (p: Priority) => PRIORITY.find((x) => x.v === p)!.color
 
+/** The ids of archived lists. */
+export const archivedListIds = (d: Pick<AppData, 'lists'>): Set<string> => new Set(d.lists.filter((l) => l.archived).map((l) => l.id))
+
+/** Whether a task belongs to an archived list. */
+export const inArchivedList = (t: Pick<Task, 'listId'>, d: Pick<AppData, 'lists'>) => d.lists.some((l) => l.archived && l.id === t.listId)
+
+/** A task that cannot be changed where it is shown: in the trash, or in an archived list. */
+export const isLocked = (t: Pick<Task, 'listId' | 'deleted'>, d: Pick<AppData, 'lists'>) => !!t.deleted || inArchivedList(t, d)
+
+/**
+ * The tasks views outside a list work with: not deleted and not in an archived list
+ * (smart lists, tags, filters, the calendar, the matrix and the counts).
+ */
+export function activeTasks(d: Pick<AppData, 'tasks' | 'lists'>): Task[] {
+  const archived = archivedListIds(d)
+  return d.tasks.filter((t) => !t.deleted && !archived.has(t.listId))
+}
+
+/** Lists in the sidebar's lists section and in "move to" menus: the ones not archived. */
+export const activeLists = (d: Pick<AppData, 'lists'>) => d.lists.filter((l) => !l.archived)
+
 /** Properties a new task gets from the view it is added in (a filter's view needs the data). */
 export function viewDefaults(view: string, d?: AppData): Partial<Task> {
   if (view.startsWith(FILTER_PREFIX)) {
@@ -50,7 +71,9 @@ export function defaultPrefs(view: string): ViewPrefs {
 
 /** The tasks a view shows, in two parts: open and completed. */
 export function tasksForView(view: string, d: AppData): { open: Task[]; done: Task[] } {
-  const live = d.tasks.filter((t) => !t.deleted)
+  // A list's own view shows all its tasks, archived or not; every other view leaves archived lists out.
+  const own = view.startsWith('list:') && d.lists.some((l) => 'list:' + l.id === view)
+  const live = own ? d.tasks.filter((t) => !t.deleted) : activeTasks(d)
   const today = todayStr()
   const week = fmt(addDays(new Date(), 6))
   const tomorrow = fmt(addDays(new Date(), 1))

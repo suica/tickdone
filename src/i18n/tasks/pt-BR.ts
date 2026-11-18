@@ -110,6 +110,8 @@ export default {
   'tasks.sidebar.filters': 'Filtros',
   'tasks.sidebar.addFilter': 'Adicionar filtro',
   'tasks.sidebar.filtersHint': 'Os filtros reúnem as tarefas que atendem às suas condições',
+  'tasks.sidebar.archived': 'Listas arquivadas',
+  'tasks.archived.banner': 'Esta lista está arquivada. As tarefas são somente leitura e ficam fora das listas inteligentes, do calendário, da matriz e da busca.',
   'tasks.dnd.filtersReordered': 'Filtros reordenados',
   'tasks.menu.editFilter': 'Editar filtro',
   'tasks.empty.filter': 'Nenhuma tarefa atende a este filtro',

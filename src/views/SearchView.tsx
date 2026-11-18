@@ -72,6 +72,9 @@ export default function SearchView() {
   const results = useRef<HTMLDivElement>(null)
   const [history, setHistory] = useState<string[]>(loadHistory)
   const query = ui.search
+  // tasks in archived lists are found only when asked for
+  const [withArchived, setWithArchived] = useState(false)
+  const hasArchived = data.lists.some((l) => l.archived)
   const q = query.trim().toLowerCase()
 
   useEffect(() => {
@@ -94,12 +97,13 @@ export default function SearchView() {
   const listName = (id: string) => (id === 'inbox' ? t('common.list.inbox') : (data.lists.find((l) => l.id === id)?.name ?? t('common.list.inbox')))
 
   const { groups, done, lists, tags, total } = useMemo(() => {
-    const empty = { groups: [] as { id: string; name: string; color?: string; hits: Hit[] }[], done: [] as Hit[], lists: [] as typeof data.lists, tags: [] as typeof data.tags, total: 0 }
+    const empty = { groups: [] as { id: string; name: string; color?: string; archived?: boolean; hits: Hit[] }[], done: [] as Hit[], lists: [] as typeof data.lists, tags: [] as typeof data.tags, total: 0 }
     if (!q) return empty
     const has = (s?: string) => !!s && s.toLowerCase().includes(q)
     const hits: Hit[] = []
+    const archived = new Set(withArchived ? [] : data.lists.filter((l) => l.archived).map((l) => l.id))
     for (const task of data.tasks) {
-      if (task.deleted) continue
+      if (task.deleted || archived.has(task.listId)) continue
       let extra: Hit['extra']
       let ok = has(task.title)
       if (has(task.content)) {
@@ -128,17 +132,17 @@ export default function SearchView() {
     }
     const groups = [...map.entries()]
       .sort((a, b) => (order.get(a[0]) ?? 0) - (order.get(b[0]) ?? 0))
-      .map(([id, hs]) => ({ id, name: listName(id), color: data.lists.find((l) => l.id === id)?.color, hits: hs }))
+      .map(([id, hs]) => ({ id, name: listName(id), color: data.lists.find((l) => l.id === id)?.color, archived: !!data.lists.find((l) => l.id === id)?.archived, hits: hs }))
     const done = hits.filter((h) => h.task.status !== 0).sort((a, b) => (b.task.completedAt ?? 0) - (a.task.completedAt ?? 0))
     return {
       groups,
       done,
-      lists: data.lists.filter((l) => has(l.name)),
+      lists: data.lists.filter((l) => has(l.name) && !archived.has(l.id)),
       tags: data.tags.filter((x) => has(x.name)),
       total: hits.length,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, data.tasks, data.lists, data.tags, locale])
+  }, [q, data.tasks, data.lists, data.tags, locale, withArchived])
 
   // Highlights the title text inside TaskRow (whose rendering we don't control) with the CSS Custom Highlight API
   useEffect(() => {
@@ -219,6 +223,12 @@ export default function SearchView() {
           )}
         </div>
 
+        {hasArchived && (
+          <label className="search-archived">
+            <input type="checkbox" checked={withArchived} onChange={(e) => setWithArchived(e.target.checked)} />
+            <span>{t('misc.search.includeArchived')}</span>
+          </label>
+        )}
         <div className="search-results" ref={results}>
           {!q ? (
             history.length > 0 ? (
@@ -282,6 +292,7 @@ export default function SearchView() {
                   <div className="search-group-head" style={stagger(fadeOrder.get('group:' + g.id))}>
                     <Icon name={g.id === 'inbox' ? 'inbox' : 'list'} size={14} style={{ color: g.color }} />
                     <span>{g.name}</span>
+                    {g.archived && <span className="search-archived-badge">{t('misc.search.archived')}</span>}
                     <span className="search-group-count">{g.hits.length}</span>
                   </div>
                   {g.hits.map(renderHit)}

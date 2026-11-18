@@ -46,6 +46,10 @@ export default {
   'shell.subtasks.reordered': 'Sous-tâches réorganisées',
   'shell.task.copyLink': 'Copier le lien',
   'shell.toast.linkCopied': 'Lien copié',
+  'shell.menu.archive': 'Archiver',
+  'shell.menu.unarchive': 'Désarchiver',
+  'shell.toast.listArchived': '« {name} » archivée',
+  'shell.toast.listUnarchived': '« {name} » est de retour dans vos listes',
   'shell.toast.taskNotFound': 'Cette tâche n’existe plus',
   'shell.detail.editNotes': 'Modifier les notes',
 } satisfies Catalog<typeof en>

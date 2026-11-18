@@ -148,6 +148,8 @@ export default {
   'misc.search.inDescription': '描述',
   'misc.search.inSubtask': '子任務',
   'misc.search.inTag': '標籤',
+  'misc.search.includeArchived': '包含已封存清單',
+  'misc.search.archived': '已封存',
 
   'misc.focus.pomodoro': '番茄鐘',
   'misc.focus.stopwatch': '正計時',

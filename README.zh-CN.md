@@ -50,6 +50,7 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
 - ✅ **任务与清单**：今天、明天、最近 7 天、收件箱，以及已完成、已放弃和垃圾桶；自建清单、文件夹和标签；子任务、备注、优先级、截止日期与时间、提醒和重复规则；置顶，每个任务都有右键菜单。
 - ⚡ **智能快速添加**：输入 `明天下午3点 开周会 !高 #重要`，TickDone 会设置好日期、时间、优先级和标签，输入时还会高亮识别出的部分；也支持英文，比如 `call mom tomorrow 3pm !high #family ~Personal`。
 - 🗂️ **列表和看板视图**，支持分组和排序。
+- 🗄️ **归档清单**：在清单菜单中归档已完成的清单。它会移到折叠的“已归档清单”分组，其中的任务不再出现在智能清单、日历、四象限和搜索中，打开时为只读，取消归档即可恢复。
 - 🔎 **过滤器**：组合清单、标签、优先级、日期（已过期、今天、本周、自定义范围……）、关键词和已完成任务，做成你自己的智能清单，并在侧栏显示名称、图标和颜色。
 - 📝 **描述支持 Markdown**：标题、粗体、斜体、删除线、代码、链接、列表、引用，以及可以直接勾选的清单；点击描述即可编辑原文。
 - 🔁 **重复规则**：每 N 天、周、月、年；指定星期几；每月第 N 天、最后一天或第 N 个/最后一个星期几；每年某一天；仅工作日。可在 N 次后或某天结束，从截止日期或完成日期起算，可跳过本次，快速添加时还能直接输入“每2周”“每月最后一个周五”。
@@ -162,7 +163,9 @@ npm run dev        # http://localhost:5173
 - [x] 任务备注支持 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 时间线视图 ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] 更多重复规则 ([#23](https://github.com/suica/tickdone/issues/23))
-- [ ] 归档清单 ([#24](https://github.com/suica/tickdone/issues/24))
+- [x] 归档清单 ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] 更多重复规则 ([#23](https://github.com/suica/tickdone/issues/23))
+- [x] 归档清单 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 无障碍 ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] 上千个任务依然流畅 ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] 主题和强调色 ([#27](https://github.com/suica/tickdone/issues/27))

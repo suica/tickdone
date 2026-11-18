@@ -62,7 +62,8 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - 📊 **Statistiques** : tâches terminées par jour, semaine ou mois, taux de réalisation, tâches en retard, répartition par liste, priorité et étiquette, et votre série ; temps de concentration par jour, sessions, temps par tâche et par liste, et votre meilleur moment de la journée ; taux de validation et séries de vos habitudes. Choisissez une semaine, un mois, une année, les 30 derniers jours ou votre propre période, et survolez ou touchez un graphique pour le détail.
 - 🔍 **Recherche** dans les tâches, les étiquettes et les listes.
 - ↩️ **Annulation** depuis la notification après avoir terminé, supprimé ou déplacé une tâche.
-- ⌨️ **Raccourcis clavier** et 🌙 **thème sombre**.
+- ⌨️ **Raccourcis clavier**.
+- 🎨 **Thèmes et couleurs d’accent** : clair, sombre ou comme le système, et huit couleurs d’accent pour les boutons, les cases, la sélection et les contours de focus. Les changements s’appliquent tout de suite, avec un aperçu dans les Réglages, et l’écran de démarrage et l’icône de l’onglet suivent.
 - ⏰ **Rappels** : à l'heure du rappel d'une tâche, TickDone affiche une carte pour la terminer, la reporter (5 min, 15 min, 1 heure, demain) ou l'ouvrir, et une notification système si vous l'autorisez. TickDone n'a pas de serveur : les rappels se déclenchent tant qu'il est ouvert dans un onglet, ou installé et en cours d'exécution ; ceux arrivés pendant qu'il était fermé s'affichent à la prochaine ouverture.
 - 📲 **Installez-le comme une application** : ajoutez TickDone à l'écran d'accueil ou au Dock depuis Paramètres → À propos ; il s'ouvre hors ligne après la première visite. Quand une nouvelle version sort, un message propose de recharger.
 - 💾 **Sauvegarde et restauration** : exportez tout dans un fichier JSON et réimportez-le.
@@ -169,7 +170,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [x] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
-- [ ] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
+- [x] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Abonnements à des calendriers ([#51](https://github.com/suica/tickdone/issues/51))
 

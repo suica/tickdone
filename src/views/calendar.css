@@ -328,7 +328,7 @@
 }
 .cal-cell.today .cal-daynum {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-weight: 600;
 }
 .cal-cell-items {
@@ -410,7 +410,7 @@
 }
 .cal-time-day.today .num {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-weight: 600;
 }
 .cal-allday {

@@ -371,7 +371,8 @@
   transform: translateX(16px);
 }
 .dlg-themes {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 112px));
   gap: 14px;
 }
 .dlg-theme {
@@ -381,14 +382,17 @@
   gap: 6px;
   font-size: 12px;
   color: var(--text-2);
+  text-align: center;
+  min-width: 0;
 }
 .dlg-theme-preview {
-  width: 104px;
-  height: 64px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 104 / 64;
   border-radius: 8px;
   border: 2px solid var(--border);
-  display: flex;
   overflow: hidden;
+  transition: border-color var(--dur) var(--ease-out);
 }
 .dlg-theme.on .dlg-theme-preview {
   border-color: var(--primary);
@@ -396,23 +400,138 @@
 .dlg-theme.on {
   color: var(--primary);
 }
-.dlg-theme-preview i {
+/* The miniature app: a sidebar with the selected entry, a ticked task, two lines of text and a button,
+   all in the accent being shown (--pv-*, set per theme from src/theme.ts) */
+.dlg-theme-pic {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.dlg-theme-pic i {
   width: 30%;
+  padding: 18% 8% 0;
 }
-.dlg-theme-preview b {
+.dlg-theme-pic em {
+  display: block;
+  height: 7px;
+  border-radius: 3px;
+  background: var(--pv-soft);
+}
+.dlg-theme-pic b {
   flex: 1;
+  position: relative;
+  padding: 14% 10% 0;
 }
-.dlg-theme.light i {
+.dlg-theme-pic u {
+  position: absolute;
+  left: 10%;
+  top: 14%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pv-primary);
+}
+.dlg-theme-pic s {
+  display: block;
+  height: 4px;
+  margin: 2px 0 7px 13px;
+  border-radius: 2px;
+}
+.dlg-theme-pic s.short {
+  width: 55%;
+}
+.dlg-theme-pic .pv-btn {
+  position: absolute;
+  right: 10%;
+  bottom: 14%;
+  width: 34%;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--pv-primary);
+}
+.dlg-theme-pic.light i {
   background: #f3f3f3;
 }
-.dlg-theme.light b {
+.dlg-theme-pic.light b {
   background: #fff;
 }
-.dlg-theme.dark i {
+.dlg-theme-pic.light s {
+  background: #e2e2e2;
+}
+.dlg-theme-pic.dark i {
   background: #151515;
 }
-.dlg-theme.dark b {
+.dlg-theme-pic.dark b {
   background: #1c1c1c;
+}
+.dlg-theme-pic.dark s {
+  background: #343434;
+}
+/* "System": the light picture with the dark one over its lower-right half */
+.dlg-theme-half {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.dlg-theme-pic,
+.dlg-theme-pic * {
+  transition: background-color var(--dur) var(--ease-out);
+}
+.dlg-accent-row {
+  margin-top: 12px;
+  gap: 16px;
+}
+.dlg-accents {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* The button is the touch target; the swatch is drawn inside it so phones get 40 px targets */
+.dlg-accent {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dlg-accent::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--sw);
+  box-shadow: 0 0 0 2px var(--bg-pop), 0 0 0 2px transparent;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+}
+.dlg-accent:hover::before {
+  transform: scale(1.1);
+}
+.dlg-accent.on::before {
+  box-shadow: 0 0 0 2px var(--bg-pop), 0 0 0 4px var(--sw);
+}
+.dlg-accent:focus-visible {
+  outline: 2px solid var(--text-3);
+  outline-offset: 3px;
+}
+.dlg-accent svg {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--sw-on);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur) var(--ease-spring);
+}
+.dlg-accent.on svg {
+  opacity: 1;
+  transform: none;
 }
 .dlg-stats {
   font-size: 12px;
@@ -484,7 +603,7 @@
   border-radius: 14px;
   margin: 0 auto 12px;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 28px;
   font-weight: 700;
   display: flex;
@@ -654,10 +773,23 @@
     transform: translateX(18px);
   }
   .dlg-themes {
-    gap: 12px;
+    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .dlg-theme-preview {
-    width: 96px;
+  .dlg-accent-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dlg-accents {
+    justify-content: space-between;
+    gap: 0;
+  }
+  .dlg-accent {
+    width: 40px;
+    height: 40px;
+  }
+  .dlg-accent::before {
+    inset: 6px;
   }
   .dlg-keys-row {
     min-height: 44px;

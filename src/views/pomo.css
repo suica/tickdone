@@ -1,6 +1,6 @@
 .pomo-view {
   --pomo-accent: var(--primary);
-  --pomo-ring-bg: rgba(71, 114, 250, 0.1);
+  --pomo-ring-bg: var(--primary-soft);
   background: var(--bg);
 }
 .pomo-view.is-break {

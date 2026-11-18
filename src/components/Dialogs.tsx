@@ -3,7 +3,9 @@ import { LIST_COLORS, addFilter, addList, deleteFilter, deleteList, deleteTag, r
 import type { AppData, FilterDate, Priority, SavedFilter, Settings } from '../types'
 import { FILTER_DATES, FILTER_ICONS, FILTER_PREFIX, filterClock, filterMatcher, conditionCount } from '../filters'
 import { PRIORITY } from '../views'
-import { isPhone, usePhone } from '../viewport'
+import { isPhone, useMedia, usePhone } from '../viewport'
+import { ACCENT_IDS, accentColors, DEFAULT_ACCENT, isAccent, resolveTheme, type AccentId, type Resolved, type ThemeMode } from '../theme'
+import { SYSTEM_DARK } from '../look'
 import { LOCALES, setLocale, t, useLocale, useT, type Locale, type MessageKey } from '../i18n'
 import { dayName } from './dateLabels'
 import { Flag, Icon } from './Icon'
@@ -819,6 +821,115 @@ function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   return <button type="button" role="switch" aria-checked={checked} className={'dlg-switch' + (checked ? ' on' : '')} onClick={() => onChange(!checked)} />
 }
 
+const ACCENT_NAME: Record<AccentId, MessageKey> = {
+  blue: 'misc.accent.blue',
+  indigo: 'misc.accent.indigo',
+  violet: 'misc.accent.violet',
+  pink: 'misc.accent.pink',
+  green: 'misc.accent.green',
+  moss: 'misc.accent.moss',
+  cocoa: 'misc.accent.cocoa',
+  graphite: 'misc.accent.graphite',
+}
+
+/** A small picture of the app in one theme, drawn in the given accent: sidebar, a ticked task and a button. */
+function ThemePreview({ theme, accent }: { theme: Resolved; accent: AccentId }) {
+  const c = accentColors(accent, theme)
+  return (
+    <span className={'dlg-theme-pic ' + theme} style={{ '--pv-primary': c.primary, '--pv-soft': c.soft, '--pv-on': c.onPrimary } as CSSProperties}>
+      <i>
+        <em />
+      </i>
+      <b>
+        <u />
+        <s />
+        <s className="short" />
+        <span className="pv-btn" />
+      </b>
+    </span>
+  )
+}
+
+/** Theme cards (light, dark, follow the system) and accent swatches. Both apply at once; pointing at a
+    swatch previews its accent on the theme cards first. */
+function Appearance() {
+  const t = useT()
+  const s = useData().settings
+  const systemDark = useMedia(SYSTEM_DARK)
+  const accent: AccentId = isAccent(s.accent) ? s.accent : DEFAULT_ACCENT
+  const [hover, setHover] = useState<AccentId | null>(null)
+  const shown = hover ?? accent
+  const resolved = resolveTheme(s.theme, systemDark)
+  const modes: [ThemeMode, string][] = [
+    ['light', t('misc.settings.light')],
+    ['dark', t('misc.settings.dark')],
+    ['system', t('misc.settings.system')],
+  ]
+  return (
+    <>
+      <div className="dlg-themes" role="radiogroup" aria-label={t('misc.settings.theme')}>
+        {modes.map(([v, l]) => (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={s.theme === v}
+            data-theme-mode={v}
+            className={'dlg-theme' + (s.theme === v ? ' on' : '')}
+            onClick={() => setSettings({ theme: v })}
+          >
+            <span className="dlg-theme-preview">
+              {v === 'system' ? (
+                <>
+                  <ThemePreview theme="light" accent={shown} />
+                  <span className="dlg-theme-half">
+                    <ThemePreview theme="dark" accent={shown} />
+                  </span>
+                </>
+              ) : (
+                <ThemePreview theme={v} accent={shown} />
+              )}
+            </span>
+            {l}
+          </button>
+        ))}
+      </div>
+      <div className="dlg-row dlg-accent-row">
+        <div>
+          <div className="dlg-row-label">{t('misc.settings.accent')}</div>
+          <div className="dlg-row-desc">{t(ACCENT_NAME[shown])}</div>
+        </div>
+        <div className="dlg-accents" role="radiogroup" aria-label={t('misc.settings.accent')} onPointerLeave={() => setHover(null)}>
+          {ACCENT_IDS.map((id) => {
+            const c = accentColors(id, resolved)
+            return (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={accent === id}
+                aria-label={t(ACCENT_NAME[id])}
+                title={t(ACCENT_NAME[id])}
+                data-accent={id}
+                className={'dlg-accent' + (accent === id ? ' on' : '')}
+                style={{ '--sw': c.primary, '--sw-on': c.onPrimary } as CSSProperties}
+                onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(id)}
+                onFocus={() => setHover(id)}
+                onBlur={() => setHover(null)}
+                onClick={() => setSettings({ accent: id })}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M4 8.2l2.6 2.6L12 5.4" />
+                </svg>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </>
+  )
+}
+
 function GeneralTab() {
   const t = useT()
   const locale = useLocale()
@@ -826,22 +937,7 @@ function GeneralTab() {
   return (
     <>
       <div className="dlg-sub">{t('misc.settings.appearance')}</div>
-      <div className="dlg-themes">
-        {(
-          [
-            ['light', t('misc.settings.light')],
-            ['dark', t('misc.settings.dark')],
-          ] as const
-        ).map(([v, l]) => (
-          <button key={v} className={'dlg-theme ' + v + (s.theme === v ? ' on' : '')} onClick={() => setSettings({ theme: v })}>
-            <span className="dlg-theme-preview">
-              <i />
-              <b />
-            </span>
-            {l}
-          </button>
-        ))}
-      </div>
+      <Appearance />
       <Row label={t('misc.settings.language')}>
         <select className="input dlg-select dlg-lang" value={locale} aria-label={t('misc.settings.language')} onChange={(e) => setLocale(e.target.value as Locale)}>
           {LOCALES.map((l) => (

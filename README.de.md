@@ -62,7 +62,8 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - 📊 **Statistik**: erledigte Aufgaben pro Tag, Woche oder Monat, Erledigungsquote, überfällige Aufgaben, Aufteilung nach Liste, Priorität und Schlagwort sowie deine Serie; Fokuszeit pro Tag, Sitzungen, Zeit pro Aufgabe und Liste und deine beste Tageszeit; Check-in-Quote und Serien deiner Gewohnheiten. Wähle eine Woche, einen Monat, ein Jahr, die letzten 30 Tage oder einen eigenen Zeitraum, und fahre über ein Diagramm oder tippe darauf für Details.
 - 🔍 **Suche** in Aufgaben, Tags und Listen.
 - ↩️ **Rückgängig** über die Meldung, nachdem du eine Aufgabe erledigt, gelöscht oder verschoben hast.
-- ⌨️ **Tastenkürzel** und 🌙 **dunkles Design**.
+- ⌨️ **Tastenkürzel**.
+- 🎨 **Designs und Akzentfarben**: hell, dunkel oder wie das System, dazu acht Akzentfarben für Schaltflächen, Kontrollkästchen, Auswahl und Fokusrahmen. Änderungen wirken sofort, mit Live-Vorschau in den Einstellungen, und Startbildschirm und Tab-Symbol ziehen mit.
 - ⏰ **Erinnerungen**: Zur Erinnerungszeit einer Aufgabe zeigt TickDone eine Karte zum Erledigen, Verschieben (5 Min., 15 Min., 1 Std., morgen) oder Öffnen und, wenn du es erlaubst, eine Systembenachrichtigung. TickDone hat keinen Server: Erinnerungen kommen, solange es in einem Tab geöffnet oder installiert ist und läuft; was fällig wurde, während es geschlossen war, erscheint beim nächsten Öffnen.
 - 📲 **Als App installieren**: Füge TickDone unter Einstellungen → Über zum Startbildschirm oder Dock hinzu; nach dem ersten Besuch startet es auch offline. Gibt es eine neue Version, bietet ein Hinweis das Neuladen an.
 - 💾 **Sichern und Wiederherstellen**: Exportiere alles als JSON-Datei und importiere sie später wieder.
@@ -169,7 +170,7 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [x] Listen archivieren ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Barrierefreiheit ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Schnell auch bei Tausenden von Aufgaben ([#26](https://github.com/suica/tickdone/issues/26))
-- [ ] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))
+- [x] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Kalender: Aufgaben ohne Datum einplanen, Agenda-Ansicht ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Kalenderabos ([#51](https://github.com/suica/tickdone/issues/51))
 

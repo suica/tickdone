@@ -43,7 +43,7 @@
 .sel-check.on {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   transform: scale(1.06);
 }
 .task-row.multi .task-title {
@@ -60,7 +60,7 @@
   padding: 0 6px;
   border-radius: 11px;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 12px;
   font-weight: 600;
   line-height: 22px;

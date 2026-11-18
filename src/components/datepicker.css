@@ -180,7 +180,7 @@
 .dp-day.sel span,
 .dp-day.sel:hover span {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 /* Time / reminder / repeat rows */
@@ -349,7 +349,7 @@
 }
 .dp-custom-week button.on {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 .dp-custom-preview {
   padding: 0 12px 10px;

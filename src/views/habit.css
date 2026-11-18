@@ -527,7 +527,7 @@ body.habit-dragging * {
   align-items: center;
   justify-content: center;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   flex-shrink: 0;
 }
 .habit-tpl:hover .habit-tpl-add {
@@ -615,7 +615,7 @@ body.habit-dragging * {
 .habit-seg button.on {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 .habit-reminders {
   display: flex;

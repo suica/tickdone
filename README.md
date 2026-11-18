@@ -58,6 +58,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - 🧭 **Eisenhower matrix**: sort tasks by urgency and importance, and drag them between quadrants to change their priority.
 - 🍅 **Focus timer** with Pomodoro and stopwatch modes and a record of past sessions.
 - 🔥 **Habit tracker** with check-ins, streaks and statistics.
+- 📊 **Statistics**: tasks completed per day, week or month, completion rate, overdue tasks, a breakdown by list, priority and tag, and your streak; focus time per day, sessions, time per task and list, and your best time of day; habit check-in rates and streaks. Pick a week, a month, a year, the last 30 days or your own range, and hover or tap a chart for the details.
 - 🔍 **Search** across tasks, tags and lists.
 - ↩️ **Undo** from the toast after completing, deleting or moving a task.
 - ⌨️ **Keyboard shortcuts** and a 🌙 **dark theme**.
@@ -158,7 +159,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [x] Reminder notifications ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] Install as an app and work offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] Saved filters ([#19](https://github.com/suica/tickdone/issues/19))
-- [ ] Statistics for tasks, focus and habits ([#20](https://github.com/suica/tickdone/issues/20))
+- [x] Statistics for tasks, focus and habits ([#20](https://github.com/suica/tickdone/issues/20))
 - [x] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Timeline view ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))

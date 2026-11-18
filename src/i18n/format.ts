@@ -37,3 +37,20 @@ export function fmtTime(hhmm: string) {
 }
 /** Numbers with the locale's grouping, e.g. "1,234" / "1 234". */
 export const fmtNumber = (n: number) => new Intl.NumberFormat(getLocale()).format(n)
+/** "18", "18日" — the day of the month alone. */
+export const fmtDayNum = (d: Date) => dtf({ day: 'numeric' }).format(d)
+/** "Nov", "11月" */
+export const fmtMonthShort = (d: Date) => dtf({ month: 'short' }).format(d)
+/** "2026", "2026年" */
+export const fmtYear = (d: Date) => dtf({ year: 'numeric' }).format(d)
+/** "Wed, Nov 18", "11月18日周三" */
+export const fmtWeekdayDate = (d: Date) => dtf({ weekday: 'short', month: 'short', day: 'numeric' }).format(d)
+/** "Nov 16 – 22, 2026", "2026年11月16日至22日": a span of days, with the parts both ends share written once. */
+export const fmtDateRange = (start: Date, end: Date) => {
+  const f = dtf({ year: 'numeric', month: 'short', day: 'numeric' })
+  return start.getTime() === end.getTime() ? f.format(start) : f.formatRange(start, end)
+}
+/** "3 PM", "15时" — an hour of the day (0–23). */
+export const fmtHour = (h: number) => dtf({ hour: 'numeric' }).format(new Date(2000, 0, 1, h))
+/** "42%", "42 %" — `share` is 0–1. */
+export const fmtPercent = (share: number) => new Intl.NumberFormat(getLocale(), { style: 'percent', maximumFractionDigits: 0 }).format(share)

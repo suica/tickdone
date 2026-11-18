@@ -623,7 +623,8 @@ function shortcuts(): { group: string; items: [string, string[]][] }[] {
         [t('common.module.matrix'), ['Alt', '3']],
         [t('common.module.focus'), ['Alt', '4']],
         [t('common.module.habits'), ['Alt', '5']],
-        [t('common.search'), ['Alt', '6']],
+        [t('common.module.stats'), ['Alt', '6']],
+        [t('common.search'), ['Alt', '7']],
       ],
     },
     {

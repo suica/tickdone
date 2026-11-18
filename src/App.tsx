@@ -23,6 +23,7 @@ import MatrixView from './views/MatrixView'
 import PomoView from './views/PomoView'
 import HabitView from './views/HabitView'
 import SearchView from './views/SearchView'
+import StatsView from './views/StatsView'
 
 const RAIL: { id: Module; icon: string; title: MessageKey }[] = [
   { id: 'tasks', icon: 'check', title: 'common.module.tasks' },
@@ -30,6 +31,7 @@ const RAIL: { id: Module; icon: string; title: MessageKey }[] = [
   { id: 'matrix', icon: 'matrix', title: 'common.module.matrix' },
   { id: 'pomo', icon: 'pomo', title: 'common.module.focus' },
   { id: 'habit', icon: 'habit', title: 'common.module.habits' },
+  { id: 'stats', icon: 'stats', title: 'common.module.stats' },
   { id: 'search', icon: 'search', title: 'common.search' },
 ]
 /** Phone bottom bar: every module except search (search lives at the top of the drawer). */
@@ -156,6 +158,7 @@ export default function App() {
         {ui.module === 'matrix' && <MatrixView />}
         {ui.module === 'pomo' && <PomoView />}
         {ui.module === 'habit' && <HabitView />}
+        {ui.module === 'stats' && <StatsView />}
         {ui.module === 'search' && <SearchView />}
       </div>
 

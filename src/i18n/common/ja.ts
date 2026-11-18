@@ -43,4 +43,5 @@ export default {
   'common.module.matrix': 'マトリクス',
   'common.module.focus': '集中',
   'common.module.habits': '習慣',
+  'common.module.stats': '統計',
 } satisfies Catalog<typeof en>

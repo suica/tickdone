@@ -58,6 +58,7 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 - 🧭 **아이젠하워 매트릭스**: 긴급도와 중요도에 따라 할 일을 분류하고, 사분면 사이로 끌어 옮기면 우선순위가 바뀝니다.
 - 🍅 **집중 타이머**: 뽀모도로와 스톱워치 모드, 지난 세션 기록을 제공합니다.
 - 🔥 **습관 트래커**: 체크인, 연속 달성 기록, 통계를 제공합니다.
+- 📊 **통계**: 일·주·월별 완료한 작업 수, 완료율, 기한이 지난 작업, 목록·우선순위·태그별 분포, 연속 기록, 하루 집중 시간, 세션 수, 작업·목록별 집중 시간, 가장 집중한 시간대, 습관 체크인 비율과 연속 기록을 보여 줍니다. 주, 월, 년, 최근 30일 또는 직접 정한 기간으로 볼 수 있고, 차트에 마우스를 올리거나 탭하면 자세한 내용이 나옵니다.
 - 🔍 **검색**: 할 일, 태그, 목록을 한 번에 찾습니다.
 - ↩️ **실행 취소**: 할 일을 완료하거나 삭제하거나 옮긴 뒤 알림에서 되돌릴 수 있습니다.
 - ⌨️ **키보드 단축키**와 🌙 **다크 테마**.
@@ -158,7 +159,7 @@ npm run dev        # http://localhost:5173
 - [x] 알림 시간에 맞춘 알림 표시 ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] 앱으로 설치하고 오프라인에서도 사용 ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] 저장된 필터 ([#19](https://github.com/suica/tickdone/issues/19))
-- [ ] 작업, 집중 타이머, 습관 트래커 통계 ([#20](https://github.com/suica/tickdone/issues/20))
+- [x] 작업, 집중 타이머, 습관 트래커 통계 ([#20](https://github.com/suica/tickdone/issues/20))
 - [x] 작업 메모에서 Markdown 지원 ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 타임라인 보기 ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))

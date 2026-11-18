@@ -41,4 +41,5 @@ export default {
   'common.module.matrix': 'Matrix',
   'common.module.focus': 'Focus',
   'common.module.habits': 'Habits',
+  'common.module.stats': 'Statistics',
 } as const

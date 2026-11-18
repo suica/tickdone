@@ -12,6 +12,7 @@ import { GITHUB_URL } from './links'
 import { getData, getUI, setUI, toast, undoToast, useData, useUI, type Module } from './store'
 import { taskIdFromHash, viewOfTask } from './taskLink'
 import { usePhone } from './viewport'
+import { startFeedSync } from './feeds'
 import CalendarView from './views/CalendarView'
 import MatrixView from './views/MatrixView'
 import PomoView from './views/PomoView'
@@ -49,6 +50,9 @@ export default function App() {
   const data = useData()
   const phone = usePhone()
   const t = useT()
+
+  // Subscribed calendars: show the cached copies and read them again when stale.
+  useEffect(() => startFeedSync(), [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.theme

@@ -59,6 +59,9 @@ const P: Record<string, string> = {
   sun2: 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
   moon: 'M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z',
   archive: 'M3 5h18v4H3zM5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4',
+  refresh: 'M20 12a8 8 0 1 1-2.6-5.9L20 8.5M20 3.5v5h-5',
+  place: 'M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 0 1 13 0c0 5.2-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  feed: 'M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8M6 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
 }
 
 // Filled marks (drawn with fill=currentColor in their own viewBox)

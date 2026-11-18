@@ -51,4 +51,6 @@ export default {
   'calendar.matrix.howTo1': '4 つの象限はそれぞれ優先度（高・中・低・なし）に対応します。',
   'calendar.matrix.howTo2': 'タスクを別の象限にドラッグすると優先度が変わります。',
   'calendar.matrix.howTo3': '象限の ··· で表示する期間と並び順を選べます。',
+  'calendar.event.label': '{title}（{calendar}）',
+  'calendar.event.readOnly': '閲覧のみ',
 } satisfies Catalog<typeof en>

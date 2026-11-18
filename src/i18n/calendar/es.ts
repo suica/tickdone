@@ -51,4 +51,6 @@ export default {
   'calendar.matrix.howTo1': 'Cada cuadrante es una prioridad: alta, media, baja y ninguna.',
   'calendar.matrix.howTo2': 'Arrastra una tarea a otro cuadrante para cambiar su prioridad.',
   'calendar.matrix.howTo3': 'Usa ··· en un cuadrante para elegir qué fechas muestra y cómo se ordena.',
+  'calendar.event.label': '{title}, de {calendar}',
+  'calendar.event.readOnly': 'Solo lectura',
 } satisfies Catalog<typeof en>

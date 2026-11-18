@@ -51,4 +51,6 @@ export default {
   'calendar.matrix.howTo1': '각 사분면은 우선순위(높음, 보통, 낮음, 없음)에 해당합니다.',
   'calendar.matrix.howTo2': '작업을 다른 사분면으로 끌면 우선순위가 바뀝니다.',
   'calendar.matrix.howTo3': '사분면의 ···에서 표시 기간과 정렬 방식을 고를 수 있습니다.',
+  'calendar.event.label': '{title}, {calendar}의 일정',
+  'calendar.event.readOnly': '읽기 전용',
 } satisfies Catalog<typeof en>

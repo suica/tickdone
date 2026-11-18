@@ -51,4 +51,6 @@ export default {
   'calendar.matrix.howTo1': '每个象限对应一个优先级：高、中、低、无。',
   'calendar.matrix.howTo2': '把任务拖到另一个象限即可修改优先级。',
   'calendar.matrix.howTo3': '点象限上的 ··· 可选择显示范围和排序方式。',
+  'calendar.event.label': '{title}，来自 {calendar}',
+  'calendar.event.readOnly': '只读',
 } satisfies Catalog<typeof en>

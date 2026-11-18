@@ -6,6 +6,7 @@ import { LOCALES, setLocale, t, useLocale, useT, type Locale, type MessageKey } 
 import { dayName } from './dateLabels'
 import { Icon } from './Icon'
 import { usePresence } from './motion'
+import { SubscriptionsTab } from './Subscriptions'
 import './dialogs.css'
 
 const close = () => setUI({ dialog: undefined })
@@ -442,9 +443,10 @@ function ShortcutsDialog() {
 }
 
 // ---------------- settings ----------------
-type Tab = 'general' | 'pomo' | 'data' | 'keys' | 'about'
+type Tab = 'general' | 'feeds' | 'pomo' | 'data' | 'keys' | 'about'
 const TABS: { id: Tab; label: MessageKey; icon: string }[] = [
   { id: 'general', label: 'misc.settings.general', icon: 'settings' },
+  { id: 'feeds', label: 'misc.feeds.tab', icon: 'feed' },
   { id: 'pomo', label: 'common.module.focus', icon: 'pomo' },
   { id: 'data', label: 'misc.settings.data', icon: 'inbox' },
   { id: 'keys', label: 'misc.settings.shortcuts', icon: 'keyboard' },
@@ -517,6 +519,7 @@ function SettingsDialog() {
             </div>
             <div className="dlg-set-body">
               {tab === 'general' && <GeneralTab />}
+              {tab === 'feeds' && <SubscriptionsTab />}
               {tab === 'pomo' && <PomoTab />}
               {tab === 'data' && <DataTab />}
               {tab === 'keys' && <ShortcutList />}

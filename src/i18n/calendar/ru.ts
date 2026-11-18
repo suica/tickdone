@@ -51,4 +51,6 @@ export default {
   'calendar.matrix.howTo1': 'Каждый квадрант — это приоритет: высокий, средний, низкий и без приоритета.',
   'calendar.matrix.howTo2': 'Перетащите задачу в другой квадрант, чтобы изменить её приоритет.',
   'calendar.matrix.howTo3': 'Через ··· у квадранта можно выбрать период и сортировку.',
+  'calendar.event.label': '{title}, из календаря «{calendar}»',
+  'calendar.event.readOnly': 'Только чтение',
 } satisfies Catalog<typeof en>

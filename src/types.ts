@@ -117,6 +117,17 @@ export interface Settings {
   showDetails?: boolean
 }
 
+/** A calendar the user subscribed to by its iCal address; its events are shown read-only. */
+export interface CalendarSubscription {
+  id: string
+  /** Empty until the user names it: the feed's own name or its host is shown instead. */
+  name: string
+  /** https:// or http:// (webcal:// is stored as https://) */
+  url: string
+  color: string
+  hidden?: boolean
+}
+
 export interface AppData {
   version: 1
   tasks: Task[]
@@ -126,6 +137,8 @@ export interface AppData {
   habits: Habit[]
   focus: FocusRecord[]
   settings: Settings
+  /** Subscribed calendars; missing in data saved before they existed. */
+  subscriptions?: CalendarSubscription[]
 }
 
 export type GroupBy = 'date' | 'list' | 'priority' | 'tag' | 'none' | 'section'

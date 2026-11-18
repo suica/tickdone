@@ -50,6 +50,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - ⚡ **Entrada rápida inteligente**: escribe `call mom tomorrow 3pm !high #family ~Personal` y TickDone asigna la fecha, la hora, la prioridad, la etiqueta y la lista, y resalta cada parte mientras escribes. También entiende chino.
 - 🗂️ **Vistas de lista y kanban**, con agrupación y ordenación.
 - 📅 **Calendario** con vistas de mes, semana, día y lista. Arrastra una tarea a otro día u otra hora, o arrastra el borde inferior de un bloque para cambiar su duración.
+- 🔔 **Suscripciones a calendarios**: suscríbete a cualquier calendario que publique una dirección iCal (.ics o webcal://), como los de trabajo, clase, equipo o festivos, y ve sus eventos en el calendario, en solo lectura y con su propio color. Se actualizan solos y siguen disponibles sin conexión.
 - 🧭 **Matriz de Eisenhower**: clasifica las tareas según su urgencia e importancia, y arrástralas entre cuadrantes para cambiar su prioridad.
 - 🍅 **Temporizador de concentración** con modos Pomodoro y cronómetro, y un historial de sesiones anteriores.
 - 🔥 **Seguimiento de hábitos** con registros, rachas y estadísticas.
@@ -149,6 +150,7 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [ ] Rápido incluso con miles de tareas ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Temas y colores de acento ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] Calendario: planificar tareas sin fecha, vista de agenda ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Suscripciones a calendarios ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Tecnologías
 

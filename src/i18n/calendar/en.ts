@@ -50,4 +50,8 @@ export default {
   'calendar.matrix.howTo1': 'Each quadrant is a priority: high, medium, low and none.',
   'calendar.matrix.howTo2': 'Drag a task into another quadrant to change its priority.',
   'calendar.matrix.howTo3': 'Use ··· on a quadrant to choose which dates it shows and how it is sorted.',
+
+  // events of subscribed calendars
+  'calendar.event.label': '{title}, from {calendar}',
+  'calendar.event.readOnly': 'Read-only',
 } as const

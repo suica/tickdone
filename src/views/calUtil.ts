@@ -4,6 +4,7 @@ import { setUI, useData } from '../store'
 import { getLocale, t } from '../i18n'
 import { fmtMonthDay, fmtMonthYear, fmtTime, fmtWeekday } from '../i18n/format'
 import type { Task } from '../types'
+import type { FeedEvent } from '../feeds'
 import type { Anchor } from '../components/Popover'
 
 /** Length of a timed task that has no duration yet. */
@@ -97,3 +98,21 @@ export const isTyping = (el: EventTarget | null) => {
   return !!n && (n.tagName === 'INPUT' || n.tagName === 'TEXTAREA' || n.isContentEditable)
 }
 
+const minOf = (d: Date) => d.getHours() * 60 + d.getMinutes()
+const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString()
+
+/** When an event happens, in the current language: a day, a range of days, or a day with a time range. */
+export function eventWhen(ev: FeedEvent): string {
+  const s = new Date(ev.start)
+  if (ev.allDay) {
+    const last = new Date(Math.max(ev.start, ev.end - 1))
+    if (sameDay(s, last)) return `${withWeekday(s)} · ${t('calendar.allDay')}`
+    return t('calendar.timeRange', { start: withWeekday(s), end: withWeekday(last) })
+  }
+  const e = new Date(ev.end)
+  if (ev.end <= ev.start) return `${withWeekday(s)} ${timeLabel(minOf(s))}`
+  // Ends at midnight: still the same day
+  const endsAtMidnight = minOf(e) === 0 && ev.end - ev.start <= 86_400_000
+  if (sameDay(s, e) || endsAtMidnight) return `${withWeekday(s)} ${timeRange(minOf(s), endsAtMidnight && !sameDay(s, e) ? 24 * 60 : minOf(e))}`
+  return t('calendar.timeRange', { start: `${withWeekday(s)} ${timeLabel(minOf(s))}`, end: `${withWeekday(e)} ${timeLabel(minOf(e))}` })
+}

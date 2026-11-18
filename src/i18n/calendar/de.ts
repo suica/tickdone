@@ -51,4 +51,6 @@ export default {
   'calendar.matrix.howTo1': 'Jeder Quadrant steht für eine Priorität: hoch, mittel, niedrig und keine.',
   'calendar.matrix.howTo2': 'Zieh eine Aufgabe in einen anderen Quadranten, um ihre Priorität zu ändern.',
   'calendar.matrix.howTo3': 'Über ··· eines Quadranten wählst du den Zeitraum und die Sortierung.',
+  'calendar.event.label': '{title}, aus {calendar}',
+  'calendar.event.readOnly': 'Nur lesen',
 } satisfies Catalog<typeof en>

@@ -1017,7 +1017,7 @@ body.dnd-active * {
   height: 52px;
   border-radius: 50%;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1129,7 +1129,7 @@ body.dnd-active * {
   height: 40px;
   border-radius: 50%;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;

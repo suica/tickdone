@@ -2,6 +2,11 @@
   --primary: #4772fa;
   --primary-soft: rgba(71, 114, 250, 0.1);
   --primary-soft2: rgba(71, 114, 250, 0.18);
+  /* Accent tokens are derived per preset in src/theme.ts and set on the root element; these are the
+     default blue. --on-primary is the label colour on accent fills, the other two draw the app mark. */
+  --on-primary: #ffffff;
+  --accent-ring: #dfe7ff;
+  --accent-mark: #4772fa;
   /* Priority colours mark the checkbox border only. Low is a teal kept apart from the accent blue that dates
      and links use; "none" is a mid grey so an open checkbox doesn't read as disabled. */
   --p-high: #d52b24;
@@ -71,6 +76,7 @@
   --primary: #6388fb;
   --primary-soft: rgba(99, 136, 251, 0.16);
   --primary-soft2: rgba(99, 136, 251, 0.26);
+  --accent-ring: #2c3a66;
   /* Reds a step lighter than in light mode so text in them stays readable on near-black */
   --danger: #f25555;
   --overdue: #f25555;
@@ -351,7 +357,7 @@ select {
 .btn-primary {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 .btn-primary:hover {
   background: var(--primary);

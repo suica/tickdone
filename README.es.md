@@ -62,7 +62,8 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - 📊 **Estadísticas**: tareas completadas por día, semana o mes, tasa de finalización, tareas vencidas, desglose por lista, prioridad y etiqueta, y tu racha; tiempo de concentración por día, sesiones, tiempo por tarea y por lista, y tu mejor momento del día; tasa de registro y rachas de tus hábitos. Elige una semana, un mes, un año, los últimos 30 días o tu propio periodo, y pasa el cursor o toca un gráfico para ver los detalles.
 - 🔍 **Búsqueda** en tareas, etiquetas y listas.
 - ↩️ **Deshacer** desde el aviso después de completar, eliminar o mover una tarea.
-- ⌨️ **Atajos de teclado** y 🌙 **tema oscuro**.
+- ⌨️ **Atajos de teclado**.
+- 🎨 **Temas y colores de énfasis**: claro, oscuro o según el sistema, y ocho colores de énfasis para botones, casillas, selección y anillos de foco. Los cambios se aplican al instante, con vista previa en Ajustes, y la pantalla de inicio y el icono de la pestaña los siguen.
 - ⏰ **Recordatorios**: a la hora del recordatorio de una tarea, TickDone muestra una tarjeta para completarla, posponerla (5 min, 15 min, 1 hora, mañana) o abrirla, y una notificación del sistema si la permites. TickDone no tiene servidor, así que los recordatorios suenan mientras está abierto en una pestaña o instalado y en ejecución; los que llegaron con la app cerrada aparecen al volver a abrirla.
 - 📲 **Instálalo como app**: añade TickDone a la pantalla de inicio o al dock desde Ajustes → Acerca de, y se abre sin conexión después de la primera visita. Cuando hay una versión nueva, un aviso ofrece recargar.
 - 💾 **Copia de seguridad y restauración**: exporta todo a un archivo JSON y vuelve a importarlo.
@@ -169,7 +170,7 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accesibilidad ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Rápido incluso con miles de tareas ([#26](https://github.com/suica/tickdone/issues/26))
-- [ ] Temas y colores de acento ([#27](https://github.com/suica/tickdone/issues/27))
+- [x] Temas y colores de acento ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendario: planificar tareas sin fecha, vista de agenda ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Suscripciones a calendarios ([#51](https://github.com/suica/tickdone/issues/51))
 

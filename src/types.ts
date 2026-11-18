@@ -1,3 +1,4 @@
+import type { AccentId, ThemeMode } from './theme'
 // Priority values: 0 none / 1 low / 3 medium / 5 high
 export type Priority = 0 | 1 | 3 | 5
 
@@ -133,7 +134,10 @@ export interface Settings {
   shortBreak: number
   longBreak: number
   weekStartsOn: 0 | 1
-  theme: 'light' | 'dark'
+  /** 'system' follows the device's light or dark setting. */
+  theme: ThemeMode
+  /** Accent colour preset; blue when unset. */
+  accent?: AccentId
   showCompleted: boolean
   /** Lunar dates and solar terms in the calendar; unset = on for Chinese, off otherwise. */
   showLunar?: boolean

@@ -46,7 +46,7 @@ function seed(): AppData {
       { id: uid(), name: t('core.seed.habit.read'), icon: '📖', color: '#6E75F4', checkins: {}, createdAt: now, order: 2 },
     ],
     focus: [],
-    settings: { pomoMinutes: 25, shortBreak: 5, longBreak: 15, weekStartsOn: 1, theme: 'light', showCompleted: true },
+    settings: { pomoMinutes: 25, shortBreak: 5, longBreak: 15, weekStartsOn: 1, theme: 'system', showCompleted: true },
     tasks: [
       mk({ title: t('core.seed.task.welcome'), content: t('core.seed.task.welcomeNote'), dueDate: today }, 0),
       mk(

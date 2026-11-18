@@ -15,10 +15,19 @@
     <meta name="format-detection" content="telephone=no" />
     <title>TickDone</title>
     <script>
-      // Apply the saved theme before the first paint so the launch screen matches the app.
+      // Apply the saved theme and accent before the first paint so the launch screen matches the app.
+      // The app keeps a copy of its derived accent colours in tickdone:look:v1 (src/look.ts) for this.
       try {
         var d = JSON.parse(localStorage.getItem('tickdone:data:v1') || 'null')
-        if (d && d.settings && d.settings.theme === 'dark') document.documentElement.dataset.theme = 'dark'
+        var look = JSON.parse(localStorage.getItem('tickdone:look:v1') || 'null')
+        var mode = (d && d.settings && d.settings.theme) || (look && look.mode) || 'system'
+        var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        var root = document.documentElement
+        root.dataset.theme = dark ? 'dark' : 'light'
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#1c1c1c' : '#ffffff')
+        var tokens = look && (dark ? look.dark : look.light)
+        if (tokens) for (var k in tokens) root.style.setProperty(k, tokens[k])
+        if (look && look.icon && d && d.settings && d.settings.accent && d.settings.accent !== 'blue') document.querySelector('link[rel="icon"]').href = look.icon
       } catch (e) {}
     </script>
     <style>
@@ -38,8 +47,9 @@
       :root[data-theme='dark'] #launch { background: #1c1c1c; }
       #launch.out { opacity: 0; }
       #launch .mark { width: 88px; height: 88px; animation: launch-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-      #launch .ring-bg { stroke: #dfe7ff; }
-      :root[data-theme='dark'] #launch .ring-bg { stroke: #2c3a66; }
+      #launch .ring-bg { stroke: var(--accent-ring, #dfe7ff); }
+      :root[data-theme='dark'] #launch .ring-bg { stroke: var(--accent-ring, #2c3a66); }
+      #launch .ring, #launch .check { stroke: var(--accent-mark, #4772fa); }
       #launch .ring, #launch .check { stroke-dasharray: 1; stroke-dashoffset: 1; }
       #launch .ring { animation: launch-draw 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
       #launch .check { animation: launch-draw 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) 0.65s forwards; }
@@ -63,8 +73,8 @@
     <div id="launch" aria-hidden="true">
       <svg class="mark" viewBox="0 0 512 512">
         <circle class="ring-bg" cx="256" cy="256" r="196" fill="none" stroke-width="44" />
-        <path class="ring" pathLength="1" d="M256 60A196 196 0 1 1 79 172" fill="none" stroke="#4772fa" stroke-width="44" stroke-linecap="round" />
-        <path class="check" pathLength="1" d="M176 260l56 56 112-124" fill="none" stroke="#4772fa" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" />
+        <path class="ring" pathLength="1" d="M256 60A196 196 0 1 1 79 172" fill="none" stroke-width="44" stroke-linecap="round" />
+        <path class="check" pathLength="1" d="M176 260l56 56 112-124" fill="none" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
       <div class="name">TickDone</div>
     </div>

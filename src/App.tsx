@@ -14,7 +14,8 @@ import { escapeSelection } from './components/batchActions'
 import { undoWithMotion } from './components/taskMotion'
 import { isBatch } from './selection'
 import { taskIdFromHash, viewOfTask } from './taskLink'
-import { usePhone } from './viewport'
+import { useMedia, usePhone } from './viewport'
+import { applyLook, SYSTEM_DARK } from './look'
 import { startFeedSync } from './feeds'
 import { startReminders } from './reminders'
 import { ReminderCards, UpdateToast } from './components/Reminders'
@@ -37,7 +38,6 @@ const RAIL: { id: Module; icon: string; title: MessageKey }[] = [
 /** Phone bottom bar: every module except search (search lives at the top of the drawer). */
 const TABS = RAIL.filter((r) => r.id !== 'search')
 
-const THEME_COLOR = { light: '#ffffff', dark: '#1c1c1c' }
 
 /** Opens the task named in the address bar (#task=<id>), if any, then removes it from the address. */
 function openTaskFromHash() {
@@ -64,10 +64,9 @@ export default function App() {
   // Reminders fire while the app is open; ones missed while it was closed show as cards now.
   useEffect(() => startReminders(), [])
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = data.settings.theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[data.settings.theme] ?? THEME_COLOR.light)
-  }, [data.settings.theme])
+  // Theme and accent: applied without a reload, and following the device when the theme is "system".
+  const systemDark = useMedia(SYSTEM_DARK)
+  useEffect(() => applyLook(data.settings.theme, data.settings.accent, systemDark), [data.settings.theme, data.settings.accent, systemDark])
 
   // A task link (#task=<id>) opens that task, on load and when the address changes.
   useEffect(() => {

@@ -75,7 +75,23 @@ export interface Habit {
   createdAt: number
   order: number
   archived?: boolean
+  /** 所属时段，缺省为「其他」 */
+  section?: HabitSection
+  /** 目标天数（坚持 N 天） */
+  goalDays?: number
+  /** 打卡频率，缺省为每天 */
+  frequency?: HabitFrequency
+  /** 提醒时间 HH:mm */
+  reminders?: string[]
+  /** 鼓励语 */
+  encouragement?: string
 }
+
+export type HabitSection = 'morning' | 'afternoon' | 'night' | 'other'
+export type HabitFrequency =
+  | { kind: 'daily' }
+  | { kind: 'weekly'; times: number } // 每周 N 天
+  | { kind: 'days'; days: number[] } // 每周特定几天，0=周日
 
 export interface FocusRecord {
   id: string

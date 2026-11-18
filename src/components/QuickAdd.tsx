@@ -1,0 +1,275 @@
+import { useMemo, useRef, useState } from 'react'
+import { dueLabel } from '../dates'
+import { quickParse } from '../quickParse'
+import { addTask, useData } from '../store'
+import type { Priority, Task } from '../types'
+import { PRIORITY } from '../views'
+import { DatePicker, type DateValue } from './DatePicker'
+import { Flag, Icon } from './Icon'
+import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
+
+interface Props {
+  defaults?: Partial<Task>
+  placeholder?: string
+  compact?: boolean
+  autoFocus?: boolean
+  onAdded?: (t: Task) => void
+  onCancel?: () => void
+}
+
+interface Suggest {
+  kind: 'tag' | 'list' | 'priority'
+  start: number
+  query: string
+}
+
+export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdded, onCancel }: Props) {
+  const data = useData()
+  const [text, setText] = useState('')
+  const [focused, setFocused] = useState(false)
+  const [manual, setManual] = useState<DateValue | null>(null)
+  const [prio, setPrio] = useState<Priority | null>(null)
+  const [pop, setPop] = useState<{ kind: 'date' | 'prio' | 'list'; anchor: Anchor } | null>(null)
+  const [suggest, setSuggest] = useState<Suggest | null>(null)
+  const [sIdx, setSIdx] = useState(0)
+  const [listOverride, setListOverride] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const mirrorRef = useRef<HTMLDivElement>(null)
+
+  const listNames = data.lists.map((l) => l.name)
+  const parsed = useMemo(() => quickParse(text, listNames), [text, listNames.join('|')])
+
+  const listId = listOverride ?? (parsed.listName ? data.lists.find((l) => l.name === parsed.listName)?.id : undefined) ?? defaults.listId ?? 'inbox'
+  const listName = listId === 'inbox' ? '收件箱' : (data.lists.find((l) => l.id === listId)?.name ?? '收件箱')
+  const date: DateValue = manual ?? {
+    dueDate: parsed.dueDate ?? defaults.dueDate,
+    dueTime: parsed.dueTime ?? defaults.dueTime,
+  }
+  const priority: Priority = prio ?? parsed.priority ?? defaults.priority ?? 0
+
+  const suggestions = useMemo(() => {
+    if (!suggest) return []
+    const q = suggest.query.toLowerCase()
+    if (suggest.kind === 'tag') {
+      const all = data.tags.map((t) => t.name).filter((n) => n.toLowerCase().includes(q))
+      if (q && !all.some((n) => n.toLowerCase() === q)) all.push(suggest.query)
+      return all.map((n) => ({ label: '#' + n, value: n }))
+    }
+    if (suggest.kind === 'list')
+      return [{ id: 'inbox', name: '收件箱' }, ...data.lists]
+        .filter((l) => l.name.toLowerCase().includes(q))
+        .map((l) => ({ label: l.name, value: l.name }))
+    return [
+      { label: '高优先级', value: '高' },
+      { label: '中优先级', value: '中' },
+      { label: '低优先级', value: '低' },
+      { label: '无优先级', value: '无' },
+    ].filter((x) => !q || x.value.includes(q) || x.label.includes(q))
+  }, [suggest, data.tags, data.lists])
+
+  const detectSuggest = (value: string, caret: number) => {
+    const before = value.slice(0, caret)
+    const m = /(?:^|\s)([#^~!])([^\s#^~!]*)$/.exec(before)
+    if (!m) return setSuggest(null)
+    const kind = m[1] === '#' ? 'tag' : m[1] === '!' ? 'priority' : 'list'
+    setSuggest({ kind, start: caret - m[2].length - 1, query: m[2] })
+    setSIdx(0)
+  }
+
+  const applySuggest = (value: string) => {
+    if (!suggest) return
+    const caret = inputRef.current?.selectionStart ?? text.length
+    const sym = text[suggest.start]
+    if (suggest.kind === 'list') {
+      const l = value === '收件箱' ? 'inbox' : data.lists.find((x) => x.name === value)?.id
+      if (l) setListOverride(l)
+      const next = text.slice(0, suggest.start) + text.slice(caret)
+      setText(next)
+    } else {
+      const ins = sym + value + ' '
+      setText(text.slice(0, suggest.start) + ins + text.slice(caret))
+    }
+    setSuggest(null)
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  const submit = () => {
+    if (!parsed.title.trim()) return
+    const t = addTask({
+      ...defaults,
+      title: parsed.title,
+      listId,
+      priority,
+      dueDate: date.dueDate,
+      dueTime: date.dueTime,
+      reminder: date.reminder ?? (date.dueTime ? 0 : defaults.reminder),
+      repeat: date.repeat ?? defaults.repeat,
+      tags: [...new Set([...(defaults.tags ?? []), ...parsed.tags])],
+    })
+    setText('')
+    setManual(null)
+    setPrio(null)
+    setListOverride(null)
+    onAdded?.(t)
+  }
+
+  // 高亮层：识别出的日期/优先级/标签文字加底色
+  const segments = useMemo(() => {
+    const out: { s: string; k?: string }[] = []
+    let pos = 0
+    for (const sp of parsed.spans) {
+      if (sp.start > pos) out.push({ s: text.slice(pos, sp.start) })
+      out.push({ s: text.slice(sp.start, sp.end), k: sp.kind })
+      pos = sp.end
+    }
+    out.push({ s: text.slice(pos) })
+    return out
+  }, [parsed, text])
+
+  const active = focused || !!text || !!pop
+  const hasDate = !!date.dueDate
+  const ph = placeholder ?? `+ 添加任务至"${listName}"，回车即可保存`
+
+  return (
+    <div className={'quick-add' + (active ? ' active' : '') + (compact ? ' compact' : '')}>
+      <div className="qa-field">
+        <div className="qa-mirror" ref={mirrorRef} aria-hidden>
+          {segments.map((x, i) => (
+            <span key={i} className={x.k ? 'qa-hl qa-hl-' + x.k : undefined}>
+              {x.s}
+            </span>
+          ))}
+        </div>
+        <input
+          ref={inputRef}
+          className="quick-add-input"
+          value={text}
+          autoFocus={autoFocus}
+          placeholder={ph}
+          onFocus={() => setFocused(true)}
+          onBlur={() => {
+            setFocused(false)
+            setTimeout(() => setSuggest(null), 150)
+          }}
+          onScroll={(e) => {
+            if (mirrorRef.current) mirrorRef.current.scrollLeft = e.currentTarget.scrollLeft
+          }}
+          onChange={(e) => {
+            setText(e.target.value)
+            detectSuggest(e.target.value, e.target.selectionStart ?? e.target.value.length)
+          }}
+          onKeyDown={(e) => {
+            if (suggest && suggestions.length) {
+              if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                setSIdx((i) => (i + 1) % suggestions.length)
+                return
+              }
+              if (e.key === 'ArrowUp') {
+                e.preventDefault()
+                setSIdx((i) => (i - 1 + suggestions.length) % suggestions.length)
+                return
+              }
+              if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault()
+                applySuggest(suggestions[sIdx].value)
+                return
+              }
+            }
+            if (e.key === 'Escape') {
+              if (suggest) return setSuggest(null)
+              setText('')
+              ;(e.target as HTMLInputElement).blur()
+              onCancel?.()
+            }
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+              e.preventDefault()
+              submit()
+            }
+          }}
+        />
+        {suggest && suggestions.length > 0 && focused && (
+          <div className="qa-suggest menu">
+            {suggestions.map((s, i) => (
+              <div
+                key={s.label}
+                className={'menu-item' + (i === sIdx ? ' hover' : '')}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  applySuggest(s.value)
+                }}
+              >
+                {suggest.kind === 'priority' && <Flag color={PRIORITY.find((p) => p.name === s.label)!.color} size={14} />}
+                {suggest.kind === 'list' && <Icon name="list" size={14} />}
+                <span className="menu-label">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {active && (
+        <div className="qa-tools" onMouseDown={(e) => e.preventDefault()}>
+          <button
+            className={'qa-tool' + (hasDate ? ' on' : '')}
+            title="设置日期"
+            onClick={(e) => setPop({ kind: 'date', anchor: anchorOf(e.currentTarget) })}
+          >
+            <Icon name="calendar" size={16} />
+            {hasDate && <span>{dueLabel(date)}</span>}
+          </button>
+          <button className="qa-tool" title="优先级" onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
+            <Flag color={PRIORITY.find((p) => p.v === priority)!.color} size={15} />
+          </button>
+          {!compact && (
+            <button className="qa-tool" title="清单" onClick={(e) => setPop({ kind: 'list', anchor: anchorOf(e.currentTarget) })}>
+              <Icon name="move" size={16} />
+            </button>
+          )}
+        </div>
+      )}
+      {pop?.kind === 'date' && (
+        <DatePicker
+          anchor={pop.anchor}
+          value={date}
+          onChange={(v) => {
+            setManual(v)
+            inputRef.current?.focus()
+          }}
+          onClose={() => setPop(null)}
+        />
+      )}
+      {pop?.kind === 'prio' && (
+        <Popover anchor={pop.anchor} onClose={() => setPop(null)}>
+          <MenuList
+            onClose={() => setPop(null)}
+            items={PRIORITY.map((p) => ({
+              label: p.name,
+              icon: <Flag color={p.color} size={14} />,
+              checked: p.v === priority,
+              onClick: () => {
+                setPrio(p.v)
+                inputRef.current?.focus()
+              },
+            }))}
+          />
+        </Popover>
+      )}
+      {pop?.kind === 'list' && (
+        <Popover anchor={pop.anchor} onClose={() => setPop(null)}>
+          <MenuList
+            onClose={() => setPop(null)}
+            items={[{ id: 'inbox', name: '收件箱', color: undefined as string | undefined }, ...data.lists].map((l) => ({
+              label: l.name,
+              icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
+              checked: l.id === listId,
+              onClick: () => {
+                setListOverride(l.id)
+                inputRef.current?.focus()
+              },
+            }))}
+          />
+        </Popover>
+      )}
+    </div>
+  )
+}

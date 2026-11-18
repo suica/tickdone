@@ -56,6 +56,7 @@ const P: Record<string, string> = {
   keyboard: 'M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M7 14h10',
   sun2: 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
   moon: 'M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z',
+  archive: 'M3 5h18v4H3zM5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4',
 }
 
 export function Icon({ name, size = 18, style, className, stroke = 1.7 }: { name: keyof typeof P | string; size?: number; style?: CSSProperties; className?: string; stroke?: number }) {

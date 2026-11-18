@@ -1,0 +1,130 @@
+.matrix-module {
+  --q-none: #35b06a;
+  background: var(--bg);
+}
+[data-theme='dark'] .matrix-module {
+  --q-none: #3fa86e;
+}
+.matrix-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px;
+}
+.matrix-head {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.matrix-head h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+.matrix-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+.matrix-quad {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg-side);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.matrix-quad.drag-over {
+  border-color: var(--q);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--q) 25%, transparent);
+}
+.matrix-quad-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 6px 14px;
+  flex-shrink: 0;
+}
+.matrix-no {
+  min-width: 22px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--q);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.matrix-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--q);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.matrix-range {
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--bg-hover);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.matrix-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.matrix-more {
+  opacity: 0.6;
+}
+.matrix-quad:hover .matrix-more {
+  opacity: 1;
+}
+.matrix-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 6px;
+}
+.matrix-empty {
+  color: var(--text-4);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 0;
+}
+.matrix-add {
+  flex-shrink: 0;
+  padding: 4px 8px 8px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.matrix-quad:hover .matrix-add,
+.matrix-add:focus-within {
+  opacity: 1;
+}
+@media (max-width: 760px) {
+  .matrix-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(240px, 1fr);
+    overflow-y: auto;
+  }
+}
+@media (hover: none) {
+  .matrix-add {
+    opacity: 1;
+  }
+}

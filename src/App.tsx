@@ -69,7 +69,7 @@ export default function App() {
       <nav className="rail">
         <div className="rail-avatar" title="TickDone">T</div>
         {RAIL.map((r) => (
-          <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} onClick={() => setUI({ module: r.id })}>
+          <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={r.title} onClick={() => setUI({ module: r.id, selectedTaskId: undefined })}>
             <Icon name={r.icon} size={22} />
           </button>
         ))}

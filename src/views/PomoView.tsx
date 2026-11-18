@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { format, isSameDay, isToday, isYesterday } from 'date-fns'
 import { Icon } from '../components/Icon'
 import { Popover, anchorOf, type Anchor } from '../components/Popover'
+import { bounce, burst, dur, ease, reducedMotion } from '../components/motion'
 import { useData } from '../store'
 import { todayStr } from '../dates'
+import { usePhone } from '../viewport'
 import type { AppData, FocusRecord } from '../types'
 import {
   abandonPomo,
   deleteFocusRecord,
   finishPomo,
+  getPomo,
+  onPomoDone,
   pausePomo,
   refreshPomo,
   resumePomo,
@@ -17,6 +21,7 @@ import {
   skipBreak,
   startFocus,
   usePomo,
+  type PomoSnapshot,
 } from '../pomo'
 import './pomo.css'
 
@@ -46,23 +51,132 @@ function DurBig({ ms }: { ms: number }) {
   )
 }
 
+// Ring geometry in the 300x300 viewBox
+const R = 130
+const C = 2 * Math.PI * R
+const HOUR = 3600000
+
+type RingState = Pick<PomoSnapshot, 'phase' | 'mode' | 'running' | 'segStart' | 'elapsed' | 'duration'>
+
+/** Ring progress (0..1) at a moment: countdown share for pomodoros and breaks, minutes of the hour for the stopwatch. */
+function progressAt(p: RingState, now: number) {
+  if (p.phase === 'idle') return 0
+  const e = p.elapsed + (p.running && p.segStart ? Math.max(0, now - p.segStart) : 0)
+  if (p.phase === 'break' || p.mode === 'pomo') return p.duration ? Math.min(1, e / p.duration) : 0
+  return (e % HOUR) / HOUR
+}
+
+/** Play triangle that morphs into pause bars (two clip-path halves). */
+function PlayPause({ playing }: { playing: boolean }) {
+  return (
+    <span className={'pomo-pp' + (playing ? ' playing' : '')} aria-hidden="true">
+      <i />
+      <i />
+    </span>
+  )
+}
+
 export default function PomoView() {
   const data = useData()
   const p = usePomo()
+  const phone = usePhone()
   const [picker, setPicker] = useState<Anchor | null>(null)
+  const ringRef = useRef<HTMLDivElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const fgRef = useRef<SVGCircleElement>(null)
+  const glowRef = useRef<HTMLDivElement>(null)
+  const cycleRef = useRef<HTMLDivElement>(null)
+  const primaryRef = useRef<HTMLButtonElement>(null)
+  const lastPrimary = useRef<{ left: number; split: boolean } | null>(null)
 
   useEffect(() => refreshPomo(), [data.settings.pomoMinutes])
 
   const task = p.taskId ? data.tasks.find((t) => t.id === p.taskId) : undefined
   const isBreak = p.phase === 'break'
   const stopwatch = p.mode === 'stopwatch' && !isBreak
+  const playing = p.phase !== 'idle' && p.running
 
-  const R = 130
-  const C = 2 * Math.PI * R
-  const progress = p.phase === 'idle' ? 0 : p.progress
+  // Smooth ring: while running, a rAF loop writes the exact progress every frame (the clock text still ticks
+  // once a second). When stopped, the value is written once and CSS eases it (e.g. rewinding after 放弃).
+  const { phase, mode, running, segStart, elapsed, duration } = p
+  useLayoutEffect(() => {
+    const el = fgRef.current
+    if (!el) return
+    const st = { phase, mode, running, segStart, elapsed, duration }
+    const write = () => {
+      el.style.strokeDashoffset = `${C * (1 - progressAt(st, Date.now()))}px`
+    }
+    write()
+    if (phase === 'idle' || !running) return
+    let raf = 0
+    const loop = () => {
+      write()
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [phase, mode, running, segStart, elapsed, duration])
+
+  // A finished pomodoro: the ring stays full, glows and swells a little, confetti flies out, then it rewinds.
+  useEffect(
+    () =>
+      onPomoDone((done) => {
+        if (done !== 'focus' || reducedMotion()) return
+        const slow = dur('--dur-slow')
+        if (!slow) return
+        const total = slow * 5
+        const fg = fgRef.current
+        if (fg) {
+          const end = C * (1 - progressAt(getPomo(), Date.now() + total))
+          fg.animate([{ strokeDashoffset: '0px' }, { strokeDashoffset: '0px', offset: 0.55 }, { strokeDashoffset: `${end}px` }], { duration: total, easing: ease('--ease-in-out') })
+        }
+        svgRef.current?.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)', offset: 0.3 }, { transform: 'scale(1)' }], { duration: slow * 3, easing: ease('--ease-out') })
+        glowRef.current?.animate(
+          [
+            { opacity: 0, transform: 'scale(0.94)' },
+            { opacity: 1, transform: 'scale(1.03)', offset: 0.3 },
+            { opacity: 0, transform: 'scale(1.16)' },
+          ],
+          { duration: slow * 4.5, easing: 'ease-out' },
+        )
+        const ring = ringRef.current
+        if (ring) {
+          const rr = (ring.getBoundingClientRect().width / 2) * (R / 150)
+          const primary = getComputedStyle(ring).getPropertyValue('--primary').trim() || '#4772fa'
+          burst(ring, [primary, '#35b36b', '#ffac38', '#ff83c3'], { count: 18, from: rr, to: rr + 46, size: 7, duration: slow * 3 })
+        }
+        const dots = cycleRef.current?.querySelectorAll('.dot.on')
+        if (dots?.length) bounce(dots[dots.length - 1], 2)
+      }),
+    [],
+  )
 
   const status =
     p.phase === 'idle' ? '' : isBreak ? (p.running ? (p.breakKind === 'long' ? '长休息' : '短休息') : '休息已暂停') : p.running ? '专注中' : '已暂停'
+
+  const primary = p.phase === 'idle' ? { label: '开始', on: () => startFocus() } : p.running ? { label: '暂停', on: pausePomo } : { label: '继续', on: resumePomo }
+  const secondary =
+    p.phase === 'idle'
+      ? null
+      : isBreak
+        ? { label: '跳过', on: skipBreak, title: undefined }
+        : p.running
+          ? stopwatch
+            ? { label: '结束', on: finishPomo, title: undefined }
+            : { label: '放弃', on: abandonPomo, title: undefined }
+          : { label: '结束', on: finishPomo, title: stopwatch ? undefined : '提前结束，满 1 分钟会记录为专注时长' }
+
+  // The primary button slides aside when the second button appears (FLIP on its x position).
+  const split = !!secondary
+  useLayoutEffect(() => {
+    const el = primaryRef.current
+    if (!el) return
+    const left = el.getBoundingClientRect().left
+    const prev = lastPrimary.current
+    lastPrimary.current = { left, split }
+    if (!prev || prev.split === split || Math.abs(prev.left - left) < 1 || reducedMotion()) return
+    el.animate([{ transform: `translateX(${prev.left - left}px)` }, { transform: 'none' }], { duration: dur('--dur-slow'), easing: ease('--ease-out') })
+  })
 
   return (
     <div className={'module pomo-view' + (isBreak ? ' is-break' : '')}>
@@ -97,18 +211,11 @@ export default function PomoView() {
             )}
           </button>
 
-          <div className="pomo-ring">
-            <svg viewBox="0 0 300 300" width="300" height="300">
+          <div className={'pomo-ring' + (playing ? ' running' : '')} ref={ringRef}>
+            <div className="pomo-ring-glow" ref={glowRef} />
+            <svg viewBox="0 0 300 300" width="300" height="300" ref={svgRef}>
               <circle cx="150" cy="150" r={R} className="pomo-ring-bg" />
-              <circle
-                cx="150"
-                cy="150"
-                r={R}
-                className="pomo-ring-fg"
-                strokeDasharray={C}
-                strokeDashoffset={C * (1 - progress)}
-                transform="rotate(-90 150 150)"
-              />
+              <circle ref={fgRef} cx="150" cy="150" r={R} className="pomo-ring-fg" strokeDasharray={C} transform="rotate(-90 150 150)" />
             </svg>
             <div className="pomo-ring-text">
               <div className="pomo-clock">{p.display}</div>
@@ -117,50 +224,20 @@ export default function PomoView() {
           </div>
 
           <div className="pomo-actions">
-            {p.phase === 'idle' && (
-              <button className="pomo-btn primary" onClick={() => startFocus()}>
-                开始
+            <button ref={primaryRef} className={'pomo-btn primary' + (playing ? ' playing' : '')} onClick={primary.on}>
+              <PlayPause playing={playing} />
+              <span key={primary.label} className="pomo-btn-label">
+                {primary.label}
+              </span>
+            </button>
+            {secondary && (
+              <button key="secondary" className="pomo-btn pomo-btn-2" onClick={secondary.on} title={secondary.title}>
+                {secondary.label}
               </button>
-            )}
-            {p.phase === 'focus' && p.running && (
-              <>
-                <button className="pomo-btn primary" onClick={pausePomo}>
-                  暂停
-                </button>
-                {stopwatch ? (
-                  <button className="pomo-btn" onClick={finishPomo}>
-                    结束
-                  </button>
-                ) : (
-                  <button className="pomo-btn" onClick={abandonPomo}>
-                    放弃
-                  </button>
-                )}
-              </>
-            )}
-            {p.phase === 'focus' && !p.running && (
-              <>
-                <button className="pomo-btn primary" onClick={resumePomo}>
-                  继续
-                </button>
-                <button className="pomo-btn" onClick={finishPomo} title={stopwatch ? undefined : '提前结束，满 1 分钟会记录为专注时长'}>
-                  结束
-                </button>
-              </>
-            )}
-            {isBreak && (
-              <>
-                <button className="pomo-btn primary" onClick={p.running ? pausePomo : resumePomo}>
-                  {p.running ? '暂停' : '继续'}
-                </button>
-                <button className="pomo-btn" onClick={skipBreak}>
-                  跳过
-                </button>
-              </>
             )}
           </div>
           {p.mode === 'pomo' && (
-            <div className="pomo-cycle" title="每 4 个番茄后长休息">
+            <div className="pomo-cycle" title="每 4 个番茄后长休息" ref={cycleRef}>
               {[0, 1, 2, 3].map((i) => (
                 <span key={i} className={'dot' + (i < p.count % 4 || (p.count > 0 && p.count % 4 === 0 && isBreak) ? ' on' : '')} />
               ))}
@@ -171,13 +248,13 @@ export default function PomoView() {
 
       <FocusSide data={data} />
 
-      {picker && <TaskPicker anchor={picker} data={data} currentId={p.taskId} onClose={() => setPicker(null)} />}
+      {picker && <TaskPicker anchor={picker} data={data} currentId={p.taskId} wide={!phone} onClose={() => setPicker(null)} />}
     </div>
   )
 }
 
 // ---------------- 任务选择浮层 ----------------
-function TaskPicker({ anchor, data, currentId, onClose }: { anchor: Anchor; data: AppData; currentId?: string; onClose: () => void }) {
+function TaskPicker({ anchor, data, currentId, wide, onClose }: { anchor: Anchor; data: AppData; currentId?: string; wide: boolean; onClose: () => void }) {
   const [q, setQ] = useState('')
   const today = todayStr()
   const groups = useMemo(() => {
@@ -199,7 +276,8 @@ function TaskPicker({ anchor, data, currentId, onClose }: { anchor: Anchor; data
   }
 
   return (
-    <Popover anchor={{ ...anchor, x: anchor.x - 60 }} onClose={onClose} width={320} className="pomo-picker">
+    // On phones the popover is a full-width bottom sheet, so no fixed width is passed there
+    <Popover anchor={{ ...anchor, x: anchor.x - 60 }} onClose={onClose} width={wide ? 320 : undefined} className="pomo-picker">
       <div className="pomo-picker-search">
         <Icon name="search" size={15} />
         <input autoFocus placeholder="搜索任务" value={q} onChange={(e) => setQ(e.target.value)} />

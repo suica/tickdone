@@ -49,7 +49,8 @@ export function formatClock(ms: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s % 60)}` : `${pad(Math.floor(s / 60))}:${pad(s % 60)}`
 }
 
-const pomoMs = () => Math.max(1, getData().settings.pomoMinutes || 25) * MIN
+// The settings UI keeps this at 5+ minutes; the low floor (3 s) only lets tests and recordings use short pomodoros.
+const pomoMs = () => Math.max(0.05, getData().settings.pomoMinutes || 25) * MIN
 
 function idleCore(mode: PomoMode = 'pomo', taskId?: string, count = 0): PomoCore {
   return { mode, phase: 'idle', running: false, elapsed: 0, duration: mode === 'pomo' ? pomoMs() : 0, taskId, count }
@@ -71,6 +72,8 @@ function load(): PomoCore {
 let core: PomoCore = load()
 let snap: PomoSnapshot = derive(core, Date.now())
 const subs = new Set<() => void>()
+/** Listeners told when a focus or break runs out while the page is open (the view celebrates a finished pomodoro). */
+const doneSubs = new Set<(phase: 'focus' | 'break') => void>()
 let timer: number | undefined
 let baseTitle = typeof document !== 'undefined' ? document.title : 'TickDone'
 
@@ -205,12 +208,21 @@ function complete(now: number) {
     // 自动进入休息；若离线期间休息也已结束，直接回空闲
     if (late && now - end >= breakDur) set(idleCore('pomo', c.taskId, count))
     else set({ ...c, phase: 'break', breakKind: long ? 'long' : 'short', running: true, segStart: end, elapsed: 0, duration: breakDur, count })
+    if (!late) doneSubs.forEach((f) => f('focus'))
   } else if (c.phase === 'break') {
     if (!late) {
       ring(3)
       notify('休息结束', '开始下一个番茄吧')
     }
     set(idleCore('pomo', c.taskId, c.count))
+    if (!late) doneSubs.forEach((f) => f('break'))
+  }
+}
+
+export function onPomoDone(f: (phase: 'focus' | 'break') => void) {
+  doneSubs.add(f)
+  return () => {
+    doneSubs.delete(f)
   }
 }
 

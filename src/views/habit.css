@@ -32,6 +32,10 @@
 .habit-week .icon-btn:disabled {
   cursor: default;
 }
+.habit-week-swap {
+  flex: 1;
+  min-width: 0;
+}
 .habit-week-days {
   flex: 1;
   display: flex;
@@ -68,7 +72,7 @@
   align-items: center;
   justify-content: center;
 }
-.habit-day-ring svg {
+.habit-day-ring > svg {
   position: absolute;
   inset: 0;
 }
@@ -82,7 +86,9 @@
   stroke: var(--primary);
   stroke-width: 2.5;
   stroke-linecap: round;
-  transition: stroke-dasharray 0.3s;
+  transition:
+    stroke-dasharray var(--dur-slow) var(--ease-out),
+    opacity var(--dur) var(--ease-out);
 }
 .habit-day-num {
   position: relative;
@@ -118,6 +124,7 @@
 /* 列表 */
 .habit-scroll {
   flex: 1;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 6px 12px 24px;
 }
@@ -151,18 +158,78 @@
   margin-left: 4px;
 }
 .habit-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 10px;
   border-radius: 8px;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+/* Shadow of a lifted (dragged) row; fades with opacity only */
+.habit-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out);
 }
 .habit-row:hover {
   background: var(--bg-hover);
 }
 .habit-row.selected {
   background: var(--bg-active);
+}
+.habit-row.lifted {
+  z-index: 5;
+  background: var(--bg-pop);
+}
+.habit-row.lifted::after {
+  opacity: 1;
+}
+.habit-row.dragging {
+  will-change: transform;
+}
+body.habit-dragging,
+body.habit-dragging * {
+  cursor: grabbing !important;
+}
+/* Insert position and drop-target highlight while dragging (fixed on <body>) */
+.habit-drop-line {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--primary);
+  pointer-events: none;
+  z-index: 60;
+}
+.habit-drop-line::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.habit-drop-hl {
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-radius: 6px;
+  background: var(--primary-soft);
+  pointer-events: none;
+  z-index: 60;
 }
 .habit-icon {
   width: 36px;
@@ -208,64 +275,57 @@
   font-size: 12px;
 }
 
-/* 打卡按钮 */
+/* 打卡按钮: checking in scales a disc of the habit color in, then draws the tick; undoing reverses it */
 .habit-check {
-  width: 30px;
-  height: 30px;
+  --hc-size: 30px;
+  width: var(--hc-size);
+  height: var(--hc-size);
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--hc) 55%, transparent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
   flex-shrink: 0;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
   position: relative;
 }
-.habit-check:hover {
-  background: color-mix(in srgb, var(--hc) 14%, transparent);
+.hc-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
-.habit-check.checked {
-  background: var(--hc);
-  border-color: var(--hc);
+.hc-ring {
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--hc) 55%, transparent);
+  stroke-width: 2;
+  transition: fill 0.2s;
 }
-.habit-check.pop {
-  animation: habit-pop 0.45s ease-out;
+.habit-check:hover .hc-ring {
+  fill: color-mix(in srgb, var(--hc) 14%, transparent);
 }
-.habit-check.pop::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  border: 2px solid var(--hc);
-  animation: habit-ripple 0.45s ease-out forwards;
-  pointer-events: none;
+.hc-fill {
+  fill: var(--hc);
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  transition: transform var(--dur) var(--ease-in-out) var(--dur-fast);
 }
-@keyframes habit-pop {
-  0% {
-    transform: scale(1);
-  }
-  35% {
-    transform: scale(0.8);
-  }
-  70% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-  }
+.habit-check.checked .hc-fill {
+  transform: scale(1);
+  transition: transform var(--dur-slow) var(--ease-spring);
 }
-@keyframes habit-ripple {
-  from {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  to {
-    transform: scale(1.9);
-    opacity: 0;
-  }
+.hc-tick {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.73;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--dur-fast) var(--ease-in-out);
+}
+.habit-check.checked .hc-tick {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--dur) var(--ease-out) var(--dur-fast);
 }
 
 /* 右栏 */
@@ -330,11 +390,15 @@
   color: var(--primary);
   padding: 0 6px;
 }
+.habit-cal-wds,
 .habit-cal {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   row-gap: 4px;
   justify-items: center;
+}
+.habit-cal-wds {
+  margin-bottom: 4px;
 }
 .habit-cal-wd {
   font-size: 12px;
@@ -416,7 +480,8 @@
   height: 100%;
   background: var(--hc);
   border-radius: 3px;
-  transition: width 0.3s;
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
 /* 弹窗 */
@@ -586,5 +651,178 @@
 @media (max-width: 900px) {
   .habit-detail {
     width: 320px;
+  }
+}
+
+/* Phones and tablets: the detail is a panel over the list (see DetailOverlay) */
+.habit-module {
+  position: relative;
+}
+.habit-detail.overlay {
+  animation: habit-detail-in var(--dur-slow) var(--ease-out);
+}
+.habit-detail.overlay.closing {
+  animation: habit-detail-out var(--dur) var(--ease-in-out) forwards;
+  pointer-events: none;
+}
+@keyframes habit-detail-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes habit-detail-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (max-width: 1199px) {
+  .habit-main {
+    border-right: 0;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .habit-detail.overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 100%;
+    z-index: 30;
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+}
+
+@media (hover: none) {
+  .habit-tpl-add {
+    display: inline-flex;
+  }
+}
+
+/* Phones: one column, bigger touch targets, the detail is a full-screen page */
+@media (max-width: 767px) {
+  .habit-main {
+    min-width: 0;
+  }
+  .habit-head {
+    padding: 8px 8px 4px 16px;
+  }
+  .habit-head .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+  /* Weeks change by swiping the strip */
+  .habit-week {
+    padding: 2px 8px 8px;
+    touch-action: pan-y;
+  }
+  .habit-week-nav {
+    display: none;
+  }
+  .habit-back-today,
+  .habit-head + .habit-week .habit-back-today {
+    right: 56px;
+    top: -42px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+  }
+  .habit-scroll {
+    padding: 4px 8px 24px;
+  }
+  .habit-group-head {
+    min-height: 40px;
+    padding: 0 8px;
+  }
+  .habit-row {
+    min-height: 60px;
+    padding: 8px 8px;
+  }
+  .habit-check {
+    --hc-size: 40px;
+  }
+  .habit-detail.overlay {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    z-index: 500;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: var(--safe-b);
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+  .habit-detail-inner {
+    padding: 8px 14px 28px;
+  }
+  .habit-detail-head {
+    gap: 8px;
+  }
+  .habit-detail-back {
+    margin-left: -8px;
+  }
+  .habit-detail-head .icon-btn,
+  .habit-cal-head .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .habit-card {
+    touch-action: pan-y;
+  }
+  .habit-cal-today {
+    height: 40px;
+  }
+  .habit-cal-day {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+  /* Dialog contents at phone width */
+  .habit-gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .habit-tpl {
+    min-height: 56px;
+  }
+  .habit-emoji-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  .habit-emoji-grid button {
+    height: 40px;
+    font-size: 20px;
+  }
+  .habit-colors {
+    gap: 12px;
+  }
+  .habit-swatch {
+    width: 32px;
+    height: 32px;
+  }
+  .habit-seg button {
+    height: 36px;
+    min-width: 40px;
+    border-radius: 18px;
+    font-size: 13px;
+  }
+  .habit-reminders .btn,
+  .habit-time {
+    height: 40px;
+  }
+  .habit-chip {
+    height: 32px;
+  }
+}
+
+/* Large screens: keep the list a readable width, centered */
+@media (min-width: 1920px) {
+  .habit-head,
+  .habit-week,
+  .habit-list {
+    width: 100%;
+    max-width: 960px;
+    margin-inline: auto;
+  }
+  .habit-detail {
+    width: 440px;
   }
 }

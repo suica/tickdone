@@ -144,6 +144,8 @@ export interface UIState {
   sidebarHidden: boolean
   /** 手机上侧栏抽屉是否打开（不持久化） */
   drawerOpen: boolean
+  /** Desktop task detail width in px after the user dragged the divider; undefined = automatic width. Persisted. */
+  detailWidth?: number
   toast?: Toast
   menu?: Menu
   dialog?: { kind: 'list' | 'tag' | 'folder' | 'settings' | 'habit' | 'shortcuts'; id?: string }
@@ -156,7 +158,8 @@ function loadUI(): UIState {
     const raw = localStorage.getItem(UI_KEY)
     if (raw) {
       const p = JSON.parse(raw)
-      return { ...base, module: p.module ?? 'tasks', view: p.view ?? 'today', prefs: p.prefs ?? {}, collapsed: p.collapsed ?? {}, sidebarHidden: !!p.sidebarHidden }
+      const detailWidth = typeof p.detailWidth === 'number' && p.detailWidth > 0 ? p.detailWidth : undefined
+      return { ...base, module: p.module ?? 'tasks', view: p.view ?? 'today', prefs: p.prefs ?? {}, collapsed: p.collapsed ?? {}, sidebarHidden: !!p.sidebarHidden, detailWidth }
     }
   } catch {
     /* ignore */
@@ -175,8 +178,8 @@ export function setUI(p: Partial<UIState> | ((u: UIState) => Partial<UIState>)) 
   const patch = typeof p === 'function' ? p(ui) : p
   ui = { ...ui, ...patch }
   try {
-    const { module, view, prefs, collapsed, sidebarHidden } = ui
-    localStorage.setItem(UI_KEY, JSON.stringify({ module, view, prefs, collapsed, sidebarHidden }))
+    const { module, view, prefs, collapsed, sidebarHidden, detailWidth } = ui
+    localStorage.setItem(UI_KEY, JSON.stringify({ module, view, prefs, collapsed, sidebarHidden, detailWidth }))
   } catch {
     /* ignore */
   }

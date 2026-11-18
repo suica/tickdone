@@ -1,7 +1,9 @@
+import { useLayoutEffect, useRef } from 'react'
 import { addDays, addWeeks, startOfWeek } from 'date-fns'
 import { fmt, todayStr } from '../dates'
 import { startFocus } from '../pomo'
 import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, updateList, updateTask, useData, useUI, wontDo } from '../store'
+import { usePhone, useTablet } from '../viewport'
 import { PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
@@ -10,7 +12,16 @@ import './ctxmenu.css'
 export function ContextMenu() {
   const ui = useUI()
   const data = useData()
+  const phone = usePhone()
+  const tablet = useTablet()
   const m = ui.menu
+  // On phones and tablets a selected task opens as a full-screen page / overlay. Opening a task's
+  // menu (long press, right click) selects the task, so put the previous selection back.
+  const selBefore = useRef(ui.selectedTaskId)
+  useLayoutEffect(() => {
+    if (!m) selBefore.current = ui.selectedTaskId
+    else if ((phone || tablet) && m.kind === 'task' && ui.selectedTaskId === m.id && selBefore.current !== m.id) setUI({ selectedTaskId: selBefore.current })
+  })
   if (!m) return null
   const close = () => setUI({ menu: undefined })
   let items: MenuItem[] = []
@@ -29,6 +40,8 @@ export function ContextMenu() {
       const nextMon = fmt(addWeeks(startOfWeek(new Date(), { weekStartsOn: 1 }), 1))
       header = (
         <div className="ctx-head">
+          {/* on phones the menu is a bottom sheet away from the row, so name the task */}
+          {phone && <div className="ctx-title">{t.title || '无标题'}</div>}
           <div className="ctx-label">日期</div>
           <div className="ctx-row">
             {[

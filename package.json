@@ -26,5 +26,12 @@
     "typescript": "~7.0.2",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"
+  },
+  "license": "MIT",
+  "description": "A to-do list and time manager that runs in your browser: tasks, calendar, Eisenhower matrix, focus timer and habit tracker.",
+  "homepage": "https://tickdone.pages.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suica/tickdone.git"
   }
 }

@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': 'Esta tarea está en la papelera',
   'shell.detail.titlePlaceholder': '¿Qué hay que hacer?',
   'shell.detail.description': 'Descripción',
+  'shell.detail.noteCheck': 'Elemento de la lista de control: {text}',
   'shell.detail.addSubtask': 'Añadir subtarea',
   'shell.detail.created': 'Creada el {date}',
   'shell.detail.completedOn': 'Completada el {date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': '«{name}» archivada',
   'shell.toast.listUnarchived': '«{name}» vuelve a tus listas',
   'shell.toast.taskNotFound': 'Esta tarea ya no existe',
-  'shell.detail.editNotes': 'Editar notas',
 } satisfies Catalog<typeof en>

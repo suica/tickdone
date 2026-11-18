@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': 'Эта задача в корзине',
   'shell.detail.titlePlaceholder': 'Что нужно сделать?',
   'shell.detail.description': 'Описание',
+  'shell.detail.noteCheck': 'Пункт чек-листа: {text}',
   'shell.detail.addSubtask': 'Добавить подзадачу',
   'shell.detail.created': 'Создана {date}',
   'shell.detail.completedOn': 'Выполнена {date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': 'Список «{name}» в архиве',
   'shell.toast.listUnarchived': 'Список «{name}» снова в списках',
   'shell.toast.taskNotFound': 'Этой задачи больше нет',
-  'shell.detail.editNotes': 'Изменить заметки',
 } satisfies Catalog<typeof en>

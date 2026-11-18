@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': 'Diese Aufgabe liegt im Papierkorb',
   'shell.detail.titlePlaceholder': 'Was ist zu tun?',
   'shell.detail.description': 'Beschreibung',
+  'shell.detail.noteCheck': 'Checklisteneintrag: {text}',
   'shell.detail.addSubtask': 'Teilaufgabe hinzufügen',
   'shell.detail.created': 'Erstellt am {date}',
   'shell.detail.completedOn': 'Erledigt am {date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': '„{name}“ archiviert',
   'shell.toast.listUnarchived': '„{name}“ ist wieder in deinen Listen',
   'shell.toast.taskNotFound': 'Diese Aufgabe gibt es nicht mehr',
-  'shell.detail.editNotes': 'Notizen bearbeiten',
 } satisfies Catalog<typeof en>

@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': '此任務在垃圾桶中',
   'shell.detail.titlePlaceholder': '準備做什麼？',
   'shell.detail.description': '描述',
+  'shell.detail.noteCheck': '清單項目：{text}',
   'shell.detail.addSubtask': '新增子任務',
   'shell.detail.created': '建立於 {date}',
   'shell.detail.completedOn': '完成於 {date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': '已封存「{name}」',
   'shell.toast.listUnarchived': '「{name}」已移回清單',
   'shell.toast.taskNotFound': '該任務已不存在',
-  'shell.detail.editNotes': '編輯描述',
 } satisfies Catalog<typeof en>

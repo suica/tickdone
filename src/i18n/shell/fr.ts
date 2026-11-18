@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': 'Cette tâche est dans la corbeille',
   'shell.detail.titlePlaceholder': 'Que faut-il faire ?',
   'shell.detail.description': 'Description',
+  'shell.detail.noteCheck': 'Élément de liste de contrôle : {text}',
   'shell.detail.addSubtask': 'Ajouter une sous-tâche',
   'shell.detail.created': 'Créée le {date}',
   'shell.detail.completedOn': 'Terminée le {date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': '« {name} » archivée',
   'shell.toast.listUnarchived': '« {name} » est de retour dans vos listes',
   'shell.toast.taskNotFound': 'Cette tâche n’existe plus',
-  'shell.detail.editNotes': 'Modifier les notes',
 } satisfies Catalog<typeof en>

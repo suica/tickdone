@@ -10,6 +10,7 @@ export default {
   'shell.detail.inTrash': '이 할 일은 휴지통에 있습니다',
   'shell.detail.titlePlaceholder': '무엇을 할까요?',
   'shell.detail.description': '설명',
+  'shell.detail.noteCheck': '체크리스트 항목: {text}',
   'shell.detail.addSubtask': '하위 할 일 추가',
   'shell.detail.created': '생성: {date}',
   'shell.detail.completedOn': '완료: {date}',
@@ -51,5 +52,4 @@ export default {
   'shell.toast.listArchived': '“{name}” 보관함',
   'shell.toast.listUnarchived': '“{name}”을(를) 목록으로 되돌림',
   'shell.toast.taskNotFound': '이 작업은 더 이상 없습니다',
-  'shell.detail.editNotes': '메모 편집',
 } satisfies Catalog<typeof en>

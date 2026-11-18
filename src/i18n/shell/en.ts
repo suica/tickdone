@@ -8,6 +8,7 @@ export default {
   'shell.detail.inTrash': 'This task is in the trash',
   'shell.detail.titlePlaceholder': 'What would you like to do?',
   'shell.detail.description': 'Description',
+  'shell.detail.noteCheck': 'Checklist item: {text}',
   'shell.detail.addSubtask': 'Add subtask',
   'shell.detail.created': 'Created {date}',
   'shell.detail.completedOn': 'Completed {date}',
@@ -49,5 +50,4 @@ export default {
   'shell.toast.listArchived': 'Archived “{name}”',
   'shell.toast.listUnarchived': '“{name}” is back in your lists',
   'shell.toast.taskNotFound': 'This task no longer exists',
-  'shell.detail.editNotes': 'Edit notes',
 } as const

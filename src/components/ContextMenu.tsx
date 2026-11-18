@@ -1,12 +1,14 @@
 import { useLayoutEffect, useRef } from 'react'
 import { addDays, addWeeks, startOfWeek } from 'date-fns'
 import { fmt, todayStr } from '../dates'
+import { useT } from '../i18n'
 import { startFocus } from '../pomo'
 import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, updateList, updateTask, useData, useUI, wontDo } from '../store'
 import { usePhone, useTablet } from '../viewport'
 import { PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
+import { PRIORITY_NAME } from './TaskDetail'
 import './ctxmenu.css'
 
 export function ContextMenu() {
@@ -14,6 +16,7 @@ export function ContextMenu() {
   const data = useData()
   const phone = usePhone()
   const tablet = useTablet()
+  const tr = useT()
   const m = ui.menu
   // On phones and tablets a selected task opens as a full-screen page / overlay. Opening a task's
   // menu (long press, right click) selects the task, so put the previous selection back.
@@ -33,22 +36,22 @@ export function ContextMenu() {
     const set = (p: Parameters<typeof updateTask>[1]) => updateTask(t.id, p)
     if (t.deleted) {
       items = [
-        { label: '恢复', icon: <Icon name="restore" size={15} />, onClick: () => set({ deleted: false }) },
-        { label: '永久删除', icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(t.id) },
+        { label: tr('shell.task.restore'), icon: <Icon name="restore" size={15} />, onClick: () => set({ deleted: false }) },
+        { label: tr('shell.task.deleteForever'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(t.id) },
       ]
     } else {
       const nextMon = fmt(addWeeks(startOfWeek(new Date(), { weekStartsOn: 1 }), 1))
       header = (
         <div className="ctx-head">
           {/* on phones the menu is a bottom sheet away from the row, so name the task */}
-          {phone && <div className="ctx-title">{t.title || '无标题'}</div>}
-          <div className="ctx-label">日期</div>
+          {phone && <div className="ctx-title">{t.title || tr('common.untitled')}</div>}
+          <div className="ctx-label">{tr('shell.menu.date')}</div>
           <div className="ctx-row">
             {[
-              { icon: 'sun', title: '今天', d: todayStr() },
-              { icon: 'sunrise', title: '明天', d: fmt(addDays(new Date(), 1)) },
-              { icon: 'nextWeek', title: '下周一', d: nextMon },
-              { icon: 'close', title: '清除日期', d: undefined },
+              { icon: 'sun', title: tr('common.today'), d: todayStr() },
+              { icon: 'sunrise', title: tr('common.tomorrow'), d: fmt(addDays(new Date(), 1)) },
+              { icon: 'nextWeek', title: tr('shell.menu.nextMonday'), d: nextMon },
+              { icon: 'close', title: tr('shell.menu.clearDate'), d: undefined },
             ].map((x) => (
               <button
                 key={x.title}
@@ -63,13 +66,13 @@ export function ContextMenu() {
               </button>
             ))}
           </div>
-          <div className="ctx-label">优先级</div>
+          <div className="ctx-label">{tr('common.priority')}</div>
           <div className="ctx-row">
             {PRIORITY.map((p) => (
               <button
                 key={p.v}
                 className={'ctx-btn' + (t.priority === p.v ? ' on' : '')}
-                title={p.name}
+                title={tr(PRIORITY_NAME[p.v])}
                 onClick={() => {
                   set({ priority: p.v })
                   close()
@@ -83,10 +86,10 @@ export function ContextMenu() {
         </div>
       )
       items = [
-        { label: t.pinned ? '取消置顶' : '置顶', icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !t.pinned }) },
-        { label: t.status === -1 ? '取消放弃' : '放弃', icon: <Icon name="wontdo" size={15} />, onClick: () => (t.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(t.id)) },
+        { label: tr(t.pinned ? 'shell.task.unpin' : 'shell.task.pin'), icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !t.pinned }) },
+        { label: tr(t.status === -1 ? 'shell.task.reopen' : 'shell.task.wontDo'), icon: <Icon name="wontdo" size={15} />, onClick: () => (t.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(t.id)) },
         {
-          label: '标签',
+          label: tr('shell.task.tags'),
           icon: <Icon name="tag" size={15} />,
           children: data.tags.length
             ? data.tags.map((tg) => ({
@@ -94,55 +97,55 @@ export function ContextMenu() {
                 checked: t.tags.includes(tg.name),
                 onClick: () => set({ tags: t.tags.includes(tg.name) ? t.tags.filter((x) => x !== tg.name) : [...t.tags, tg.name] }),
               }))
-            : [{ label: '暂无标签', disabled: true }],
+            : [{ label: tr('shell.menu.noTags'), disabled: true }],
         },
         {
-          label: '移动到',
+          label: tr('shell.menu.moveTo'),
           icon: <Icon name="move" size={15} />,
-          children: [{ id: 'inbox', name: '收件箱' }, ...data.lists].map((l) => ({
+          children: [{ id: 'inbox', name: tr('common.list.inbox') }, ...data.lists].map((l) => ({
             label: l.name,
             checked: t.listId === l.id,
             onClick: () => {
               const snap = getData()
               set({ listId: l.id, sectionId: undefined })
-              toast(`已移动到「${l.name}」`, snap)
+              toast(tr('shell.toast.movedTo', { name: l.name }), snap)
             },
           })),
         },
-        { label: '开始专注', icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(t.id); setUI({ module: 'pomo' }) } },
-        { label: '创建副本', icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(t.id) },
+        { label: tr('shell.task.startFocus'), icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(t.id); setUI({ module: 'pomo' }) } },
+        { label: tr('shell.task.duplicate'), icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(t.id) },
         { divider: true },
-        { label: '删除', icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(t.id) },
+        { label: tr('common.delete'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(t.id) },
       ]
     }
   } else if (m.kind === 'list') {
     const l = data.lists.find((x) => x.id === m.id)
     if (!l) return null
     items = [
-      { label: '编辑', icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: l.id } }) },
-      { label: l.view === 'kanban' ? '列表视图' : '看板视图', icon: <Icon name={l.view === 'kanban' ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(l.id, { view: l.view === 'kanban' ? 'list' : 'kanban' }) },
+      { label: tr('common.edit'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: l.id } }) },
+      { label: tr(l.view === 'kanban' ? 'shell.menu.listView' : 'shell.menu.kanbanView'), icon: <Icon name={l.view === 'kanban' ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(l.id, { view: l.view === 'kanban' ? 'list' : 'kanban' }) },
       {
-        label: '移动到文件夹',
+        label: tr('shell.menu.moveToFolder'),
         icon: <Icon name="folder" size={15} />,
         children: [
-          { label: '无', checked: !l.folderId, onClick: () => updateList(l.id, { folderId: undefined }) },
+          { label: tr('shell.menu.noFolder'), checked: !l.folderId, onClick: () => updateList(l.id, { folderId: undefined }) },
           ...data.folders.map((f) => ({ label: f.name, checked: l.folderId === f.id, onClick: () => updateList(l.id, { folderId: f.id }) })),
         ],
       },
       { divider: true },
       {
-        label: '删除',
+        label: tr('common.delete'),
         icon: <Icon name="trash" size={15} />,
         danger: true,
         onClick: () => {
-          if (confirm(`删除清单「${l.name}」？清单中的任务会移到垃圾桶`)) deleteList(l.id)
+          if (confirm(tr('shell.confirm.deleteList', { name: l.name }))) deleteList(l.id)
         },
       },
     ]
   } else if (m.kind === 'tag') {
     items = [
-      { label: '编辑', icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'tag', id: m.id } }) },
-      { label: '删除', icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTag(m.id) },
+      { label: tr('common.edit'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'tag', id: m.id } }) },
+      { label: tr('common.delete'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTag(m.id) },
     ]
   } else if (m.kind === 'section') {
     const [listId, secId] = m.id.split('/')
@@ -151,21 +154,21 @@ export function ContextMenu() {
     if (!l || !s) return null
     items = [
       {
-        label: '重命名',
+        label: tr('common.rename'),
         icon: <Icon name="edit" size={15} />,
         onClick: () => {
-          const name = prompt('分组名称', s.name)
+          const name = prompt(tr('shell.prompt.sectionName'), s.name)
           if (name) updateList(l.id, { sections: l.sections.map((x) => (x.id === s.id ? { ...x, name } : x)) })
         },
       },
       {
-        label: '删除分组',
+        label: tr('shell.menu.deleteSection'),
         icon: <Icon name="trash" size={15} />,
         danger: true,
         onClick: () => {
           const snap = getData()
           updateList(l.id, { sections: l.sections.filter((x) => x.id !== s.id) })
-          toast('分组已删除，任务移到未分组', snap)
+          toast(tr('shell.toast.sectionDeleted'), snap)
         },
       },
     ]

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react'
 import { blockTouchScrollWhileDragging, pressToDrag } from '../dnd'
+import { useT } from '../i18n'
 import { cancelAnimations, dur, ease, play } from '../motion'
 import { getData, toast } from '../store'
 import type { Subtask, Task } from '../types'
@@ -21,6 +22,7 @@ const lift = () => getComputedStyle(document.documentElement).getPropertyValue('
  * mouse after 4px, touch after a 350ms long press) or with Alt+Up/Down while editing a row.
  */
 export function Subtasks({ task, ro, set, focusSub, setFocusSub, addSubAfter }: Props) {
+  const t = useT()
   const listRef = useRef<HTMLDivElement>(null)
   const [dragId, setDragId] = useState<string | null>(null)
   /** y of the insertion line inside the list while dragging */
@@ -116,7 +118,7 @@ export function Subtasks({ task, ro, set, focusSub, setFocusSub, addSubAfter }: 
           row.style.transform = ''
           const snap = getData()
           set({ subtasks: next })
-          toast('已调整子任务顺序', snap)
+          toast(t('shell.subtasks.reordered'), snap)
         },
         onCancel() {
           setDragId(null)
@@ -143,7 +145,7 @@ export function Subtasks({ task, ro, set, focusSub, setFocusSub, addSubAfter }: 
           <input
             value={s.title}
             autoFocus={focusSub === s.id}
-            placeholder="子任务"
+            placeholder={t('shell.subtasks.placeholder')}
             readOnly={ro}
             onChange={(e) => setSub(s.id, { title: e.target.value })}
             onKeyDown={(e) => {
@@ -163,7 +165,7 @@ export function Subtasks({ task, ro, set, focusSub, setFocusSub, addSubAfter }: 
             }}
           />
           {!ro && (
-            <button className="subtask-del" title="删除" onClick={() => set({ subtasks: subs.filter((x) => x.id !== s.id) })}>
+            <button className="subtask-del" title={t('common.delete')} onClick={() => set({ subtasks: subs.filter((x) => x.id !== s.id) })}>
               <Icon name="close" size={13} />
             </button>
           )}

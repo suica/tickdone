@@ -7,7 +7,7 @@ import { usePhone } from '../viewport'
 export interface Anchor {
   x: number
   y: number
-  /** 锚点元素的高度，用于向上翻转 */
+  /** Height of the anchor element, used to flip the popover above it */
   h?: number
 }
 
@@ -53,7 +53,7 @@ export function Popover(props: PopoverProps) {
 
 function Floating({ anchor, onClose, children, className = '', width }: PopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
-  // 通过 React 事件冒泡（含 portal 子浮层）标记“点在浮层内”
+  // Marks presses inside the popover, including nested portal popovers, through React event bubbling
   const inside = useRef(false)
   const isTop = useLayer()
   const [pos, setPos] = useState({ left: anchor.x, top: anchor.y, origin: '0 0', ready: false })
@@ -103,7 +103,8 @@ function Floating({ anchor, onClose, children, className = '', width }: PopoverP
     <div
       ref={ref}
       className={'popover ' + className}
-      style={{ left: pos.left, top: pos.top, width, transformOrigin: pos.origin, visibility: pos.ready ? 'visible' : 'hidden' }}
+      // Transparent (not visibility:hidden) until placed, so an autoFocus field inside can take the focus.
+      style={{ left: pos.left, top: pos.top, width, transformOrigin: pos.origin, opacity: pos.ready ? undefined : 0 }}
       onContextMenu={(e) => e.preventDefault()}
       onMouseDown={() => (inside.current = true)}
     >
@@ -225,11 +226,11 @@ export interface MenuItem {
   divider?: boolean
   hint?: string
   onClick?: () => void
-  /** 子菜单 */
+  /** Submenu */
   children?: MenuItem[]
 }
 
-/** 通用下拉/右键菜单 */
+/** Dropdown and context menu list */
 export function MenuList({ items, onClose }: { items: MenuItem[]; onClose: () => void }) {
   const [sub, setSub] = useState<{ i: number; anchor: Anchor } | null>(null)
   const phone = usePhone()

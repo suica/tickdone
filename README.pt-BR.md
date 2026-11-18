@@ -54,6 +54,7 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
 - 📝 **Markdown nas notas**: títulos, negrito, itálico, tachado, código, links, listas, citações e listas de verificação que você marca na própria nota; digite `**negrito**`, `# ` ou `- [ ] ` e a formatação aparece enquanto você digita, com a nota ainda salva em Markdown.
 - 🔁 **Regras de repetição**: a cada N dias, semanas, meses ou anos; dias da semana escolhidos; o dia N, o último dia ou o N-ésimo/último dia da semana do mês; uma data por ano; só dias úteis. Termina após N vezes ou em uma data, conta a partir do vencimento ou da conclusão, pula uma ocorrência e entende "every 2 weeks" na adição rápida.
 - 📅 **Calendário** com visualizações de mês, semana, dia e lista. Arraste uma tarefa para outro dia ou horário, ou arraste a borda inferior de um bloco para mudar a duração.
+- 🗓️ **Planeje no calendário**: um painel "Sem data" ao lado das visualizações de semana e dia (uma folha inferior no celular) lista as tarefas abertas que ainda não têm data, filtradas por lista. Arraste uma para um dia ou horário para agendá-la, ou solte uma tarefa de volta no painel para remover a data, com desfazer no aviso. A visualização de agenda mostra os próximos dias numa única lista rolável, com suas tarefas e os eventos dos calendários assinados.
 - 🔔 **Assinaturas de calendários**: assine qualquer calendário que publique um endereço iCal (.ics ou webcal://), como os de trabalho, escola, equipe ou feriados, e veja os eventos no calendário, somente leitura e com a cor de cada um. Eles se atualizam sozinhos e continuam disponíveis off-line.
 - 🧭 **Matriz de Eisenhower**: organize as tarefas por urgência e importância e arraste-as entre os quadrantes para mudar a prioridade.
 - 🍅 **Timer de foco** com modos Pomodoro e cronômetro e um histórico das sessões anteriores.
@@ -169,7 +170,7 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [ ] Acessibilidade ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Rápido mesmo com milhares de tarefas ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Temas e cores de destaque ([#27](https://github.com/suica/tickdone/issues/27))
-- [ ] Calendário: planejar tarefas sem data, visualização de agenda ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Calendário: planejar tarefas sem data, visualização de agenda ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Assinaturas de calendários ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Tecnologias

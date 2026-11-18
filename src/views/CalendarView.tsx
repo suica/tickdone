@@ -14,7 +14,9 @@ import { TaskRow } from '../components/TaskRow'
 import { beginDrag, dragging, useTouchGuard } from './calDnd'
 import { dur, easing, flyFrom, playSlides, snapshotSlides } from './calMotion'
 import { AddPopover, CalTask } from './calParts'
-import { TimeGrid } from './CalTimeGrid'
+import { TimeGrid, type GridApi } from './CalTimeGrid'
+import { UnscheduledPanel } from './calUnscheduled'
+import { agendaDays, dayRange, unscheduledTasks } from './calPlan'
 import { dayLabel, isTyping, monthSpan, sortDay, twelveHour, useColorOf, withWeekday, type AddState } from './calUtil'
 import { capChips, weekNumber } from './monthCell'
 import { lunarLabel } from '../lunar'
@@ -32,13 +34,26 @@ const MODES: { id: Mode; label: MessageKey; phone?: MessageKey }[] = [
 ]
 const MODE_ICON: Record<Mode, string> = { month: 'calendar', week: 'week', day: 'today', agenda: 'list' }
 /** Titles of the previous / next buttons per view (the phone week view pages by three days). */
-const NAV: Record<'month' | 'week' | 'threeDays' | 'day', [MessageKey, MessageKey]> = {
+const NAV: Record<'month' | 'week' | 'threeDays' | 'day' | 'agenda', [MessageKey, MessageKey]> = {
+  agenda: ['calendar.nav.earlier', 'calendar.nav.later'],
   month: ['calendar.nav.prevMonth', 'calendar.nav.nextMonth'],
   week: ['calendar.nav.prevWeek', 'calendar.nav.nextWeek'],
   threeDays: ['calendar.nav.prevThreeDays', 'calendar.nav.nextThreeDays'],
   day: ['calendar.nav.prevDay', 'calendar.nav.nextDay'],
 }
 const MODE_KEY = 'tickdone:cal:mode'
+const UNSCHED_KEY = 'tickdone:cal:unsched'
+/** Days the agenda shows at first, and how many more each time it reaches its end. */
+const AGENDA_DAYS = 30
+
+/** Whether the unscheduled panel is open next to the week and day views (on unless closed). */
+function loadUnsched(): boolean {
+  try {
+    return localStorage.getItem(UNSCHED_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
 
 function loadMode(): Mode {
   try {
@@ -303,14 +318,20 @@ function DayList({
 }
 
 // ---------------- agenda ----------------
+/** The coming days in one scrolling list: each day with tasks or events (and today), grouped by day. */
 function AgendaView({
-  cursor,
+  start,
+  count,
+  onMore,
   byDay,
   evByDay,
   onEvent,
   onAdd,
 }: {
-  cursor: Date
+  start: Date
+  count: number
+  /** The end of the list came into view: show more days. */
+  onMore: () => void
   byDay: Map<string, Task[]>
   evByDay: Map<string, DayEvent[]>
   onEvent: OpenEvent
@@ -318,25 +339,43 @@ function AgendaView({
 }) {
   const t = useT()
   const today = todayStr()
-  const days = eachDayOfInterval({ start: startOfMonth(cursor), end: endOfMonth(cursor) })
-    .map(fmt)
-    .filter((ds) => byDay.has(ds) || evByDay.has(ds) || ds === today)
+  const days = agendaDays(dayRange(start, count), (ds) => byDay.has(ds) || evByDay.has(ds), today)
+  const moreRef = useRef<HTMLButtonElement>(null)
+  const onMoreRef = useRef(onMore)
+  useLayoutEffect(() => {
+    onMoreRef.current = onMore
+  })
+  // Scrolling to the end loads the next days.
+  useEffect(() => {
+    const el = moreRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    // Only while the list scrolls: a short list keeps the button for the person to press.
+    const sc = el.closest<HTMLElement>('.cal-agenda')
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting) && sc && sc.scrollHeight > sc.clientHeight + 1) onMoreRef.current()
+    }, { root: sc, rootMargin: '120px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [count])
   return (
     <div className="cal-agenda" data-slide>
-      {days.length === 0 && <div className="empty">{t('calendar.agendaEmpty')}</div>}
-      {days.map((ds) => {
+      {days.length === 0 && <div className="empty">{t('calendar.agenda.empty')}</div>}
+      {days.map((ds, i) => {
         const d = parseISO(ds)
         const list = byDay.get(ds) ?? []
         const evs = evByDay.get(ds) ?? []
+        // The month is named on the first day shown in it.
+        const newMonth = i === 0 || days[i - 1].slice(0, 7) !== ds.slice(0, 7)
         return (
-          <section key={ds} className={'cal-agenda-day' + (ds === today ? ' today' : '')}>
+          <section key={ds} className={'cal-agenda-day' + (ds === today ? ' today' : '')} data-day={ds}>
+            {newMonth && <h3 className="cal-agenda-month">{fmtMonthYear(d)}</h3>}
             <div className="cal-agenda-head">
               <span className="num">{d.getDate()}</span>
               <span className="wd">
                 {format(d, 'LLL', { locale: dateFnsLocale() })} {fmtWeekday(d)}
                 {ds === today && ` · ${t('common.today')}`}
               </span>
-              <button className="icon-btn cal-agenda-add" title={t('calendar.addTask')} onClick={(e) => onAdd({ date: ds, anchor: { x: e.clientX - 280, y: e.clientY + 8, h: 16 } })}>
+              <button className="icon-btn cal-agenda-add" title={t('calendar.addTask')} onClick={(e) => onAdd({ date: ds, anchor: anchorOf(e.currentTarget) })}>
                 <Icon name="plus" size={16} />
               </button>
             </div>
@@ -352,6 +391,9 @@ function AgendaView({
           </section>
         )
       })}
+      <button ref={moreRef} className="btn cal-agenda-more" onClick={onMore}>
+        {t('calendar.agenda.more')}
+      </button>
     </div>
   )
 }
@@ -374,6 +416,11 @@ export default function CalendarView() {
   const [fresh, setFresh] = useState<string | null>(null)
   const [evPop, setEvPop] = useState<{ ev: FeedEvent; anchor: Anchor } | null>(null)
   const [viewAnim, setViewAnim] = useState(false)
+  const [agendaCount, setAgendaCount] = useState(AGENDA_DAYS)
+  // Phones start with the sheet closed; wider screens remember the panel.
+  const [unschedOpen, setUnschedOpen] = useState(() => !phone && loadUnsched())
+  const [moving, setMoving] = useState<{ id: string; out: boolean } | null>(null)
+  const gridApi = useRef<GridApi | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const layerRef = useRef<HTMLDivElement>(null)
@@ -418,21 +465,23 @@ export default function CalendarView() {
   // The days in view, for the events of subscribed calendars (recurring ones are expanded over them only).
   const [rangeFrom, rangeTo] = useMemo(() => {
     if (mode === 'week' || mode === 'day') return [days[0].getTime(), addDays(days[days.length - 1], 1).getTime()]
-    const s = mode === 'agenda' ? startOfMonth(cursor) : startOfWeek(startOfMonth(cursor), { weekStartsOn })
-    const e = mode === 'agenda' ? endOfMonth(cursor) : endOfWeek(endOfMonth(cursor), { weekStartsOn })
+    if (mode === 'agenda') return [cursor.getTime(), addDays(cursor, agendaCount).getTime()]
+    const s = startOfWeek(startOfMonth(cursor), { weekStartsOn })
+    const e = endOfWeek(endOfMonth(cursor), { weekStartsOn })
     return [s.getTime(), addDays(startOfDay(e), 1).getTime()]
-  }, [mode, days, cursor, weekStartsOn])
+  }, [mode, days, cursor, weekStartsOn, agendaCount])
   const feedEvents = useFeedEvents(rangeFrom, rangeTo)
   const evByDay = useMemo(() => eventsByDay(feedEvents), [feedEvents])
   const openEvent: OpenEvent = (ev, anchor) => setEvPop({ ev, anchor })
 
-  const periodOf = (d: Date) => (mode === 'month' || mode === 'agenda' ? format(d, 'yyyy-MM') : mode === 'week' && !phone ? fmt(startOfWeek(d, { weekStartsOn })) : fmt(d))
+  const periodOf = (d: Date) => (mode === 'month' ? format(d, 'yyyy-MM') : mode === 'week' && !phone ? fmt(startOfWeek(d, { weekStartsOn })) : fmt(d))
   const period = periodOf(cursor)
 
   /** Move the cursor; a new month / week / day slides in from the side it comes from. */
   const go = (next: Date) => {
     if (periodOf(next) !== period && snapshotSlides(bodyRef.current, layerRef.current)) slideDir.current = next > cursor ? 1 : -1
     setCursor(next)
+    setAgendaCount(AGENDA_DAYS)
   }
   useLayoutEffect(() => {
     const dir = slideDir.current
@@ -444,6 +493,7 @@ export default function CalendarView() {
   const step = (n: number) => {
     if (mode === 'week') go(phone ? addDays(cursor, 3 * n) : addWeeks(cursor, n))
     else if (mode === 'day') go(addDays(cursor, n))
+    else if (mode === 'agenda') go(addDays(cursor, AGENDA_DAYS * n))
     else if (phone && mode === 'month') {
       const first = startOfMonth(addMonths(cursor, n))
       go(isSameMonth(first, new Date()) ? startOfDay(new Date()) : first)
@@ -525,14 +575,29 @@ export default function CalendarView() {
   const title =
     mode === 'day'
       ? withWeekday(cursor, phone ? fmtMonthDay : fmtFullDate)
-      : mode === 'week' || phone
+      : mode === 'agenda'
+        ? // phones name the first month only; the list shows where the next one starts
+          monthSpan(cursor, phone ? cursor : addDays(cursor, agendaCount - 1), phone ? 'short' : 'long')
+        : mode === 'week' || phone
         ? monthSpan(mode === 'week' ? days[0] : cursor, mode === 'week' ? days[days.length - 1] : cursor, phone ? 'short' : 'long')
         : fmtMonthYear(cursor)
   const modeLabel = (m: Mode) => {
     const x = MODES.find((y) => y.id === m)!
     return phone && x.phone ? x.phone : x.label
   }
-  const [prevTitle, nextTitle] = NAV[mode === 'week' ? (phone ? 'threeDays' : 'week') : mode === 'day' ? 'day' : 'month']
+  const [prevTitle, nextTitle] = NAV[mode === 'week' ? (phone ? 'threeDays' : 'week') : mode === 'day' ? 'day' : mode === 'agenda' ? 'agenda' : 'month']
+  const timed = mode === 'week' || mode === 'day'
+  const showUnsched = timed && unschedOpen
+  const unschedCount = useMemo(() => unscheduledTasks(data).length, [data])
+  const toggleUnsched = (open: boolean) => {
+    setUnschedOpen(open)
+    if (!phone)
+      try {
+        localStorage.setItem(UNSCHED_KEY, open ? '1' : '0')
+      } catch {
+        /* storage unavailable */
+      }
+  }
 
   return (
     <div className={'module cal' + (phone ? ' phone' : '')} ref={rootRef}>
@@ -541,6 +606,18 @@ export default function CalendarView() {
           <h2 className="cal-title">{title}</h2>
           <div className="cal-spacer" />
           <div className="cal-tools">
+            {timed && !phone && (
+              <button
+                className={'btn cal-tool cal-unsched-btn' + (showUnsched ? ' on' : '')}
+                title={t('calendar.unsched.toggle')}
+                aria-label={t('calendar.unsched.toggle')}
+                aria-pressed={showUnsched}
+                onClick={() => toggleUnsched(!showUnsched)}
+              >
+                <Icon name="inbox" size={16} />
+                {unschedCount > 0 && <span className="cal-unsched-badge">{unschedCount}</span>}
+              </button>
+            )}
             <button className="btn cal-tool cal-add" title={t('calendar.newTask')} aria-label={t('calendar.newTask')} onClick={(e) => newTask(e.currentTarget)}>
               <Icon name="plus" size={16} />
             </button>
@@ -571,7 +648,13 @@ export default function CalendarView() {
           <Popover anchor={viewMenu} onClose={() => setViewMenu(null)} className="cal-view-menu">
             <MenuList
               onClose={() => setViewMenu(null)}
-              items={MODES.map((m) => ({ label: t(modeLabel(m.id)), icon: <Icon name={MODE_ICON[m.id]} size={15} />, checked: mode === m.id, onClick: () => setMode(m.id) }))}
+              items={[
+                ...MODES.map((m) => ({ label: t(modeLabel(m.id)), icon: <Icon name={MODE_ICON[m.id]} size={15} />, checked: mode === m.id, onClick: () => setMode(m.id) })),
+                // Phones have no room for the panel's own button in the toolbar.
+                ...(phone && timed
+                  ? [{ divider: true }, { label: t('calendar.unsched.toggle'), icon: <Icon name="inbox" size={15} />, checked: showUnsched, hint: unschedCount ? String(unschedCount) : undefined, onClick: () => toggleUnsched(!showUnsched) }]
+                  : []),
+              ]}
             />
           </Popover>
         )}
@@ -595,13 +678,36 @@ export default function CalendarView() {
               />
             )}
             {(mode === 'week' || mode === 'day') && (
-              <TimeGrid days={days} byDay={byDay} evByDay={evByDay} onEvent={openEvent} hourH={phone ? 52 : large ? 56 : 48} labelW={(phone ? 40 : 56) + (twelveHour() ? 16 : 0)} add={add} fresh={fresh} onAdd={setAdd} />
+              <TimeGrid
+                days={days}
+                byDay={byDay}
+                evByDay={evByDay}
+                onEvent={openEvent}
+                hourH={phone ? 52 : large ? 56 : 48}
+                labelW={(phone ? 40 : 56) + (twelveHour() ? 16 : 0)}
+                add={add}
+                fresh={fresh}
+                onAdd={setAdd}
+                api={gridApi}
+                onMoveState={setMoving}
+              />
             )}
-            {mode === 'agenda' && <AgendaView cursor={cursor} byDay={byDay} evByDay={evByDay} onEvent={openEvent} onAdd={setAdd} />}
+            {mode === 'agenda' && (
+              <AgendaView
+                start={cursor}
+                count={agendaCount}
+                onMore={() => setAgendaCount((n) => Math.min(n + AGENDA_DAYS, 366))}
+                byDay={byDay}
+                evByDay={evByDay}
+                onEvent={openEvent}
+                onAdd={setAdd}
+              />
+            )}
           </div>
           <div className="cal-slide-layer" ref={layerRef} aria-hidden="true" inert />
         </div>
       </div>
+      {showUnsched && <UnscheduledPanel grid={gridApi} moving={moving} sheet={phone} onClose={() => toggleUnsched(false)} />}
       {add && <AddPopover key={add.date + add.time + add.anchor.x + add.anchor.y} s={add} onClose={() => setAdd(null)} onAdded={onAdded} />}
       {evPop && <EventPopover key={evPop.ev.id} ev={evPop.ev} anchor={evPop.anchor} onClose={() => setEvPop(null)} />}
       {ui.selectedTaskId && <TaskDetail floating />}

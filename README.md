@@ -54,6 +54,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - 📝 **Markdown in notes**: headings, bold, italics, strikethrough, code, links, lists, quotes and checklists you can tick right in the note; type `**bold**`, `# ` or `- [ ] ` and it is formatted as you type, while the note is still saved as Markdown.
 - 🔁 **Repeat rules**: every N days, weeks, months or years; chosen weekdays; day N, the last day or the Nth/last weekday of the month; a date each year; weekdays only. End after N times or on a date, count from the due date or the completion date, skip an occurrence, and type "every 2 weeks" or "every last Friday" in quick add.
 - 📅 **Calendar** with month, week, day and list views. Drag a task to another day or time, or drag the bottom edge of a block to change how long it takes.
+- 🗓️ **Plan in the calendar**: an Unscheduled panel next to the week and day views (a bottom sheet on phones) lists the open tasks that have no date yet, filtered by list. Drag one onto a day or a time to schedule it, or drop a task back on the panel to clear its date, with undo from the toast. The agenda view shows the coming days in one scrolling list, with your tasks and the events of your subscribed calendars.
 - 🔔 **Calendar subscriptions**: subscribe to any calendar that publishes an iCal (.ics or webcal://) address, such as work, school, team or holiday calendars, and see its events read-only in the calendar, in its own color. They refresh on their own and stay available offline.
 - 🧭 **Eisenhower matrix**: sort tasks by urgency and importance, and drag them between quadrants to change their priority.
 - 🍅 **Focus timer** with Pomodoro and stopwatch modes and a record of past sessions.
@@ -169,7 +170,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [ ] Accessibility ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))
-- [ ] Calendar: plan undated tasks, agenda view ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Calendar: plan undated tasks, agenda view ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Calendar subscriptions ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Tech stack

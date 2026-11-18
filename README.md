@@ -51,6 +51,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - 🗂️ **List and kanban views**, with grouping and sorting.
 - 🔎 **Saved filters**: combine lists, tags, priorities, dates (overdue, today, this week, a custom range…), keywords and completed tasks into a smart list of your own, with its name, icon and color in the sidebar.
 - 📝 **Markdown in notes**: headings, bold, italics, strikethrough, code, links, lists, quotes and checklists you can tick right in the note; click the note to edit its source.
+- 🔁 **Repeat rules**: every N days, weeks, months or years; chosen weekdays; day N, the last day or the Nth/last weekday of the month; a date each year; weekdays only. End after N times or on a date, count from the due date or the completion date, skip an occurrence, and type "every 2 weeks" or "every last Friday" in quick add.
 - 📅 **Calendar** with month, week, day and list views. Drag a task to another day or time, or drag the bottom edge of a block to change how long it takes.
 - 🔔 **Calendar subscriptions**: subscribe to any calendar that publishes an iCal (.ics or webcal://) address, such as work, school, team or holiday calendars, and see its events read-only in the calendar, in its own color. They refresh on their own and stay available offline.
 - 🧭 **Eisenhower matrix**: sort tasks by urgency and importance, and drag them between quadrants to change their priority.
@@ -159,7 +160,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [ ] Statistics for tasks, focus and habits ([#20](https://github.com/suica/tickdone/issues/20))
 - [x] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Timeline view ([#22](https://github.com/suica/tickdone/issues/22))
-- [ ] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
+- [x] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
 - [ ] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accessibility ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))

@@ -1,8 +1,9 @@
 import { addDays, addMonths, getDay, setDate } from 'date-fns'
 import { fmt } from './dates'
-import type { Priority } from './types'
+import { firstOccurrence, withDays } from './repeat'
+import type { Priority, RepeatRule } from './types'
 
-// Quick-add parser: picks dates, times, priorities, #tags and ~lists out of a task title.
+// Quick-add parser: picks dates, times, repeat rules, priorities, #tags and ~lists out of a task title.
 // It understands Chinese and English in full; for the other UI languages it knows today / tomorrow /
 // the day after tomorrow, times like 15:00 and the priority words in `tasks.quickAdd.token.*`.
 // The CJK and other non-English words in this file are the words users type, so they stay as they are.
@@ -18,6 +19,8 @@ export interface Parsed {
   dueDate?: string
   dueTime?: string
   priority?: Priority
+  /** A repeat rule from phrases like "every 2 weeks", "every last Friday", 每月最后一个周五 */
+  repeat?: RepeatRule
   tags: string[]
   listName?: string
   spans: Span[]
@@ -79,6 +82,11 @@ const WORD = '\\p{Script=Latin}\\p{Script=Cyrillic}\\p{N}'
 const DAY_WORDS_RE = new RegExp(`(?<![${WORD}])(${alternation(Object.keys(DAY_WORDS))})(?![${WORD}]|['’-])`, 'iu')
 const PRIORITY_RE = new RegExp(`(?:^|(?<=\\s))!(${alternation(Object.keys(PRIORITY_WORDS))})(?=\\s|$)`, 'iu')
 
+const EN_WD = '(mon|tue|wed|thu|fri|sat|sun)(?:day|sday|nesday|rsday|urday)?s?'
+const EN_NTH: Record<string, number> = { first: 1, '1st': 1, second: 2, '2nd': 2, third: 3, '3rd': 3, fourth: 4, '4th': 4, last: -1 }
+const EN_UNIT: Record<string, Exclude<RepeatRule['kind'], 'weekdays'>> = { day: 'daily', week: 'weekly', month: 'monthly', year: 'yearly' }
+const CN_UNIT: Record<string, Exclude<RepeatRule['kind'], 'weekdays'>> = { 天: 'daily', 日: 'daily', 周: 'weekly', 週: 'weekly', 星期: 'weekly', 礼拜: 'weekly', 禮拜: 'weekly', 月: 'monthly', 年: 'yearly' }
+
 function num(s: string): number {
   return /^\d+$/.test(s) ? Number(s) : (CN_NUM[s] ?? NaN)
 }
@@ -101,6 +109,7 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
   let dueDate: string | undefined
   let dueTime: string | undefined
   let priority: Priority | undefined
+  let repeat: RepeatRule | undefined
   let ampm: 'am' | 'pm' | undefined
   const tags: string[] = []
   let listName: string | undefined
@@ -131,6 +140,51 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
     if (!year && fmt(d) < fmt(now)) d = new Date(now.getFullYear() + 1, month - 1, day)
     setDue(d)
   }
+
+  // ---- repeat rules (before dates, so "every Monday" and 每周五 are not read as one date) ----
+  const setRepeat = (r: RepeatRule) => {
+    if (repeat) return false
+    repeat = r
+  }
+  // Chinese: 每月最后一个周五, 每月第二个星期一, 每月最后一天, 每月15号, 每年3月8日, 每个工作日, 每周一三五, 每2周, 每天
+  take(/每(?:个|個)?月(?:的)?(?:第([一二三四1-4])|(最后一|最後一))(?:个|個)?(?:周|週|星期|礼拜|禮拜)([一二三四五六日天])/, 'date', (m) =>
+    setRepeat({ kind: 'monthly', interval: 1, nth: m[2] ? -1 : num(m[1]), weekday: CN_WEEK[m[3]] }),
+  )
+  take(/每(?:个|個)?月(?:的)?(?:最后一天|最後一天|月底)/, 'date', () => setRepeat({ kind: 'monthly', interval: 1, day: -1 }))
+  take(/每(?:个|個)?月(?:的)?(\d{1,2})[号號日]/, 'date', (m) => (+m[1] >= 1 && +m[1] <= 31 ? setRepeat({ kind: 'monthly', interval: 1, day: +m[1] }) : false))
+  take(/每年(?:的)?(\d{1,2}|十[一二]?|[一二三四五六七八九])月(\d{1,2})[日号號]/, 'date', (m) => {
+    const month = num(m[1])
+    if (!(month >= 1 && month <= 12) || +m[2] < 1 || +m[2] > 31) return false
+    return setRepeat({ kind: 'yearly', interval: 1, month, day: +m[2] })
+  })
+  take(/每(?:个|個)?工作日/, 'date', () => setRepeat({ kind: 'weekdays' }))
+  take(/每(?:个|個)?(?:周|週|星期|礼拜|禮拜)([一二三四五六日天](?:[、,，和及]?[一二三四五六日天])*)/, 'date', (m) =>
+    setRepeat({ kind: 'weekly', interval: 1, days: [...new Set([...m[1].replace(/[、,，和及]/g, '')].map((c) => CN_WEEK[c]))].sort() }),
+  )
+  take(/每\s*(\d+|[一二两兩三四五六七八九十])?\s*(?:个|個)?(天|日|周|週|星期|礼拜|禮拜|月|年)/, 'date', (m) => {
+    const n = m[1] ? num(m[1]) : 1
+    if (!(n >= 1)) return false
+    return setRepeat({ kind: CN_UNIT[m[2]], interval: n } as RepeatRule)
+  })
+  // English: every last Friday, every month on the 15th / last day, every weekday, every Mon and Wed, every 2 weeks, every other day
+  take(new RegExp(`\\bevery\\s+(first|1st|second|2nd|third|3rd|fourth|4th|last)\\s+${EN_WD}(?:\\s+of\\s+(?:the|each|every)\\s+month)?\\b`, 'i'), 'date', (m) =>
+    setRepeat({ kind: 'monthly', interval: 1, nth: EN_NTH[m[1].toLowerCase()], weekday: EN_WEEK[m[2].toLowerCase()] }),
+  )
+  take(/\b(?:every\s+month|monthly)\s+on\s+the\s+(?:(last)\s+day|(\d{1,2})(?:st|nd|rd|th)?)\b/i, 'date', (m) => {
+    const day = m[1] ? -1 : +m[2]
+    if (day !== -1 && (day < 1 || day > 31)) return false
+    return setRepeat({ kind: 'monthly', interval: 1, day })
+  })
+  take(/\b(?:every\s+(?:week\s?day|work\s?day)s?|on\s+weekdays)\b/i, 'date', () => setRepeat({ kind: 'weekdays' }))
+  take(new RegExp(`\\bevery\\s+${EN_WD}((?:\\s*,\\s*|\\s*&\\s*|\\s+and\\s+|,\\s*and\\s+)${EN_WD})*\\b`, 'i'), 'date', (m) => {
+    const days = [...m[0].matchAll(new RegExp(EN_WD, 'gi'))].map((x) => EN_WEEK[x[1].toLowerCase()])
+    return setRepeat({ kind: 'weekly', interval: 1, days: [...new Set(days)].sort() })
+  })
+  take(/\bevery\s+(?:(other)\s+|(\d+)\s+)?(day|week|month|year)s?\b/i, 'date', (m) => {
+    const n = m[1] ? 2 : m[2] ? +m[2] : 1
+    if (n < 1) return false
+    return setRepeat({ kind: EN_UNIT[m[3].toLowerCase()], interval: n } as RepeatRule)
+  })
 
   // ---- dates: Chinese ----
   take(/(\d{4})[年/-](\d{1,2})[月/-](\d{1,2})[日号號]?/, 'date', (m) => {
@@ -264,6 +318,11 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
       dueTime = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
     },
   )
+  if (repeat) {
+    // A repeating task starts on the first day its rule falls on, and the rule takes its days from that date
+    if (!dueDate) dueDate = firstOccurrence(repeat, fmt(now))
+    repeat = withDays(repeat, dueDate)
+  }
   if (dueTime && !dueDate) {
     // Only a time: today, or tomorrow when that time has passed
     const [h, mm] = dueTime.split(':').map(Number)
@@ -303,5 +362,5 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
   title += text.slice(pos)
   title = title.replace(/\s{2,}/g, ' ').trim()
 
-  return { title, dueDate, dueTime, priority, tags, listName, spans }
+  return { title, dueDate, dueTime, priority, repeat, tags, listName, spans }
 }

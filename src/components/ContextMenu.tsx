@@ -3,7 +3,7 @@ import { addDays, addWeeks, startOfWeek } from 'date-fns'
 import { fmt, todayStr } from '../dates'
 import { useT } from '../i18n'
 import { startFocus } from '../pomo'
-import { deleteFilter, deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
+import { canSkip, deleteFilter, deleteList, deleteTag, deleteTask, skipOccurrence, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
 import { copyText, taskLink } from '../taskLink'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY } from '../views'
@@ -103,6 +103,7 @@ export function ContextMenu() {
         },
         { label: tr(t.pinned ? 'shell.task.unpin' : 'shell.task.pin'), icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !t.pinned }) },
         { label: tr(t.status === -1 ? 'shell.task.reopen' : 'shell.task.wontDo'), icon: <Icon name="wontdo" size={15} />, onClick: () => (t.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(t.id)) },
+        ...(canSkip(t) ? [{ label: tr('shell.task.skip'), icon: <Icon name="repeat" size={15} />, onClick: () => skipOccurrence(t.id) }] : []),
         {
           label: tr('shell.task.tags'),
           icon: <Icon name="tag" size={15} />,

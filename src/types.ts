@@ -1,12 +1,36 @@
 // Priority values: 0 none / 1 low / 3 medium / 5 high
 export type Priority = 0 | 1 | 3 | 5
 
-export type RepeatRule =
-  | { kind: 'daily'; interval: number }
-  | { kind: 'weekly'; interval: number; days?: number[] } // 0 = Sunday
-  | { kind: 'weekdays' }
-  | { kind: 'monthly'; interval: number }
-  | { kind: 'yearly'; interval: number }
+/**
+ * How a task repeats. Rules saved by older versions have only `kind` and `interval`; they are
+ * migrated on load (see `migrateRepeat` in repeat.ts), which writes the days in.
+ */
+export type RepeatRule = RepeatOptions &
+  (
+    | { kind: 'daily'; interval: number }
+    /** On the chosen weekdays (0 = Sunday) every `interval` weeks */
+    | { kind: 'weekly'; interval: number; days?: number[] }
+    /** Monday to Friday */
+    | { kind: 'weekdays' }
+    /**
+     * Every `interval` months on day `day` (1–31, the last day in shorter months; -1 = the last day),
+     * or on the `nth` (1–4, -1 = last) `weekday` (0 = Sunday) of the month.
+     */
+    | { kind: 'monthly'; interval: number; day?: number; nth?: number; weekday?: number }
+    /** Every `interval` years on `month` (1–12) / `day`; Feb 29 falls on Feb 28 in common years. */
+    | { kind: 'yearly'; interval: number; month?: number; day?: number }
+  )
+
+export interface RepeatOptions {
+  /** Count the next date from the due date (default) or from the day the task is completed. */
+  from?: 'due' | 'completion'
+  /** The series ends after this many occurrences. */
+  count?: number
+  /** The series ends after this date (yyyy-MM-dd, included). */
+  until?: string
+  /** Occurrences completed or skipped so far, for `count`. */
+  done?: number
+}
 
 export interface Subtask {
   id: string

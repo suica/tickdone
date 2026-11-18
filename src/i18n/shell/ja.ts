@@ -19,6 +19,7 @@ export default {
   'shell.task.pin': 'ピン留め',
   'shell.task.unpin': 'ピン留めを解除',
   'shell.task.wontDo': 'やらない',
+  'shell.task.skip': '今回をスキップ',
   'shell.task.reopen': 'やらないを取り消す',
   'shell.task.tags': 'タグ',
   'shell.task.startFocus': '集中を開始',

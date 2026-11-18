@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': 'Completada: «{title}»',
   'core.toast.completedNext': 'Completada. Próxima: {date}',
+  'core.toast.skipped': 'Omitida. Próxima: {date}',
   'core.toast.wontDo': 'Marcada como no se hará',
   'core.toast.deletedForever': 'Eliminada para siempre',
   'core.toast.deleted': 'Eliminada. Puedes restaurarla desde la Papelera',

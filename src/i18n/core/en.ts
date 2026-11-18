@@ -28,6 +28,7 @@ export default {
   // undo toasts
   'core.toast.completed': 'Completed “{title}”',
   'core.toast.completedNext': 'Completed. Next: {date}',
+  'core.toast.skipped': 'Skipped. Next: {date}',
   'core.toast.wontDo': "Marked as won't do",
   'core.toast.deletedForever': 'Deleted forever',
   'core.toast.deleted': 'Deleted. You can restore it from Trash',

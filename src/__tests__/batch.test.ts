@@ -55,6 +55,20 @@ describe('batch changes', () => {
     expect(d.tasks.filter((t) => t.status === 2 && t.title === 'r')).toHaveLength(1)
     expect(byId(d, 'x').completedAt).toBe(1)
   })
+  it('completeMany ends a series on its last occurrence and counts the others', () => {
+    const d = completeMany(
+      data([
+        task('last', 0, { dueDate: '2026-11-18', repeat: { kind: 'daily', interval: 1, count: 2, done: 1 } }),
+        task('more', 1, { dueDate: '2026-11-18', repeat: { kind: 'monthly', interval: 1, nth: -1, weekday: 5, count: 3 } }),
+      ]),
+      ['last', 'more'],
+      new Date(2026, 10, 18, 12).getTime(),
+    )
+    expect(byId(d, 'last')).toMatchObject({ status: 2, dueDate: '2026-11-18', repeat: { done: 2 } })
+    expect(byId(d, 'more')).toMatchObject({ status: 0, dueDate: '2026-11-27', repeat: { done: 1 } })
+    // only the series that goes on leaves a completed copy
+    expect(d.tasks).toHaveLength(3)
+  })
   it("wontDoMany and deleteMany; deleting tasks already in the trash removes them", () => {
     expect(ids.map((id) => byId(wontDoMany(d0, ids), id).status)).toEqual([-1, -1, -1])
     const trashed = deleteMany(d0, ['a', 'b'])

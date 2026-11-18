@@ -1,15 +1,7 @@
-import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
-  differenceInCalendarDays,
-  format,
-  getDay,
-  parseISO,
-} from 'date-fns'
+import { differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { t as tr } from './i18n'
 import { fmtFullDate, fmtMonthDay, fmtTime, fmtWeekday } from './i18n/format'
+import { nextMatch } from './repeat'
 import type { RepeatRule, Task } from './types'
 
 export const fmt = (d: Date) => format(d, 'yyyy-MM-dd')
@@ -47,31 +39,9 @@ export function isOverdue(t: Task): boolean {
   return false
 }
 
-export function nextOccurrence(date: string, rule: RepeatRule): string {
-  const d = parseISO(date)
-  switch (rule.kind) {
-    case 'daily':
-      return fmt(addDays(d, rule.interval))
-    case 'weekdays': {
-      let n = addDays(d, 1)
-      while (getDay(n) === 0 || getDay(n) === 6) n = addDays(n, 1)
-      return fmt(n)
-    }
-    case 'weekly': {
-      if (rule.days && rule.days.length) {
-        let n = addDays(d, 1)
-        for (let i = 0; i < 7 * rule.interval + 7; i++) {
-          if (rule.days.includes(getDay(n))) return fmt(n)
-          n = addDays(n, 1)
-        }
-      }
-      return fmt(addWeeks(d, rule.interval))
-    }
-    case 'monthly':
-      return fmt(addMonths(d, rule.interval))
-    case 'yearly':
-      return fmt(addYears(d, rule.interval))
-  }
+/** The next date of a repeating task counted from `date` (see `nextMatch` in repeat.ts). */
+export function nextOccurrence(date: string, rule: RepeatRule, weekStartsOn: 0 | 1 = 1): string {
+  return nextMatch(rule, date, weekStartsOn)
 }
 
 /** A day of the week (0 = Sunday) as a date, to format its name. 2023-01-01 was a Sunday. */

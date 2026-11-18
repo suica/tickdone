@@ -19,6 +19,7 @@ export default {
   'shell.task.pin': 'Épingler',
   'shell.task.unpin': 'Désépingler',
   'shell.task.wontDo': 'Abandonner',
+  'shell.task.skip': 'Ignorer cette occurrence',
   'shell.task.reopen': 'Rouvrir',
   'shell.task.tags': 'Étiquettes',
   'shell.task.startFocus': 'Démarrer la concentration',

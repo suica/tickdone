@@ -25,6 +25,7 @@ export default {
 
   'core.toast.completed': '„{title}“ erledigt',
   'core.toast.completedNext': 'Erledigt. Nächstes Mal: {date}',
+  'core.toast.skipped': 'Übersprungen. Nächstes Mal: {date}',
   'core.toast.wontDo': 'Als verworfen markiert',
   'core.toast.deletedForever': 'Endgültig gelöscht',
   'core.toast.deleted': 'Gelöscht. Im Papierkorb wiederherstellbar',

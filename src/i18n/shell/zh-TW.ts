@@ -19,6 +19,7 @@ export default {
   'shell.task.pin': '置頂',
   'shell.task.unpin': '取消置頂',
   'shell.task.wontDo': '放棄',
+  'shell.task.skip': '跳過本次',
   'shell.task.reopen': '取消放棄',
   'shell.task.tags': '標籤',
   'shell.task.startFocus': '開始專注',

@@ -1,5 +1,6 @@
 import { descendantIds } from './components/taskTree'
-import { nextOccurrence } from './dates'
+import { fmt } from './dates'
+import { advance } from './repeat'
 import type { AppData, Task } from './types'
 
 // Changes to several tasks at once, as pure functions of the app data. Each returns new data (or the same
@@ -60,18 +61,20 @@ export function tagState(d: AppData, ids: string[], tag: string): 'all' | 'some'
 
 /**
  * Completes the open tasks in `ids`. A repeating task with a date stays open on its next date and leaves a
- * completed copy behind, as completing it on its own does.
+ * completed copy behind, as completing it on its own does; its last occurrence is completed for good.
  */
 export function completeMany(d: AppData, ids: string[], now = Date.now()): AppData {
   const want = new Set(ids)
   const copies: Task[] = []
   const tasks = d.tasks.map((t) => {
     if (!want.has(t.id) || t.status !== 0 || t.deleted) return t
-    if (t.repeat && t.dueDate) {
+    const step = advance(t, fmt(new Date(now)), d.settings.weekStartsOn)
+    if (step?.next) {
       copies.push({ ...t, id: uid(), status: 2, completedAt: now, repeat: null })
-      return { ...t, dueDate: nextOccurrence(t.dueDate, t.repeat), subtasks: t.subtasks.map((s) => ({ ...s, done: false })), modifiedAt: now }
+      return { ...t, dueDate: step.dueDate, repeat: step.repeat, subtasks: t.subtasks.map((s) => ({ ...s, done: false })), modifiedAt: now }
     }
-    return { ...t, status: 2 as const, completedAt: now, modifiedAt: now }
+    // a plain task, or the last occurrence of a series
+    return { ...t, status: 2 as const, completedAt: now, modifiedAt: now, ...(step ? { repeat: step.repeat } : {}) }
   })
   if (!copies.length && tasks.every((t, i) => t === d.tasks[i])) return d
   return { ...d, tasks: [...tasks, ...copies] }

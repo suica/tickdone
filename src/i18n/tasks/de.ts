@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': 'In „{name}“ verschoben',
   'tasks.dnd.outOfFolder': 'Aus dem Ordner verschoben',
   'tasks.dnd.folder': 'Ordner',
+  'tasks.swipe.date': 'Datum',
+  'tasks.swipe.move': 'Verschieben',
+  'tasks.swipe.complete': 'Erledigen',
+  'tasks.swipe.pinned': 'Oben angeheftet',
+  'tasks.swipe.unpinned': 'Nicht mehr angeheftet',
+  'tasks.swipe.dateChanged': 'Datum aktualisiert',
 } satisfies Catalog<typeof en>

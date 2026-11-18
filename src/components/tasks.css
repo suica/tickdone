@@ -822,7 +822,7 @@ body.dnd-active * {
 .qa-fab {
   position: fixed;
   right: 16px;
-  bottom: calc(var(--tabbar-h) + var(--safe-b) + 16px);
+  bottom: calc(var(--tabbar-space) + 14px);
   z-index: 300;
   width: 52px;
   height: 52px;
@@ -1024,20 +1024,139 @@ body.dnd-active * {
     width: 100%;
     border-right: none;
   }
+  /* Grouped cards on a grey page */
   .list-pane {
     min-width: 0;
+    background: var(--bg-grouped);
   }
   .list-head {
-    gap: 4px;
-    min-height: 52px;
-    padding: 6px 8px 2px 6px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 16px 0;
+  }
+  .list-head h1 {
+    order: 10;
+    flex: 1 0 100%;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+    padding: 6px 4px 10px;
   }
   .list-head-btn {
     width: 40px;
     height: 40px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    color: var(--text);
+    box-shadow: var(--shadow-soft);
+  }
+  .list-head-btn:hover {
+    background: var(--bg-card);
   }
   .list-body {
-    padding: 0 12px calc(96px + var(--safe-b)) 24px;
+    padding: 0 12px calc(var(--tabbar-space) + 84px) 12px;
+  }
+  .list-content > .group,
+  .list-content > .trash-hint {
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 2px 0 4px var(--gutter);
+    /* rows sliding sideways, their list bars and swipe buttons stay inside the rounded card */
+    position: relative;
+    overflow: clip;
+  }
+  .list-content > .trash-hint {
+    padding: 14px 16px;
+  }
+  .group-head {
+    height: 44px;
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-right: 10px;
+    font-size: 15px;
+  }
+  /* name first, then the action, the count and the fold arrow at the right */
+  .group-head > span:not(.group-count) {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .group-head .group-action {
+    order: 1;
+    margin-left: 0;
+  }
+  .group-head .group-count {
+    order: 2;
+    font-size: 13px;
+  }
+  .group-head > .chev {
+    order: 3;
+  }
+  .task-row {
+    padding-right: 14px;
+    border-radius: 0;
+  }
+  .task-main {
+    border-bottom: none;
+  }
+  /* the list colour as a bar on the card's left edge */
+  .task-row[style*='--list-c']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--list-c);
+    opacity: 0.85;
+  }
+  .task-row.selected {
+    background: var(--bg-selected);
+  }
+
+  /* Swipe actions (TaskRow / rowSwipe.ts): the row slides over a strip of buttons */
+  .task-row.swipeable {
+    touch-action: pan-y;
+    background: var(--bg-card);
+  }
+  .task-row.swipeable.selected {
+    background: var(--bg-selected);
+  }
+  .task-row.swipe-anim {
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .swipe-acts {
+    position: absolute;
+    display: flex;
+    overflow: hidden;
+  }
+  .swipe-acts.swipe-end {
+    flex-direction: row-reverse;
+  }
+  .swipe-btn {
+    width: 68px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      opacity var(--dur-fast) var(--ease-out),
+      transform var(--dur) var(--ease-spring);
+  }
+  .swipe-btn:active svg {
+    transform: scale(0.9);
+  }
+  /* a full swipe: only the first action (at the outer edge) is left, and it pops */
+  .swipe-acts.full .swipe-btn:not(:first-child) {
+    opacity: 0;
+  }
+  .swipe-acts.full .swipe-btn:first-child {
+    transform: scale(1.12);
   }
   .kanban {
     gap: 12px;

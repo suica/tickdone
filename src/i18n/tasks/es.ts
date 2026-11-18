@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': 'Movida a la carpeta «{name}»',
   'tasks.dnd.outOfFolder': 'Sacada de la carpeta',
   'tasks.dnd.folder': 'Carpeta',
+  'tasks.swipe.date': 'Fecha',
+  'tasks.swipe.move': 'Mover',
+  'tasks.swipe.complete': 'Completar',
+  'tasks.swipe.pinned': 'Fijada arriba',
+  'tasks.swipe.unpinned': 'Ya no está fijada',
+  'tasks.swipe.dateChanged': 'Fecha actualizada',
 } satisfies Catalog<typeof en>

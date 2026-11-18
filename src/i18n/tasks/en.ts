@@ -94,4 +94,11 @@ export default {
   'tasks.dnd.intoFolder': 'Moved into “{name}”',
   'tasks.dnd.outOfFolder': 'Moved out of the folder',
   'tasks.dnd.folder': 'Folder',
+  // swipe actions on phone rows
+  'tasks.swipe.date': 'Date',
+  'tasks.swipe.move': 'Move',
+  'tasks.swipe.complete': 'Complete',
+  'tasks.swipe.pinned': 'Pinned to the top',
+  'tasks.swipe.unpinned': 'Unpinned',
+  'tasks.swipe.dateChanged': 'Date updated',
 } as const

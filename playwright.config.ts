@@ -21,6 +21,8 @@ export default defineConfig({
     { name: 'desktop', use: { browserName: 'chromium', viewport: { width: 1440, height: 860 } } },
     { name: 'large', testMatch: /layout\.spec\.ts/, use: { browserName: 'chromium', viewport: { width: 2560, height: 1440 } } },
     { name: 'phone', testMatch: /layout\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium' } },
+    { name: 'phone-390', testMatch: /layout\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', viewport: { width: 390, height: 844 } } },
+    { name: 'phone-360', testMatch: /layout\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', viewport: { width: 360, height: 740 } } },
   ],
   webServer: {
     command: `npx vite preview --port ${port} --strictPort --host 127.0.0.1`,

@@ -132,7 +132,7 @@ test.describe('phone (Pixel 7 emulation)', () => {
     expect(await page.evaluate(() => [innerWidth, matchMedia('(max-width: 767px)').matches, matchMedia('(pointer: coarse)').matches, navigator.maxTouchPoints > 0])).toEqual([412, true, true, true])
   })
 
-  test('bottom bar, edge-swipe drawer with search/settings/GitHub, full-screen detail and bottom sheet', async ({ page }) => {
+  test('bottom bar, edge-swipe drawer with search/settings/GitHub, detail sheet and menu sheets', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.rail')).toHaveCount(0)
     await expect(page.locator('.tabbar button')).toHaveCount(5)
@@ -153,9 +153,9 @@ test.describe('phone (Pixel 7 emulation)', () => {
     }).toPass({ timeout: 8000 })
 
     await page.locator('.task-row .task-meta').first().tap()
-    const sheetPage = page.locator('.detail-page')
-    await expect(sheetPage).toBeVisible()
-    await page.locator('.detail-foot .icon-btn[title="更多"]').tap()
+    const detail = page.locator('.detail-sheet')
+    await expect(detail).toBeVisible()
+    await page.locator('.detail-sheet-head .detail-round[title="更多"]').tap()
     const sheet = page.locator('.sheet-layer .popover.sheet')
     await expect(sheet).toBeVisible()
     await expect.poll(async () => Math.round((await sheet.boundingBox())!.width)).toBe(vw)
@@ -167,8 +167,8 @@ test.describe('phone (Pixel 7 emulation)', () => {
     await expect.poll(async () => Math.round((await page.locator('.popover.sheet.dp').boundingBox())!.width)).toBe(vw)
     await page.keyboard.press('Escape')
     await expect(page.locator('.sheet-layer')).toHaveCount(0)
-    await page.locator('.detail-back').tap()
-    await expect(sheetPage).toHaveCount(0)
+    await page.locator('.detail-sheet-mask').tap({ position: { x: 100, y: 60 } })
+    await expect(detail).toHaveCount(0)
   })
 
   test('the undo toast stays clear of the round add button', async ({ page }) => {

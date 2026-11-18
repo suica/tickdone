@@ -1,13 +1,16 @@
-import { useContext, type CSSProperties, type MouseEvent } from 'react'
+import { useContext, useLayoutEffect, useState, type CSSProperties, type MouseEvent } from 'react'
 import { dueLabel, isOverdue } from '../dates'
-import { useT } from '../i18n'
-import { setUI, updateTask, useData, useUI } from '../store'
+import { useT, type MessageKey } from '../i18n'
+import { deleteTask, getData, setUI, toast, updateTask, useData, useUI } from '../store'
 import type { Task } from '../types'
-import { useMedia } from '../viewport'
+import { useMedia, usePhone } from '../viewport'
 import { priorityColor } from '../views'
+import { DatePicker } from './DatePicker'
 import { Icon } from './Icon'
+import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
+import { useRowSwipe, type SwipeSide } from './rowSwipe'
 import { toggleWithMotion, useLinger } from './taskMotion'
-import { TaskDragContext } from './taskDnd'
+import { moveTaskTo, TaskDragContext } from './taskDnd'
 
 /** Check mark drawn with pathLength 1 so it can be stroked in. */
 function Tick() {
@@ -81,11 +84,70 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : 'var(--primary)'
   const draggable = !!drag && !task.deleted && !dragDisabled
 
-  return (
+  // Phone list rows: swipe left for date / move / delete, swipe right for complete / pin.
+  const phone = usePhone()
+  const swipeable = phone && touch && draggable && !!drag?.flipRows && task.status === 0
+  const [pop, setPop] = useState<{ kind: 'date' | 'move'; anchor: Anchor; snap: ReturnType<typeof getData> } | null>(null)
+  const actions: Record<SwipeSide, SwipeAction[]> = {
+    end: [
+      { id: 'date', label: 'tasks.swipe.date', icon: 'calendar', color: 'var(--swipe-blue)', run: (a) => setPop({ kind: 'date', anchor: a, snap: getData() }) },
+      { id: 'move', label: 'tasks.swipe.move', icon: 'move', color: 'var(--swipe-orange)', run: (a) => setPop({ kind: 'move', anchor: a, snap: getData() }) },
+      { id: 'delete', label: 'common.delete', icon: 'trash', color: 'var(--swipe-red)', run: () => deleteTask(task.id) },
+    ],
+    start: [
+      { id: 'complete', label: 'tasks.swipe.complete', icon: 'check', color: 'var(--swipe-green)', run: () => toggleWithMotion(task.id) },
+      {
+        id: 'pin',
+        label: task.pinned ? 'shell.task.unpin' : 'shell.task.pin',
+        icon: 'pin',
+        color: 'var(--swipe-orange)',
+        run: () => {
+          const snap = getData()
+          updateTask(task.id, { pinned: !task.pinned })
+          toast(t(task.pinned ? 'tasks.swipe.unpinned' : 'tasks.swipe.pinned'), snap)
+        },
+      },
+    ],
+  }
+  const rowAnchor = () => (swipe.rowRef.current ? anchorOf(swipe.rowRef.current) : { x: 0, y: 0 })
+  const swipe = useRowSwipe({ id: task.id, enabled: swipeable, count: { start: 2, end: 3 }, onFull: (sd) => actions[sd][0].run(rowAnchor()) })
+  useLayoutEffect(() => {
+    const row = swipe.rowRef.current
+    const acts = swipe.actsRef.current
+    if (!row || !acts) return
+    acts.style.cssText = `top:${row.offsetTop}px;left:${row.offsetLeft}px;width:${row.offsetWidth}px;height:${row.offsetHeight}px`
+  }, [swipe.side])
+
+  const closePop = () => {
+    if (pop?.kind === 'date') {
+      const before = pop.snap.tasks.find((x) => x.id === task.id)
+      const now = getData().tasks.find((x) => x.id === task.id)
+      if (before && now && (['dueDate', 'dueTime', 'reminder', 'repeat'] as const).some((k) => JSON.stringify(before[k]) !== JSON.stringify(now[k]))) toast(t('tasks.swipe.dateChanged'), pop.snap)
+    }
+    setPop(null)
+  }
+
+  const row = (
     <div
-      className={'task-row' + (selected ? ' selected' : '') + (done && !phase ? ' done' : '') + (phase ? ' is-' + phase + 'ing' : '') + (fold ? ' has-children' : '')}
-      onPointerDown={draggable ? (e) => drag!.start(e, task, e.currentTarget) : undefined}
-      onClick={() => setUI({ selectedTaskId: task.id })}
+      ref={swipe.rowRef}
+      className={'task-row' + (selected ? ' selected' : '') + (done && !phase ? ' done' : '') + (phase ? ' is-' + phase + 'ing' : '') + (fold ? ' has-children' : '') + (swipeable ? ' swipeable' : '')}
+      style={list?.color && depth === 0 ? ({ '--list-c': list.color } as CSSProperties) : undefined}
+      onPointerDown={
+        draggable
+          ? (e) => {
+              const wasOpen = !!swipe.side
+              swipe.handlers.onPointerDown(e)
+              if (!wasOpen) drag!.start(e, task, e.currentTarget)
+            }
+          : undefined
+      }
+      onPointerMove={swipeable ? swipe.handlers.onPointerMove : undefined}
+      onPointerUp={swipeable ? swipe.handlers.onPointerUp : undefined}
+      onPointerCancel={swipeable ? swipe.handlers.onPointerCancel : undefined}
+      onClick={() => {
+        if (swipe.takeClick()) return
+        setUI({ selectedTaskId: task.id })
+      }}
       onContextMenu={(e) => openTaskMenu(e, task.id)}
       data-task-id={task.id}
       data-flip={drag?.flipRows && !dragDisabled ? task.id : undefined}
@@ -168,4 +230,62 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
       </div>
     </div>
   )
+
+  if (!swipeable && !pop) return row
+  const side = swipe.side
+  return (
+    <>
+      {side && (
+        <div ref={swipe.actsRef} className={'swipe-acts swipe-' + side} style={{ background: actions[side][0].color }}>
+          {actions[side].map((a) => (
+            <button
+              key={a.id}
+              className={'swipe-btn swipe-' + a.id}
+              style={{ background: a.color }}
+              aria-label={t(a.label)}
+              title={t(a.label)}
+              onClick={(e) => {
+                e.stopPropagation()
+                const anchor = anchorOf(e.currentTarget)
+                swipe.close()
+                a.run(anchor)
+              }}
+            >
+              <Icon name={a.icon} size={22} stroke={2} />
+            </button>
+          ))}
+        </div>
+      )}
+      {row}
+      {pop?.kind === 'date' && (
+        <DatePicker
+          anchor={pop.anchor}
+          value={{ dueDate: task.dueDate, dueTime: task.dueTime, reminder: task.reminder, repeat: task.repeat }}
+          onChange={(v) => updateTask(task.id, { dueDate: v.dueDate, dueTime: v.dueTime, reminder: v.reminder ?? null, repeat: v.repeat ?? null })}
+          onClose={closePop}
+        />
+      )}
+      {pop?.kind === 'move' && (
+        <Popover anchor={pop.anchor} onClose={closePop}>
+          <MenuList
+            onClose={closePop}
+            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...data.lists].map((l) => ({
+              label: l.name,
+              icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
+              checked: l.id === task.listId,
+              onClick: () => moveTaskTo(task, l.id === 'inbox' ? 'inbox' : 'list:' + l.id),
+            }))}
+          />
+        </Popover>
+      )}
+    </>
+  )
+}
+
+interface SwipeAction {
+  id: string
+  label: MessageKey
+  icon: string
+  color: string
+  run: (anchor: Anchor) => void
 }

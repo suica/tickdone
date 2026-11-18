@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': 'フォルダ「{name}」に移動しました',
   'tasks.dnd.outOfFolder': 'フォルダから出しました',
   'tasks.dnd.folder': 'フォルダ',
+  'tasks.swipe.date': '日付',
+  'tasks.swipe.move': '移動',
+  'tasks.swipe.complete': '完了',
+  'tasks.swipe.pinned': '先頭に固定しました',
+  'tasks.swipe.unpinned': '固定を解除しました',
+  'tasks.swipe.dateChanged': '日付を更新しました',
 } satisfies Catalog<typeof en>

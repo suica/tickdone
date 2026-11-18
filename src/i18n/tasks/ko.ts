@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': '‘{name}’ 폴더로 옮겼습니다',
   'tasks.dnd.outOfFolder': '폴더에서 꺼냈습니다',
   'tasks.dnd.folder': '폴더',
+  'tasks.swipe.date': '날짜',
+  'tasks.swipe.move': '이동',
+  'tasks.swipe.complete': '완료',
+  'tasks.swipe.pinned': '맨 위에 고정했습니다',
+  'tasks.swipe.unpinned': '고정을 해제했습니다',
+  'tasks.swipe.dateChanged': '날짜를 업데이트했습니다',
 } satisfies Catalog<typeof en>

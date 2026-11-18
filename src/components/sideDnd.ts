@@ -4,6 +4,7 @@ import { getData, setData, setUI, toast } from '../store'
 import type { AppData, Folder, TaskList } from '../types'
 import { hideLine, highlight, hitAt, pressToDrag, showLine } from './dnd'
 import { flip, measure } from './taskMotion'
+import { moveFilter, sortedFilters } from '../filters'
 
 // Sidebar drags: reorder lists, move a list into / out of a folder, reorder folders.
 // The sidebar shows folders (each with its lists) first, then the lists outside folders.
@@ -169,6 +170,40 @@ export function startFolderDrag(e: React.PointerEvent<HTMLElement>, folderId: st
         return true
       },
       onLongPress: () => setUI({ dialog: { kind: 'folder', id: folderId } }),
+    }
+  })
+}
+
+/** Drag a saved filter to reorder the filters; a long press on touch opens its menu. */
+export function startFilterDrag(e: React.PointerEvent<HTMLElement>, filterId: string, onLongPress: (x: number, y: number) => void) {
+  const item = e.currentTarget
+  pressToDrag(e, () => {
+    const side = item.closest<HTMLElement>('.sidebar')
+    const region = item.closest<HTMLElement>('[data-side-filters]')
+    if (!side || !region) return null
+    let index = -1
+    return {
+      source: item,
+      onMove: (s) => {
+        index = -1
+        hideLine()
+        const r = region.getBoundingClientRect()
+        if (s.x < r.left || s.x > r.right || s.y < r.top - 20 || s.y > r.bottom + 20) return
+        const rows = [...region.querySelectorAll<HTMLElement>('[data-side-filter]')].filter((x) => x !== item).map((x) => x.getBoundingClientRect())
+        if (!rows.length) return
+        const i = rows.findIndex((b) => s.y < b.top + b.height / 2)
+        index = i < 0 ? rows.length : i
+        const y = index < rows.length ? rows[index].top : rows[rows.length - 1].bottom
+        showLine(r.left + 10, y, r.width - 20)
+      },
+      onDrop: () => {
+        if (index < 0) return false
+        // `index` counts the filters without the dragged one, so its old index means "same place"
+        if (sortedFilters(getData()).findIndex((f) => f.id === filterId) === index) return false
+        commit(side, (dd) => moveFilter(dd, filterId, index), t('tasks.dnd.filtersReordered'))
+        return true
+      },
+      onLongPress,
     }
   })
 }

@@ -58,4 +58,5 @@ export default {
   'core.pomo.focusDone.bodyTask': { other: '‘{task}’ 뽀모도로 하나를 마쳤습니다. {count}분 쉬세요.' },
   'core.pomo.breakDone.title': '휴식 끝',
   'core.pomo.breakDone.body': '다음 뽀모도로를 시작해 보세요',
+  'core.toast.filterDeleted': '필터를 삭제했습니다',
 } satisfies Catalog<typeof en>

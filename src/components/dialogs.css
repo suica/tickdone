@@ -705,3 +705,140 @@
     width: 100%;
   }
 }
+
+/* Saved filter editor: name and look, then one group of choices per condition and a live count */
+.dlg-filter-body {
+  max-height: min(72vh, 680px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dlg-filter-look {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 24px;
+}
+.dlg-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.dlg-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.dlg-icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.dlg-icon-btn.on {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.dlg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dlg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  max-width: 100%;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-size: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-spring);
+}
+.dlg-chip:hover {
+  color: var(--text);
+  border-color: var(--text-3);
+}
+.dlg-chip:active {
+  transform: scale(0.96);
+}
+.dlg-chip.on {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.dlg-filter-sub {
+  margin-top: 8px;
+}
+.dlg-filter-none {
+  margin-left: 0;
+}
+.dlg-filter-range {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 8px;
+  margin-top: 10px;
+}
+/* label text and field sit in the grid's columns, so both fields line up whatever the language */
+.dlg-filter-range label {
+  display: contents;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.dlg-filter-range .input {
+  min-width: 0;
+}
+.dlg-filter-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-2);
+  font-size: 13px;
+}
+@media (max-width: 767px) {
+  .dlg-filter-body {
+    max-height: none;
+  }
+  .dlg-filter-look {
+    grid-template-columns: 1fr;
+  }
+  .dlg-filter-range {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .dlg-icons {
+    gap: 6px;
+  }
+  .dlg-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .dlg-chip {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+}
+@media (pointer: coarse) {
+  .dlg-chip,
+  .dlg-icon-btn {
+    min-height: 40px;
+    min-width: 40px;
+  }
+}

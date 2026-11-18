@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { LIST_COLORS, addList, deleteList, deleteTag, renameTag, setData, setUI, toast, uid, updateList, useData, useUI, getData } from '../store'
-import type { AppData, Settings } from '../types'
+import { LIST_COLORS, addFilter, addList, deleteFilter, deleteList, deleteTag, renameTag, updateFilter, setData, setUI, toast, uid, updateList, useData, useUI, getData } from '../store'
+import type { AppData, FilterDate, Priority, SavedFilter, Settings } from '../types'
+import { FILTER_DATES, FILTER_ICONS, FILTER_PREFIX, filterClock, filterMatcher, conditionCount } from '../filters'
+import { PRIORITY } from '../views'
 import { isPhone, usePhone } from '../viewport'
 import { LOCALES, setLocale, t, useLocale, useT, type Locale, type MessageKey } from '../i18n'
 import { dayName } from './dateLabels'
-import { Icon } from './Icon'
+import { Flag, Icon } from './Icon'
 import { usePresence } from './motion'
 import { SubscriptionsTab } from './Subscriptions'
 import { isStandalone, promptInstall, usePwa } from '../pwa'
@@ -31,6 +33,9 @@ export function Dialogs() {
       break
     case 'tag':
       el = <TagDialog key={key} id={d.id} />
+      break
+    case 'filter':
+      el = <FilterDialog key={key} id={d.id} />
       break
     case 'settings':
       el = <SettingsDialog key={key} />
@@ -364,6 +369,230 @@ function TagDialog({ id }: { id?: string }) {
         <Field label={t('misc.tag.color')}>
           <ColorPicker value={color} onChange={setColor} />
         </Field>
+      </div>
+    </Modal>
+  )
+}
+
+// ---------------- saved filter ----------------
+const DATE_NAME: Record<FilterDate, MessageKey> = {
+  overdue: 'common.overdue',
+  today: 'common.today',
+  tomorrow: 'common.tomorrow',
+  thisWeek: 'tasks.filter.thisWeek',
+  next7: 'common.list.next7Days',
+  noDate: 'common.noDate',
+  custom: 'tasks.filter.custom',
+}
+const PRIORITY_SHORT: Record<number, MessageKey> = { 5: 'common.priority.high', 3: 'common.priority.medium', 1: 'common.priority.low', 0: 'common.priority.none' }
+
+/** A toggle in a group of choices (lists, tags, priorities, dates). */
+function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" className={'dlg-chip' + (on ? ' on' : '')} aria-pressed={on} onClick={onClick}>
+      {children}
+    </button>
+  )
+}
+
+const toggle = <T,>(arr: T[] | undefined, v: T): T[] => (arr?.includes(v) ? arr.filter((x) => x !== v) : [...(arr ?? []), v])
+
+type FilterDraft = Omit<SavedFilter, 'id' | 'order'>
+
+/** Create or edit a saved filter: its name, icon and color, and the conditions with a live count of matching tasks. */
+function FilterDialog({ id }: { id?: string }) {
+  const t = useT()
+  const data = useData()
+  const filter = id ? data.filters?.find((f) => f.id === id) : undefined
+  const [f, setF] = useState<FilterDraft>(() => {
+    if (!filter) return { name: '', match: 'all', tagMode: 'any' }
+    const { id: _id, order: _order, ...rest } = filter
+    return rest
+  })
+  const set = (p: Partial<FilterDraft>) => setF((x) => ({ ...x, ...p }))
+  // the days the live count compares against, taken when the dialog opens
+  const [clock] = useState(() => filterClock(new Date(), data.settings.weekStartsOn))
+  const trimmed = f.name.trim()
+  const lists = [{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...[...data.lists].sort((a, b) => a.order - b.order)]
+  // conditions on lists and tags that no longer exist are dropped when saving
+  const clean = (): FilterDraft => {
+    const known = new Set(lists.map((l) => l.id))
+    const tags = new Set(data.tags.map((x) => x.name))
+    const out: FilterDraft = { ...f, name: trimmed, keyword: f.keyword?.trim() || undefined }
+    out.lists = f.lists?.filter((x) => known.has(x))
+    out.tags = f.tags?.filter((x) => tags.has(x))
+    if (!f.dates?.includes('custom')) {
+      out.from = undefined
+      out.to = undefined
+    }
+    return out
+  }
+  const draft = clean()
+  const count = (() => {
+    const match = filterMatcher({ ...draft, id: '', order: 0 }, clock)
+    return data.tasks.filter((x) => !x.deleted && x.status === 0 && match(x)).length
+  })()
+  const noConditions = conditionCount({ ...draft, id: '', order: 0 }) === 0
+
+  const submit = () => {
+    if (!trimmed) return
+    if (filter) updateFilter(filter.id, draft)
+    else {
+      const nf = addFilter(draft)
+      setUI({ view: FILTER_PREFIX + nf.id, module: 'tasks' })
+    }
+    close()
+  }
+
+  return (
+    <Modal
+      title={filter ? t('tasks.filter.edit') : t('tasks.filter.new')}
+      onSubmit={submit}
+      width={520}
+      className="dlg-filter"
+      foot={
+        <>
+          {filter && (
+            <button
+              className="btn dlg-danger-link"
+              onClick={() => {
+                close()
+                deleteFilter(filter.id)
+              }}
+            >
+              {t('tasks.filter.delete')}
+            </button>
+          )}
+          <span className="dlg-spacer" />
+          <button className="btn" onClick={close}>
+            {t('common.cancel')}
+          </button>
+          <button className="btn btn-primary" disabled={!trimmed} onClick={submit}>
+            {filter ? t('common.save') : t('common.add')}
+          </button>
+        </>
+      }
+    >
+      <div className="modal-body dlg-filter-body">
+        <div className="dlg-name-row">
+          <span className="dlg-name-icon" style={{ color: f.color ?? 'var(--text-3)' }}>
+            <Icon name={f.icon || 'filter'} size={18} />
+          </span>
+          <input className="input" type="text" placeholder={t('tasks.filter.name')} aria-label={t('tasks.filter.name')} maxLength={64} value={f.name} onChange={(e) => set({ name: e.target.value })} />
+        </div>
+        <div className="dlg-filter-look">
+          <Field label={t('tasks.filter.icon')}>
+            <div className="dlg-icons" role="group" aria-label={t('tasks.filter.icon')}>
+              {FILTER_ICONS.map((ic) => (
+                <button type="button" key={ic} data-icon={ic} className={'dlg-icon-btn' + ((f.icon || 'filter') === ic ? ' on' : '')} aria-pressed={(f.icon || 'filter') === ic} onClick={() => set({ icon: ic === 'filter' ? undefined : ic })}>
+                  <Icon name={ic} size={17} />
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label={t('tasks.filter.color')}>
+            <ColorPicker value={f.color} onChange={(color) => set({ color })} />
+          </Field>
+        </div>
+
+        <Field label={t('tasks.filter.match')}>
+          <div className="dlg-seg" data-filter-match>
+            {(['all', 'any'] as const).map((m) => (
+              <button type="button" key={m} className={f.match === m ? 'on' : ''} aria-pressed={f.match === m} onClick={() => set({ match: m })}>
+                {t(m === 'all' ? 'tasks.filter.matchAll' : 'tasks.filter.matchAny')}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <Field label={t('tasks.filter.lists')}>
+          <div className="dlg-chips" data-filter-lists>
+            {lists.map((l) => (
+              <Chip key={l.id} on={!!f.lists?.includes(l.id)} onClick={() => set({ lists: toggle(f.lists, l.id) })}>
+                {l.id === 'inbox' ? <Icon name="inbox" size={14} /> : <i className="dot" style={{ background: l.color ?? 'var(--text-3)' }} />}
+                {l.name}
+              </Chip>
+            ))}
+          </div>
+        </Field>
+
+        <Field label={t('tasks.filter.tags')}>
+          {data.tags.length ? (
+            <>
+              <div className="dlg-chips" data-filter-tags>
+                {data.tags.map((tg) => (
+                  <Chip key={tg.name} on={!!f.tags?.includes(tg.name)} onClick={() => set({ tags: toggle(f.tags, tg.name) })}>
+                    <Icon name="tag" size={13} style={tg.color ? { color: tg.color } : undefined} />
+                    {tg.name}
+                  </Chip>
+                ))}
+              </div>
+              {(f.tags?.length ?? 0) > 1 && (
+                <div className="dlg-seg small dlg-filter-sub" data-filter-tagmode>
+                  {(['any', 'all'] as const).map((m) => (
+                    <button type="button" key={m} className={(f.tagMode ?? 'any') === m ? 'on' : ''} aria-pressed={(f.tagMode ?? 'any') === m} onClick={() => set({ tagMode: m })}>
+                      {t(m === 'any' ? 'tasks.filter.tagsAny' : 'tasks.filter.tagsAll')}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="dlg-hint muted dlg-filter-none">{t('tasks.filter.noTags')}</div>
+          )}
+        </Field>
+
+        <Field label={t('tasks.filter.priority')}>
+          <div className="dlg-chips" data-filter-priority>
+            {PRIORITY.map((p) => (
+              <Chip key={p.v} on={!!f.priorities?.includes(p.v)} onClick={() => set({ priorities: toggle<Priority>(f.priorities, p.v) })}>
+                <Flag color={p.color} size={14} />
+                {t(PRIORITY_SHORT[p.v])}
+              </Chip>
+            ))}
+          </div>
+        </Field>
+
+        <Field label={t('tasks.filter.date')}>
+          <div className="dlg-chips" data-filter-dates>
+            {FILTER_DATES.map((k) => (
+              <Chip key={k} on={!!f.dates?.includes(k)} onClick={() => set({ dates: toggle(f.dates, k) })}>
+                {t(DATE_NAME[k])}
+              </Chip>
+            ))}
+          </div>
+          {f.dates?.includes('custom') && (
+            <div className="dlg-filter-range">
+              <label>
+                <span>{t('tasks.filter.from')}</span>
+                <input className="input" type="date" data-filter-from value={f.from ?? ''} max={f.to || undefined} onChange={(e) => set({ from: e.target.value || undefined })} />
+              </label>
+              <label>
+                <span>{t('tasks.filter.to')}</span>
+                <input className="input" type="date" data-filter-to value={f.to ?? ''} min={f.from || undefined} onChange={(e) => set({ to: e.target.value || undefined })} />
+              </label>
+            </div>
+          )}
+        </Field>
+
+        <Field label={t('tasks.filter.keyword')}>
+          <input className="input" type="search" data-filter-keyword placeholder={t('tasks.filter.keywordHint')} aria-label={t('tasks.filter.keyword')} maxLength={120} value={f.keyword ?? ''} onChange={(e) => set({ keyword: e.target.value })} />
+        </Field>
+
+        <Field label={t('tasks.filter.completed')}>
+          <div className="dlg-seg" data-filter-completed>
+            {([false, true] as const).map((v) => (
+              <button type="button" key={String(v)} className={!!f.showCompleted === v ? 'on' : ''} aria-pressed={!!f.showCompleted === v} onClick={() => set({ showCompleted: v || undefined })}>
+                <Icon name={v ? 'eye' : 'eyeOff'} size={15} /> {t(v ? 'tasks.filter.show' : 'tasks.filter.hide')}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <div className="dlg-filter-preview" role="status" data-filter-preview>
+          <Icon name="filter" size={15} />
+          <span>{noConditions ? t('tasks.filter.anyHint') : t('tasks.filter.preview', { count })}</span>
+        </div>
       </div>
     </Modal>
   )
@@ -759,6 +988,7 @@ function DataTab() {
         tags: obj.tags ?? [],
         habits: obj.habits ?? [],
         focus: obj.focus ?? [],
+        filters: Array.isArray(obj.filters) ? obj.filters : [],
         settings: { ...cur.settings, ...(obj.settings ?? {}) },
       }
       setData(() => merged)
@@ -773,7 +1003,7 @@ function DataTab() {
     if (!confirm(t('misc.data.confirmClear'))) return
     if (!confirm(t('misc.data.confirmClear2'))) return
     const snap = getData()
-    setData((d) => ({ ...d, tasks: [], lists: [], folders: [], tags: [], habits: [], focus: [] }))
+    setData((d) => ({ ...d, tasks: [], lists: [], folders: [], tags: [], habits: [], focus: [], filters: [] }))
     setUI({ selectedTaskId: undefined, view: 'inbox' })
     toast(t('misc.data.cleared'), snap)
   }

@@ -68,4 +68,5 @@ export default {
   },
   'core.pomo.breakDone.title': 'Перерыв окончен',
   'core.pomo.breakDone.body': 'Готовы к следующему помидору?',
+  'core.toast.filterDeleted': 'Фильтр удалён',
 } satisfies Catalog<typeof en>

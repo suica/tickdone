@@ -3,7 +3,7 @@ import { addDays } from 'date-fns'
 import { dueLabel, fmt, nextOccurrence } from './dates'
 import { t } from './i18n'
 import { EMPTY_SELECTION, type Selection } from './selection'
-import type { AppData, Habit, Task, TaskList, ViewPrefs } from './types'
+import type { AppData, Habit, SavedFilter, Task, TaskList, ViewPrefs } from './types'
 
 const KEY = 'tickdone:data:v1'
 const UI_KEY = 'tickdone:ui:v1'
@@ -141,13 +141,13 @@ export interface Toast {
 export interface Menu {
   x: number
   y: number
-  kind: 'task' | 'list' | 'tag' | 'section'
+  kind: 'task' | 'list' | 'tag' | 'section' | 'filter'
   id: string
 }
 
 export interface UIState {
   module: Module
-  view: string // 'today' | 'tomorrow' | 'week' | 'inbox' | 'all' | 'completed' | 'wontdo' | 'trash' | 'list:<id>' | 'tag:<name>'
+  view: string // 'today' | 'tomorrow' | 'week' | 'inbox' | 'all' | 'completed' | 'wontdo' | 'trash' | 'list:<id>' | 'tag:<name>' | 'filter:<id>'
   /** The task the detail shows and the keyboard is on (the selection's cursor). */
   selectedTaskId?: string
   /** Tasks selected together (two or more; any number in selection mode). Not persisted. */
@@ -165,7 +165,7 @@ export interface UIState {
   detailWidth?: number
   toast?: Toast
   menu?: Menu
-  dialog?: { kind: 'list' | 'tag' | 'folder' | 'settings' | 'habit' | 'shortcuts'; id?: string }
+  dialog?: { kind: 'list' | 'tag' | 'folder' | 'filter' | 'settings' | 'habit' | 'shortcuts'; id?: string }
   search: string
 }
 
@@ -374,6 +374,8 @@ export function renameTag(old: string, name: string, color?: string) {
     ...d,
     tags: d.tags.map((t) => (t.name === old ? { name, color: color ?? t.color } : t)),
     tasks: d.tasks.map((t) => (t.tags.includes(old) ? { ...t, tags: t.tags.map((x) => (x === old ? name : x)) } : t)),
+    // saved filters follow the new name
+    filters: d.filters?.map((f) => (f.tags?.includes(old) ? { ...f, tags: f.tags.map((x) => (x === old ? name : x)) } : f)),
   }))
   if (ui.view === 'tag:' + old) setUI({ view: 'tag:' + name })
 }
@@ -386,6 +388,22 @@ export function deleteTag(name: string) {
   }))
   if (ui.view === 'tag:' + name) setUI({ view: 'inbox' })
   toast(t('core.toast.tagDeleted'), snap)
+}
+
+// ---------------- Saved filters ----------------
+export function addFilter(p: Omit<SavedFilter, 'id' | 'order'>): SavedFilter {
+  const f: SavedFilter = { ...p, id: uid(), order: Math.max(0, ...(data.filters ?? []).map((x) => x.order)) + 1 }
+  setData((d) => ({ ...d, filters: [...(d.filters ?? []), f] }))
+  return f
+}
+export function updateFilter(id: string, p: Partial<SavedFilter>) {
+  setData((d) => ({ ...d, filters: (d.filters ?? []).map((f) => (f.id === id ? { ...f, ...p } : f)) }))
+}
+export function deleteFilter(id: string) {
+  const snap = data
+  setData((d) => ({ ...d, filters: (d.filters ?? []).filter((f) => f.id !== id) }))
+  if (ui.view === 'filter:' + id) setUI({ view: 'today' })
+  toast(t('core.toast.filterDeleted'), snap, () => setUI({ view: 'filter:' + id, module: 'tasks' }))
 }
 
 // ---------------- Habits ----------------

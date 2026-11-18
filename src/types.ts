@@ -132,6 +132,35 @@ export interface CalendarSubscription {
   hidden?: boolean
 }
 
+/** Date conditions of a saved filter; a task matches when its due date fits any of the chosen ones. */
+export type FilterDate = 'overdue' | 'today' | 'tomorrow' | 'thisWeek' | 'next7' | 'noDate' | 'custom'
+
+/** A saved filter: a smart list built from conditions. Empty conditions are left out. */
+export interface SavedFilter {
+  id: string
+  name: string
+  color?: string
+  /** An icon name (see components/Icon); "filter" when unset. */
+  icon?: string
+  order: number
+  /** Whether a task has to meet every condition or any one of them. */
+  match: 'all' | 'any'
+  /** List ids ("inbox" for the inbox); a task in any of them matches. */
+  lists?: string[]
+  tags?: string[]
+  /** Any of the tags (default) or all of them. */
+  tagMode?: 'any' | 'all'
+  priorities?: Priority[]
+  dates?: FilterDate[]
+  /** The custom date range (yyyy-MM-dd, both ends included); either end may be open. */
+  from?: string
+  to?: string
+  /** Words looked for in the title, notes and subtasks; every word has to appear. */
+  keyword?: string
+  /** Show the completed tasks that match, below the open ones. */
+  showCompleted?: boolean
+}
+
 export interface AppData {
   version: 1
   tasks: Task[]
@@ -143,6 +172,8 @@ export interface AppData {
   settings: Settings
   /** Subscribed calendars; missing in data saved before they existed. */
   subscriptions?: CalendarSubscription[]
+  /** Saved filters; missing in data saved before they existed. */
+  filters?: SavedFilter[]
 }
 
 export type GroupBy = 'date' | 'list' | 'priority' | 'tag' | 'none' | 'section'

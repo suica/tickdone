@@ -58,4 +58,5 @@ export default {
   'core.pomo.focusDone.bodyTask': { other: '「{task}」已完成一個番茄，休息 {count} 分鐘吧' },
   'core.pomo.breakDone.title': '休息結束',
   'core.pomo.breakDone.body': '開始下一個番茄吧',
+  'core.toast.filterDeleted': '篩選器已刪除',
 } satisfies Catalog<typeof en>

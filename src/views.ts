@@ -2,6 +2,7 @@ import { addDays } from 'date-fns'
 import { dayDiff, fmt, todayStr } from './dates'
 import { getLocale, t as tr, type MessageKey } from './i18n'
 import { fmtMonthDay, fmtWeekday } from './i18n/format'
+import { FILTER_PREFIX, filterClock, filterDefaults, filterMatcher, filterOf } from './filters'
 import type { AppData, GroupBy, Priority, Task, ViewPrefs } from './types'
 
 /** Smart lists; `name` is a message key. */
@@ -26,8 +27,12 @@ export const PRIORITY: { v: Priority; name: MessageKey; color: string }[] = [
 ]
 export const priorityColor = (p: Priority) => PRIORITY.find((x) => x.v === p)!.color
 
-/** Properties a new task gets from the view it is added in. */
-export function viewDefaults(view: string): Partial<Task> {
+/** Properties a new task gets from the view it is added in (a filter's view needs the data). */
+export function viewDefaults(view: string, d?: AppData): Partial<Task> {
+  if (view.startsWith(FILTER_PREFIX)) {
+    const f = d && filterOf(view, d)
+    return f && d ? filterDefaults(f, d, filterClock(new Date(), d.settings?.weekStartsOn ?? 1)) : {}
+  }
   if (view === 'today') return { dueDate: todayStr() }
   if (view === 'tomorrow') return { dueDate: fmt(addDays(new Date(), 1)) }
   if (view === 'week') return { dueDate: todayStr() }
@@ -79,6 +84,12 @@ export function tasksForView(view: string, d: AppData): { open: Task[]; done: Ta
       } else if (view.startsWith('tag:')) {
         const tag = view.slice(4)
         match = (t) => t.tags.includes(tag)
+      } else if (view.startsWith(FILTER_PREFIX)) {
+        const f = filterOf(view, d)
+        if (!f) return { open: [], done: [] }
+        match = filterMatcher(f, filterClock(new Date(), d.settings?.weekStartsOn ?? 1))
+        // completed tasks are part of a filter only when it says so
+        if (!f.showCompleted) doneMatch = () => false
       } else match = () => false
   }
   return {

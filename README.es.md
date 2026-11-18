@@ -49,6 +49,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - ✅ **Tareas y listas**: Hoy, Mañana, Próximos 7 días y Bandeja de entrada, además de Completadas, Descartadas y Papelera; tus propias listas, carpetas y etiquetas; subtareas, notas, prioridades, fechas y horas de vencimiento, recordatorios y reglas de repetición; tareas fijadas y menú contextual en cada tarea.
 - ⚡ **Entrada rápida inteligente**: escribe `call mom tomorrow 3pm !high #family ~Personal` y TickDone asigna la fecha, la hora, la prioridad, la etiqueta y la lista, y resalta cada parte mientras escribes. También entiende chino.
 - 🗂️ **Vistas de lista y kanban**, con agrupación y ordenación.
+- 🔎 **Filtros guardados**: combina listas, etiquetas, prioridades, fechas (vencidas, hoy, esta semana, un rango personalizado…), palabras clave y tareas completadas en una lista inteligente propia, con nombre, icono y color en la barra lateral.
 - 📅 **Calendario** con vistas de mes, semana, día y lista. Arrastra una tarea a otro día u otra hora, o arrastra el borde inferior de un bloque para cambiar su duración.
 - 🔔 **Suscripciones a calendarios**: suscríbete a cualquier calendario que publique una dirección iCal (.ics o webcal://), como los de trabajo, clase, equipo o festivos, y ve sus eventos en el calendario, en solo lectura y con su propio color. Se actualizan solos y siguen disponibles sin conexión.
 - 🧭 **Matriz de Eisenhower**: clasifica las tareas según su urgencia e importancia, y arrástralas entre cuadrantes para cambiar su prioridad.
@@ -153,7 +154,7 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Navegación con el teclado en las listas de tareas ([#16](https://github.com/suica/tickdone/issues/16))
 - [x] Notificaciones de recordatorios ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] Instalar como app y usar sin conexión ([#18](https://github.com/suica/tickdone/issues/18))
-- [ ] Filtros guardados ([#19](https://github.com/suica/tickdone/issues/19))
+- [x] Filtros guardados ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Estadísticas de tareas, del temporizador de concentración y del seguimiento de hábitos ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown en las notas de las tareas ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Vista de línea de tiempo ([#22](https://github.com/suica/tickdone/issues/22))

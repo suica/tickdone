@@ -1,11 +1,11 @@
-/* 日期设置浮层 */
+/* Date picker */
 .dp {
   padding: 12px 0 0;
   user-select: none;
   font-size: 13px;
 }
 
-/* 分段切换 */
+/* Segmented control */
 .dp-seg {
   display: flex;
   margin: 0 12px 10px;
@@ -27,7 +27,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
-/* 快捷图标 */
+/* Quick dates */
 .dp-quick {
   display: flex;
   justify-content: space-around;
@@ -71,7 +71,7 @@
   background: #444;
 }
 
-/* 时间段 */
+/* Range */
 .dp-range {
   display: flex;
   align-items: center;
@@ -103,7 +103,7 @@
   color: var(--text-4);
 }
 
-/* 月历 */
+/* Month grid */
 .dp-cal {
   padding: 0 10px;
 }
@@ -183,7 +183,7 @@
   color: #fff;
 }
 
-/* 设置行 */
+/* Time / reminder / repeat rows */
 .dp-rows {
   margin-top: 8px;
   padding: 4px 0;
@@ -240,7 +240,7 @@
   color: var(--text-4);
 }
 
-/* 底部 */
+/* Footer */
 .dp-foot,
 .dp-sub-foot {
   display: flex;
@@ -255,7 +255,7 @@
   padding: 0;
 }
 
-/* 子浮层 */
+/* Sub-popovers */
 .dp-sub {
   font-size: 13px;
 }
@@ -275,7 +275,7 @@
   margin-left: auto;
 }
 
-/* 时间选择 */
+/* Time list */
 .dp-time-input {
   display: block;
   width: calc(100% - 20px);
@@ -309,7 +309,7 @@
   background: var(--primary-soft);
 }
 
-/* 自定义重复 */
+/* Custom repeat */
 .dp-custom {
   padding-top: 8px;
 }
@@ -355,4 +355,169 @@
   padding: 0 12px 10px;
   color: var(--text-3);
   font-size: 12px;
+}
+
+/* Touch screens: the clear button is always shown when there is something to clear */
+@media (hover: none) {
+  .dp-row-x {
+    display: inline-flex;
+  }
+  .dp-row-x + .dp-row-arrow {
+    display: none;
+  }
+}
+
+/* Phones: the picker fills the bottom sheet's width; every control is at least 40px */
+@media (max-width: 767px) {
+  .dp {
+    padding-top: 2px;
+    font-size: 15px;
+  }
+  .dp-seg {
+    margin: 0 16px 10px;
+  }
+  .dp-seg button {
+    height: 36px;
+    font-size: 14px;
+  }
+  .dp-quick {
+    gap: 4px;
+    padding: 0 10px 6px;
+  }
+  /* The quick dates show their names under the icons (there is no hover to reveal a tooltip) */
+  .dp-qbtn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    height: auto;
+    min-height: 56px;
+    padding: 6px 2px;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 3px;
+    border-radius: 10px;
+  }
+  .dp-qbtn:active {
+    background: var(--bg-hover);
+  }
+  .dp-tip {
+    position: static;
+    transform: none;
+    opacity: 1;
+    max-width: 100%;
+    padding: 0;
+    background: none;
+    color: var(--text-3);
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: center;
+    /* long names (e.g. in Russian) wrap to a second line instead of being cut off */
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  :root[data-theme='dark'] .dp-tip {
+    background: none;
+  }
+  .dp-range {
+    padding: 0 16px 8px;
+  }
+  .dp-range-f {
+    height: 48px;
+    padding: 0 12px;
+    font-size: 15px;
+  }
+  .dp-cal {
+    padding: 0 12px;
+  }
+  .dp-cal-head {
+    height: 44px;
+    padding-left: 6px;
+  }
+  .dp-cal-title {
+    font-size: 16px;
+  }
+  .dp-nav {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+  .dp-wd {
+    height: 30px;
+    line-height: 30px;
+    font-size: 13px;
+  }
+  .dp-day {
+    height: 44px;
+    font-size: 15px;
+  }
+  .dp-day span {
+    width: 40px;
+    height: 40px;
+  }
+  .dp-rows {
+    margin-top: 6px;
+  }
+  .dp-row {
+    height: 48px;
+    gap: 12px;
+    padding: 0 8px 0 16px;
+  }
+  .dp-row-val {
+    max-width: 55%;
+  }
+  .dp-row-x {
+    width: 40px;
+    height: 40px;
+  }
+  .dp-row-arrow {
+    margin-right: 8px;
+  }
+  .dp-foot,
+  .dp-sub-foot {
+    padding: 10px 16px 12px;
+  }
+  .dp-foot .btn,
+  .dp-sub-foot .btn {
+    height: 44px;
+    font-size: 15px;
+  }
+  .dp-time-input {
+    width: calc(100% - 32px);
+    height: 44px;
+    margin: 4px 16px 8px;
+    font-size: 16px;
+  }
+  .dp-time-list {
+    max-height: 50vh;
+    padding: 0 8px 4px;
+  }
+  .dp-time-item {
+    height: 44px;
+    line-height: 44px;
+    font-size: 15px;
+  }
+  .dp-custom-title {
+    padding: 0 12px 8px;
+    font-size: 15px;
+  }
+  .dp-custom-line {
+    padding: 0 16px 12px;
+  }
+  .dp-custom-n,
+  .dp-custom-u {
+    height: 44px;
+    font-size: 16px;
+  }
+  .dp-custom-week {
+    padding: 0 16px 12px;
+  }
+  .dp-custom-week button {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+  .dp-custom-preview {
+    padding: 0 16px 12px;
+    font-size: 13px;
+  }
 }

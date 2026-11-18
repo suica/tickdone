@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { setUI, useData, useUI } from '../store'
 import type { Task } from '../types'
 import { Icon } from '../components/Icon'
@@ -9,6 +9,9 @@ import './search.css'
 
 const HIST_KEY = 'tickdone:search-history'
 const HL_NAME = 'tickdone-search'
+
+/** Results fade in one after another: an item's place in that order, capped so long lists don't keep you waiting. */
+const stagger = (i: number | undefined) => ({ '--i': Math.min(i ?? 0, 12) }) as CSSProperties
 
 function loadHistory(): string[] {
   try {
@@ -149,7 +152,8 @@ export default function SearchView() {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {
       const p = n.parentElement
-      if (!p || p.closest('mark, .search-group-head, .search-snippet')) continue
+      // only task titles: counts, dates and list or tag names in the row are not what was searched for
+      if (!p || !p.closest('.task-title')) continue
       const s = (n.nodeValue ?? '').toLowerCase()
       let i = s.indexOf(q)
       while (i >= 0) {
@@ -168,8 +172,16 @@ export default function SearchView() {
 
   const setQuery = (s: string) => setUI({ search: s })
 
+  // The fade-in order: the list/tag chips, then each group head followed by its rows
+  const fadeOrder = new Map<string, number>()
+  if (lists.length > 0 || tags.length > 0) fadeOrder.set('chips', fadeOrder.size)
+  for (const g of [...groups, { id: 'done', hits: done }]) {
+    fadeOrder.set('group:' + g.id, fadeOrder.size)
+    for (const h of g.hits) fadeOrder.set(h.task.id, fadeOrder.size)
+  }
+
   const renderHit = (h: Hit) => (
-    <div key={h.task.id} className="search-hit">
+    <div key={h.task.id} className="search-hit" style={stagger(fadeOrder.get(h.task.id))}>
       <TaskRow task={h.task} showList />
       {h.extra && (
         <div className="search-snippet">
@@ -249,17 +261,17 @@ export default function SearchView() {
           ) : (
             <>
               {(lists.length > 0 || tags.length > 0) && (
-                <div className="search-chips">
+                <div className="search-chips" style={stagger(fadeOrder.get('chips'))}>
                   {lists.map((l) => (
                     <button key={l.id} className="search-chip" onClick={() => { remember(query); setUI({ module: 'tasks', view: 'list:' + l.id }) }}>
                       <Icon name="list" size={14} style={{ color: l.color }} />
-                      {highlight(l.name, q)}
+                      <span className="search-chip-name">{highlight(l.name, q)}</span>
                     </button>
                   ))}
                   {tags.map((tg) => (
                     <button key={tg.name} className="search-chip" onClick={() => { remember(query); setUI({ module: 'tasks', view: 'tag:' + tg.name }) }}>
                       <Icon name="tag" size={14} style={{ color: tg.color }} />
-                      {highlight(tg.name, q)}
+                      <span className="search-chip-name">{highlight(tg.name, q)}</span>
                     </button>
                   ))}
                 </div>
@@ -267,7 +279,7 @@ export default function SearchView() {
               {total > 0 && <div className="search-total">{t('misc.count.tasks', { count: total })}</div>}
               {groups.map((g) => (
                 <div key={g.id} className="search-group">
-                  <div className="search-group-head">
+                  <div className="search-group-head" style={stagger(fadeOrder.get('group:' + g.id))}>
                     <Icon name={g.id === 'inbox' ? 'inbox' : 'list'} size={14} style={{ color: g.color }} />
                     <span>{g.name}</span>
                     <span className="search-group-count">{g.hits.length}</span>
@@ -277,7 +289,7 @@ export default function SearchView() {
               ))}
               {done.length > 0 && (
                 <div className="search-group search-group-done">
-                  <div className="search-group-head">
+                  <div className="search-group-head" style={stagger(fadeOrder.get('group:done'))}>
                     <Icon name="done" size={14} />
                     <span>{t('common.list.completed')}</span>
                     <span className="search-group-count">{done.length}</span>

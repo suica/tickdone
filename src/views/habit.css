@@ -20,7 +20,7 @@
   font-weight: 600;
 }
 
-/* 周日期条 */
+/* Week strip */
 .habit-week {
   display: flex;
   align-items: center;
@@ -121,7 +121,7 @@
   right: 56px;
 }
 
-/* 列表 */
+/* List */
 .habit-scroll {
   flex: 1;
   overflow-x: hidden;
@@ -275,7 +275,7 @@ body.habit-dragging * {
   font-size: 12px;
 }
 
-/* 打卡按钮: checking in scales a disc of the habit color in, then draws the tick; undoing reverses it */
+/* Check-in button: checking in scales a disc of the habit color in, then draws the tick; undoing reverses it */
 .habit-check {
   --hc-size: 30px;
   width: var(--hc-size);
@@ -328,7 +328,7 @@ body.habit-dragging * {
   transition: stroke-dashoffset var(--dur) var(--ease-out) var(--dur-fast);
 }
 
-/* 右栏 */
+/* Detail column */
 .habit-detail {
   width: 380px;
   flex-shrink: 0;
@@ -484,7 +484,7 @@ body.habit-dragging * {
   transition: transform var(--dur-slow) var(--ease-out);
 }
 
-/* 弹窗 */
+/* Dialog */
 .habit-modal {
   width: 480px;
 }

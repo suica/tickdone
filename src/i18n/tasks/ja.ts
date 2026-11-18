@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': '新しいセクション',
   'tasks.section.none': 'セクションなし',
   'tasks.group.noTag': 'タグなし',
+  'tasks.group.pinned': 'ピン留め済み',
+  'tasks.group.unpinned': 'ピン留めなし',
   'tasks.overdue.postpone': '延期',
   'tasks.overdue.postponed': '今日に移動しました',
   'tasks.trash.empty': '空にする',

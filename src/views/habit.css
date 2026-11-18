@@ -184,7 +184,7 @@
   background: var(--bg-hover);
 }
 .habit-row.selected {
-  background: var(--bg-active);
+  background: var(--bg-selected);
 }
 .habit-row.lifted {
   z-index: 5;

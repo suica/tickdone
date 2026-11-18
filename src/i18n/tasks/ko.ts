@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': '새 섹션',
   'tasks.section.none': '섹션 없음',
   'tasks.group.noTag': '태그 없음',
+  'tasks.group.pinned': '고정됨',
+  'tasks.group.unpinned': '고정 안 됨',
   'tasks.overdue.postpone': '미루기',
   'tasks.overdue.postponed': '오늘로 옮겼습니다',
   'tasks.trash.empty': '비우기',

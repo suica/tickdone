@@ -34,6 +34,8 @@ export default {
   'tasks.section.new': 'New section',
   'tasks.section.none': 'No section',
   'tasks.group.noTag': 'No tag',
+  'tasks.group.pinned': 'Pinned',
+  'tasks.group.unpinned': 'Not pinned',
   'tasks.overdue.postpone': 'Postpone',
   'tasks.overdue.postponed': 'Moved to today',
 

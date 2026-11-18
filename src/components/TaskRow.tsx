@@ -1,5 +1,5 @@
 import { useContext, type CSSProperties, type MouseEvent } from 'react'
-import { dayDiff, dueLabel, isOverdue } from '../dates'
+import { dueLabel, isOverdue } from '../dates'
 import { useT } from '../i18n'
 import { setUI, updateTask, useData, useUI } from '../store'
 import type { Task } from '../types'
@@ -77,7 +77,8 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const overdue = isOverdue(task) && !phase
   const done = (task.status !== 0 && phase !== 'uncheck') || phase === 'check'
   const subDone = task.subtasks.filter((s) => s.done).length
-  const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : task.dueDate && dayDiff(task.dueDate) <= 1 ? 'var(--primary)' : 'var(--text-3)'
+  // Every open date is blue; overdue ones are red.
+  const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : 'var(--primary)'
   const draggable = !!drag && !task.deleted && !dragDisabled
 
   return (
@@ -135,7 +136,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
           )}
         </div>
         <div className="task-meta">
-          {task.pinned && <Icon name="pin" size={13} className="meta-ic" />}
+          {task.pinned && <Icon name="pin" size={13} className="meta-ic meta-pin" />}
           {task.subtasks.length > 0 && (
             <span className="meta-ic meta-sub" title={t('tasks.row.subtasks')}>
               <Icon name="subtask" size={13} /> {subDone}/{task.subtasks.length}

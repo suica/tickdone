@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': 'Новый раздел',
   'tasks.section.none': 'Без раздела',
   'tasks.group.noTag': 'Без метки',
+  'tasks.group.pinned': 'Закреплённые',
+  'tasks.group.unpinned': 'Не закреплённые',
   'tasks.overdue.postpone': 'Перенести',
   'tasks.overdue.postponed': 'Перенесено на сегодня',
   'tasks.trash.empty': 'Очистить',

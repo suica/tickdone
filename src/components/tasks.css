@@ -333,6 +333,13 @@
 .group-head .overdue {
   color: var(--overdue);
 }
+/* the pinned group: a pin in the heading, so its rows don't repeat it */
+.group-head .group-pin {
+  color: var(--primary);
+}
+.group[data-group='pinned'] .meta-pin {
+  display: none;
+}
 .group-count {
   color: var(--text-3);
   font-weight: 400;
@@ -400,7 +407,7 @@
   background: var(--bg-hover);
 }
 .task-row.selected {
-  background: var(--bg-active);
+  background: var(--bg-selected);
 }
 .task-drag {
   position: absolute;

@@ -9,7 +9,7 @@ import { cancelAnimations, dur, ease, play } from '../motion'
 import { startFocus } from '../pomo'
 import { deleteTask, duplicateTask, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
 import type { Priority, Subtask, Task } from '../types'
-import { usePhone, useTablet } from '../viewport'
+import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY, priorityColor } from '../views'
 import { DatePicker, reminderText, repeatText } from './DatePicker'
 import { Flag, Icon } from './Icon'
@@ -42,9 +42,11 @@ function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, auto
 
 /**
  * Where the detail shows:
- * - pane: desktop task module, a column next to the list with a draggable divider;
+ * - pane: task module on desktops and wide tablets (≥1024px), a column next to the list with a
+ *   draggable divider; it shows an empty state while no task is selected;
  * - float: desktop calendar/matrix/search, a panel over the right edge;
- * - overlay: tablets, a panel sliding in from the right over the list (click outside closes);
+ * - overlay: calendar/matrix/search on tablets, and the task module on narrow tablets (768–1023px),
+ *   a panel sliding in from the right over the list (click outside closes);
  * - page: phones, a full-screen page sliding in from the right (back button or swipe right closes).
  */
 type Mode = 'pane' | 'float' | 'overlay' | 'page'
@@ -54,8 +56,9 @@ export function TaskDetail({ floating }: { floating?: boolean }) {
   const data = useData()
   const phone = usePhone()
   const tablet = useTablet()
+  const narrow = useNarrowTablet()
   const task = data.tasks.find((t) => t.id === ui.selectedTaskId)
-  const mode: Mode = phone ? 'page' : tablet ? 'overlay' : floating ? 'float' : 'pane'
+  const mode: Mode = phone ? 'page' : floating ? (tablet ? 'overlay' : 'float') : narrow ? 'overlay' : 'pane'
   if (mode === 'pane') return <DetailPane task={task} width={ui.detailWidth} />
   if (!task) return null
   return <DetailLayer task={task} mode={mode} />

@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': 'Nouvelle section',
   'tasks.section.none': 'Sans section',
   'tasks.group.noTag': 'Sans étiquette',
+  'tasks.group.pinned': 'Épinglées',
+  'tasks.group.unpinned': 'Non épinglées',
   'tasks.overdue.postpone': 'Reporter',
   'tasks.overdue.postponed': "Déplacées à aujourd'hui",
   'tasks.trash.empty': 'Vider',

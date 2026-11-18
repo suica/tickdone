@@ -1,8 +1,11 @@
 import { useSyncExternalStore } from 'react'
 
 // Breakpoints (CSS uses the same values): phone ≤767px; tablet 768–1199px; desktop ≥1200px; large ≥1920px.
+// Wide tablets (1024–1199px) already show the task detail as a column next to the list, like desktops.
 export const PHONE = '(max-width: 767px)'
 export const TABLET = '(min-width: 768px) and (max-width: 1199px)'
+/** Tablets too narrow for a detail column (768–1023px): the detail slides over the list. */
+export const NARROW_TABLET = '(min-width: 768px) and (max-width: 1023px)'
 export const LARGE = '(min-width: 1920px)'
 
 type Subscribe = (cb: () => void) => () => void
@@ -27,4 +30,5 @@ export function useMedia(query: string): boolean {
 
 export const usePhone = () => useMedia(PHONE)
 export const useTablet = () => useMedia(TABLET)
+export const useNarrowTablet = () => useMedia(NARROW_TABLET)
 export const isPhone = () => window.matchMedia(PHONE).matches

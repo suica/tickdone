@@ -113,7 +113,16 @@ export interface Group {
   /** Properties applied to a task dropped into this group */
   patch?: Partial<Task>
   overdue?: boolean
+  /** The group of pinned tasks, shown first */
+  pinned?: boolean
+  /** A fixed heading (a message key), translated when shown */
+  nameKey?: MessageKey
 }
+
+/** Groupings that put pinned tasks in a group of their own at the top: by date, by section (the
+ *  default in lists), and the inbox's default, which has no sections and so no groups. */
+const pinGrouped = (groupBy: GroupBy, view: string) => groupBy === 'date' || groupBy === 'section' || (groupBy === 'none' && view === 'inbox')
+export const PINNED_GROUP = 'pinned'
 
 export function groupTasks(tasks: Task[], groupBy: GroupBy, d: AppData, view: string): Group[] {
   const map = new Map<string, Group>()
@@ -121,9 +130,15 @@ export function groupTasks(tasks: Task[], groupBy: GroupBy, d: AppData, view: st
     if (!map.has(key)) map.set(key, { key, name, tasks: [], patch, overdue })
     map.get(key)!.tasks.push(t)
   }
-  if (groupBy === 'none') return [{ key: 'all', name: '', tasks }]
+  const pinGroup = pinGrouped(groupBy, view) && tasks.some((t) => t.pinned)
+  if (groupBy === 'none' && !pinGroup) return [{ key: 'all', name: '', tasks }]
   for (const t of tasks) {
-    if (groupBy === 'date') {
+    if (pinGroup && t.pinned) {
+      push(PINNED_GROUP, tr('tasks.group.pinned'), t, { pinned: true })
+      continue
+    }
+    if (groupBy === 'none') push('all', '', t, {})
+    else if (groupBy === 'date') {
       if (!t.dueDate) push('9-none', tr('common.noDate'), t, { dueDate: undefined, dueTime: undefined })
       else {
         const diff = dayDiff(t.dueDate)
@@ -161,5 +176,20 @@ export function groupTasks(tasks: Task[], groupBy: GroupBy, d: AppData, view: st
       if (!map.has(k)) map.set(k, { key: k, name: s.name, tasks: [], patch: { sectionId: s.id } })
     })
   }
-  return [...map.values()].sort((a, b) => a.key.localeCompare(b.key))
+  const groups = [...map.values()].sort((a, b) => a.key.localeCompare(b.key))
+  if (!pinGroup) return groups
+  const pinned = map.get(PINNED_GROUP)!
+  pinned.pinned = true
+  pinned.nameKey = 'tasks.group.pinned'
+  const rest = groups.filter((g) => g !== pinned)
+  for (const g of rest) {
+    // A task dropped into another group is no longer pinned.
+    if (g.patch) g.patch = { ...g.patch, pinned: undefined }
+    // The tasks outside any section get a heading, so they don't read as part of the pinned group.
+    if ((groupBy === 'section' || groupBy === 'none') && !g.patch?.sectionId && !g.name) {
+      g.nameKey = rest.some((x) => x.patch?.sectionId) ? 'tasks.section.none' : 'tasks.group.unpinned'
+      g.name = tr(g.nameKey)
+    }
+  }
+  return [pinned, ...rest]
 }

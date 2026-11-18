@@ -99,6 +99,47 @@ describe('groupTasks', () => {
     const g = groupTasks([task({ listId: 'work', sectionId: 's2' })], 'section', data([]), 'list:work')
     expect(g.map((x) => [x.name, x.tasks.length])).toEqual([['Doing', 0], ['Later', 1]])
   })
+  it('pinned tasks get a group of their own at the top when grouped by date', () => {
+    const pinnedLater = task({ title: 'pinned later', dueDate: '2026-11-25', pinned: true })
+    const pinnedNoDate = task({ title: 'pinned', pinned: true })
+    const today = task({ title: 'today', dueDate: '2026-11-18' })
+    const g = groupTasks([pinnedLater, pinnedNoDate, today], 'date', data([]), 'today')
+    expect(g.map((x) => [x.key, x.name, x.tasks.map((t) => t.title)])).toEqual([
+      ['pinned', 'Pinned', ['pinned later', 'pinned']],
+      ['1-today', 'Today', ['today']],
+    ])
+    expect(g[0].pinned).toBe(true)
+    // a drop into the pinned group pins the task; a drop into another group unpins it
+    expect(g[0].patch).toEqual({ pinned: true })
+    expect(g[1].patch).toHaveProperty('pinned', undefined)
+    expect(g[1].patch?.dueDate).toBe('2026-11-18')
+    setLocale('zh-CN')
+    expect(groupTasks([pinnedNoDate], 'date', data([]), 'today')[0].name).toBe('已置顶')
+  })
+  it('no pinned group without pinned tasks, and none for other groupings', () => {
+    const p = task({ priority: 5, pinned: true })
+    expect(groupTasks([task({ dueDate: '2026-11-18' })], 'date', data([]), 'today').map((x) => x.key)).toEqual(['1-today'])
+    expect(groupTasks([p], 'priority', data([]), 'all').map((x) => x.key)).toEqual(['4'])
+    expect(groupTasks([p], 'none', data([]), 'all')[0].tasks).toEqual([p])
+  })
+  it('in a list (grouped by section) pinned tasks come first and the rest get a heading', () => {
+    const p = task({ title: 'p', listId: 'work', pinned: true, sectionId: 's1' })
+    const loose = task({ title: 'loose', listId: 'work' })
+    const g = groupTasks([p, loose], 'section', data([]), 'list:work')
+    expect(g.map((x) => [x.name, x.tasks.map((t) => t.title)])).toEqual([
+      ['Pinned', ['p']],
+      ['No section', ['loose']],
+      ['Doing', []],
+      ['Later', []],
+    ])
+    const noSections = { ...data([]), lists: [{ id: 'inbox2', name: 'Plain', sections: [], view: 'list', order: 0 }] } as unknown as AppData
+    const g2 = groupTasks([task({ listId: 'inbox2', pinned: true }), task({ listId: 'inbox2' })], 'section', noSections, 'list:inbox2')
+    expect(g2.map((x) => x.name)).toEqual(['Pinned', 'Not pinned'])
+    // the inbox has no sections (its default grouping is none)
+    const g3 = groupTasks([task({ title: 'a' }), task({ title: 'b', pinned: true })], 'none', data([]), 'inbox')
+    expect(g3.map((x) => [x.name, x.tasks.map((t) => t.title)])).toEqual([['Pinned', ['b']], ['Not pinned', ['a']]])
+    expect(g3[1].patch).toHaveProperty('pinned', undefined)
+  })
   it('a new task gets defaults from the view', () => {
     expect(viewDefaults('today')).toEqual({ dueDate: '2026-11-18' })
     expect(viewDefaults('tomorrow')).toEqual({ dueDate: '2026-11-19' })

@@ -10,10 +10,12 @@
   --overdue: #e03131;
 
   --bg: #ffffff;
-  --bg-rail: #f3f3f3;
-  --bg-side: #f9f9f9;
+  --bg-rail: #f5f5f5;
+  --bg-side: #fbfbfb;
   --bg-hover: rgba(0, 0, 0, 0.04);
-  --bg-active: rgba(71, 114, 250, 0.1);
+  /* Selection is neutral grey: the active sidebar or settings entry, and the selected row in a list */
+  --bg-active: #ededed;
+  --bg-selected: #f1f1f1;
   --bg-input: #f5f5f5;
   --bg-pop: #ffffff;
   --border: #ececec;
@@ -55,7 +57,8 @@
   --bg-rail: #151515;
   --bg-side: #1a1a1a;
   --bg-hover: rgba(255, 255, 255, 0.05);
-  --bg-active: rgba(91, 130, 251, 0.18);
+  --bg-active: #2c2c2c;
+  --bg-selected: #2b2b2b;
   --bg-input: #2a2a2a;
   --bg-pop: #2a2a2a;
   --border: #2e2e2e;

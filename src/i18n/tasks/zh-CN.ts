@@ -31,6 +31,8 @@ export default {
   'tasks.section.new': '新分组',
   'tasks.section.none': '未分组',
   'tasks.group.noTag': '无标签',
+  'tasks.group.pinned': '已置顶',
+  'tasks.group.unpinned': '未置顶',
   'tasks.overdue.postpone': '顺延',
   'tasks.overdue.postponed': '已顺延到今天',
   'tasks.trash.empty': '清空',

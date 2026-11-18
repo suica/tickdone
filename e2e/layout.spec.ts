@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-const MODULES = ['日历', '四象限', '番茄专注', '习惯打卡']
+const MODULES = ['日历', '四象限', '番茄专注', '习惯打卡', '统计']
 
 /** 伸出视口、又没被视口内的滚动/裁剪容器包住的元素（关闭状态的抽屉/面板用 inert 或 aria-hidden 跳过） */
 async function offenders(page: Page) {

@@ -43,4 +43,5 @@ export default {
   'common.module.matrix': '四象限',
   'common.module.focus': '番茄專注',
   'common.module.habits': '習慣打卡',
+  'common.module.stats': '統計',
 } satisfies Catalog<typeof en>

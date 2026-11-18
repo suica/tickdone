@@ -58,6 +58,7 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
 - 🧭 **Matriz de Eisenhower**: organize as tarefas por urgência e importância e arraste-as entre os quadrantes para mudar a prioridade.
 - 🍅 **Timer de foco** com modos Pomodoro e cronômetro e um histórico das sessões anteriores.
 - 🔥 **Rastreador de hábitos** com check-ins, sequências e estatísticas.
+- 📊 **Estatísticas**: tarefas concluídas por dia, semana ou mês, taxa de conclusão, tarefas atrasadas, divisão por lista, prioridade e etiqueta, e sua sequência; tempo de foco por dia, sessões, tempo por tarefa e por lista, e seu melhor horário do dia; taxa de check-in e sequências dos seus hábitos. Escolha uma semana, um mês, um ano, os últimos 30 dias ou seu próprio período, e passe o mouse ou toque num gráfico para ver os detalhes.
 - 🔍 **Busca** em tarefas, etiquetas e listas.
 - ↩️ **Desfazer** pelo aviso depois de concluir, excluir ou mover uma tarefa.
 - ⌨️ **Atalhos de teclado** e 🌙 **tema escuro**.
@@ -158,7 +159,7 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [x] Notificações de lembretes ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] Instalar como app e usar offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] Filtros salvos ([#19](https://github.com/suica/tickdone/issues/19))
-- [ ] Estatísticas de tarefas, do timer de foco e do rastreador de hábitos ([#20](https://github.com/suica/tickdone/issues/20))
+- [x] Estatísticas de tarefas, do timer de foco e do rastreador de hábitos ([#20](https://github.com/suica/tickdone/issues/20))
 - [x] Markdown nas notas das tarefas ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Visualização em linha do tempo ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Mais regras de repetição ([#23](https://github.com/suica/tickdone/issues/23))

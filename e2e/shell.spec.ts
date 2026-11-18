@@ -135,7 +135,7 @@ test.describe('phone (Pixel 7 emulation)', () => {
   test('bottom bar, edge-swipe drawer with search/settings/GitHub, detail sheet and menu sheets', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.rail')).toHaveCount(0)
-    await expect(page.locator('.tabbar button')).toHaveCount(5)
+    await expect(page.locator('.tabbar button')).toHaveCount(6)
     await expect(page.locator('.tabbar button[aria-current="page"]')).toHaveAttribute('aria-label', '任务')
 
     const t = await touch(page)

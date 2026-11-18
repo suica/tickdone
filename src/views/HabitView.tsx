@@ -11,6 +11,7 @@ import { habitDragStart, sectionName } from './habitDrag'
 import { weekdayList, dayName } from '../components/dateLabels'
 import { t, useT, type MessageKey } from '../i18n'
 import { fmtMonthYear, fmtTime } from '../i18n/format'
+import { habitBestStreak, habitScheduled, habitStreak } from '../stats'
 import type { Habit, HabitFrequency, HabitSection } from '../types'
 import './habit.css'
 
@@ -58,44 +59,6 @@ function withNodes(text: string, nodes: Record<string, ReactNode>): ReactNode {
 // ---------------- stats ----------------
 const freqOf = (h: Habit): HabitFrequency => h.frequency ?? { kind: 'daily' }
 
-/** Whether the habit is planned for that day */
-function scheduled(h: Habit, d: Date): boolean {
-  const f = freqOf(h)
-  if (f.kind === 'days') return f.days.length === 0 || f.days.includes(getDay(d))
-  return true
-}
-
-function currentStreak(h: Habit): number {
-  let d = new Date()
-  // Not checked in yet today doesn't break the streak
-  if (!h.checkins[fmt(d)]) d = addDays(d, -1)
-  let n = 0
-  for (let i = 0; i < 3660; i++) {
-    const k = fmt(d)
-    if (h.checkins[k]) n++
-    else if (scheduled(h, d)) break
-    d = addDays(d, -1)
-  }
-  return n
-}
-
-function longestStreak(h: Habit): number {
-  const keys = Object.keys(h.checkins).sort()
-  if (!keys.length) return 0
-  let d = parseISO(keys[0])
-  const end = parseISO(keys[keys.length - 1])
-  let best = 0
-  let cur = 0
-  while (d <= end) {
-    if (h.checkins[fmt(d)]) {
-      cur++
-      best = Math.max(best, cur)
-    } else if (scheduled(h, d)) cur = 0
-    d = addDays(d, 1)
-  }
-  return best
-}
-
 const totalDays = (h: Habit) => Object.keys(h.checkins).length
 
 function monthStats(h: Habit, month: Date) {
@@ -111,7 +74,7 @@ function monthStats(h: Habit, month: Date) {
   for (let d = start; d <= end; d = addDays(d, 1)) {
     const k = fmt(d)
     if (h.checkins[k]) checked++
-    if (d <= today && d >= from && scheduled(h, d)) plan++
+    if (d <= today && d >= from && habitScheduled(h, d)) plan++
   }
   const f = freqOf(h)
   if (f.kind === 'weekly') plan = Math.max(1, Math.round((plan / 7) * f.times))
@@ -179,7 +142,7 @@ export default function HabitView() {
   const toggleCollapse = (k: string) => setUI((u) => ({ collapsed: { ...u.collapsed, ['habit:' + k]: !u.collapsed['habit:' + k] } }))
 
   const dayDate = parseISO(day)
-  const dayHabits = active.filter((h) => scheduled(h, dayDate))
+  const dayHabits = active.filter((h) => habitScheduled(h, dayDate))
 
   return (
     <div className="module habit-module">
@@ -357,7 +320,7 @@ function WeekStrip({ day, setDay, habits, weekStartsOn }: { day: string; setDay:
     <div className="habit-week-days">
       {Array.from({ length: 7 }, (_, i) => addDays(start, i)).map((d) => {
         const k = fmt(d)
-        const sch = habits.filter((h) => scheduled(h, d))
+        const sch = habits.filter((h) => habitScheduled(h, d))
         const ratio = sch.length ? sch.filter((h) => h.checkins[k]).length / sch.length : 0
         const future = k > today
         const r = 15
@@ -420,7 +383,7 @@ function CheckGlyph() {
 function HabitRow({ habit: h, day, selected, onSelect, weekStartsOn, archived }: { habit: Habit; day: string; selected: boolean; onSelect: () => void; weekStartsOn: 0 | 1; archived?: boolean }) {
   const t = useT()
   const done = !!h.checkins[day]
-  const streak = currentStreak(h)
+  const streak = habitStreak(h)
   const total = totalDays(h)
   const f = freqOf(h)
   const totalText = withNodes(t('misc.habit.row.total', { count: total }), { num: <NumberRoll value={total} /> })
@@ -503,8 +466,8 @@ function HabitDetail({ habit: h, weekStartsOn, phone, onEdit, onClose }: { habit
   const [month, setMonth] = useState(thisMonth)
   const [menu, setMenu] = useState<Anchor | null>(null)
   const stats = monthStats(h, month)
-  const streak = currentStreak(h)
-  const longest = longestStreak(h)
+  const streak = habitStreak(h)
+  const longest = habitBestStreak(h)
   const total = totalDays(h)
   const swipe = useSwipe((dir) => setMonth((m) => addMonths(m, dir)))
 
@@ -533,7 +496,7 @@ function HabitDetail({ habit: h, weekStartsOn, phone, onEdit, onClose }: { habit
         return (
           <button
             key={k}
-            className={'habit-cal-day' + (on ? ' on' : '') + (out ? ' out' : '') + (future ? ' future' : '') + (k === today ? ' today' : '') + (!scheduled(h, d) ? ' off' : '')}
+            className={'habit-cal-day' + (on ? ' on' : '') + (out ? ' out' : '') + (future ? ' future' : '') + (k === today ? ' today' : '') + (!habitScheduled(h, d) ? ' off' : '')}
             disabled={future}
             title={future ? '' : on ? t('misc.habit.calUncheck') : t('misc.habit.calCheck')}
             onClick={(e) => {

@@ -59,6 +59,7 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
 - 🧭 **四象限**：按紧急和重要程度给任务分类，在象限之间拖动任务即可修改优先级。
 - 🍅 **番茄专注**：番茄钟和正计时两种模式，并保留历史专注记录。
 - 🔥 **习惯打卡**：打卡、连续天数和统计。
+- 📊 **统计**：每天、每周或每月完成的任务数、完成率、过期任务、按清单、优先级和标签的分布，以及连续完成天数；每天的专注时长、专注次数、各任务和清单的专注时长和最佳专注时段；习惯的打卡率和连续打卡天数。可以按周、月、年、近 30 天或自定义时间范围查看，悬停或点按图表查看详情。
 - 🔍 **搜索**任务、标签和清单。
 - ↩️ **撤销**：完成、删除或移动任务后，可以在提示条中撤销。
 - ⌨️ **键盘快捷键**和 🌙 **深色主题**。
@@ -159,7 +160,7 @@ npm run dev        # http://localhost:5173
 - [x] 提醒通知 ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] 可安装为应用并离线使用 ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] 可保存的筛选条件 ([#19](https://github.com/suica/tickdone/issues/19))
-- [ ] 任务、番茄专注和习惯打卡的统计 ([#20](https://github.com/suica/tickdone/issues/20))
+- [x] 任务、番茄专注和习惯打卡的统计 ([#20](https://github.com/suica/tickdone/issues/20))
 - [x] 任务备注支持 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 时间线视图 ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] 更多重复规则 ([#23](https://github.com/suica/tickdone/issues/23))

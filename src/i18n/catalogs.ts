@@ -68,23 +68,33 @@ import pwaFr from './pwa/fr'
 import pwaDe from './pwa/de'
 import pwaPtBR from './pwa/pt-BR'
 import pwaRu from './pwa/ru'
+import statsEn from './stats/en'
+import statsZhCN from './stats/zh-CN'
+import statsZhTW from './stats/zh-TW'
+import statsJa from './stats/ja'
+import statsKo from './stats/ko'
+import statsEs from './stats/es'
+import statsFr from './stats/fr'
+import statsDe from './stats/de'
+import statsPtBR from './stats/pt-BR'
+import statsRu from './stats/ru'
 import type { Locale } from './locales'
 import type { Msg } from './types'
 
 /** The English catalog, merged from every area. Its keys are the valid message keys. */
-export const en = { ...commonEn, ...shellEn, ...tasksEn, ...calendarEn, ...miscEn, ...coreEn, ...pwaEn }
+export const en = { ...commonEn, ...shellEn, ...tasksEn, ...calendarEn, ...miscEn, ...coreEn, ...pwaEn, ...statsEn }
 
 export type MessageKey = keyof typeof en
 
 export const catalogs: Record<Locale, Record<MessageKey, Msg>> = {
-  en: { ...commonEn, ...shellEn, ...tasksEn, ...calendarEn, ...miscEn, ...coreEn, ...pwaEn },
-  'zh-CN': { ...commonZhCN, ...shellZhCN, ...tasksZhCN, ...calendarZhCN, ...miscZhCN, ...coreZhCN, ...pwaZhCN },
-  'zh-TW': { ...commonZhTW, ...shellZhTW, ...tasksZhTW, ...calendarZhTW, ...miscZhTW, ...coreZhTW, ...pwaZhTW },
-  ja: { ...commonJa, ...shellJa, ...tasksJa, ...calendarJa, ...miscJa, ...coreJa, ...pwaJa },
-  ko: { ...commonKo, ...shellKo, ...tasksKo, ...calendarKo, ...miscKo, ...coreKo, ...pwaKo },
-  es: { ...commonEs, ...shellEs, ...tasksEs, ...calendarEs, ...miscEs, ...coreEs, ...pwaEs },
-  fr: { ...commonFr, ...shellFr, ...tasksFr, ...calendarFr, ...miscFr, ...coreFr, ...pwaFr },
-  de: { ...commonDe, ...shellDe, ...tasksDe, ...calendarDe, ...miscDe, ...coreDe, ...pwaDe },
-  'pt-BR': { ...commonPtBR, ...shellPtBR, ...tasksPtBR, ...calendarPtBR, ...miscPtBR, ...corePtBR, ...pwaPtBR },
-  ru: { ...commonRu, ...shellRu, ...tasksRu, ...calendarRu, ...miscRu, ...coreRu, ...pwaRu },
+  en: { ...commonEn, ...shellEn, ...tasksEn, ...calendarEn, ...miscEn, ...coreEn, ...pwaEn, ...statsEn },
+  'zh-CN': { ...commonZhCN, ...shellZhCN, ...tasksZhCN, ...calendarZhCN, ...miscZhCN, ...coreZhCN, ...pwaZhCN, ...statsZhCN },
+  'zh-TW': { ...commonZhTW, ...shellZhTW, ...tasksZhTW, ...calendarZhTW, ...miscZhTW, ...coreZhTW, ...pwaZhTW, ...statsZhTW },
+  ja: { ...commonJa, ...shellJa, ...tasksJa, ...calendarJa, ...miscJa, ...coreJa, ...pwaJa, ...statsJa },
+  ko: { ...commonKo, ...shellKo, ...tasksKo, ...calendarKo, ...miscKo, ...coreKo, ...pwaKo, ...statsKo },
+  es: { ...commonEs, ...shellEs, ...tasksEs, ...calendarEs, ...miscEs, ...coreEs, ...pwaEs, ...statsEs },
+  fr: { ...commonFr, ...shellFr, ...tasksFr, ...calendarFr, ...miscFr, ...coreFr, ...pwaFr, ...statsFr },
+  de: { ...commonDe, ...shellDe, ...tasksDe, ...calendarDe, ...miscDe, ...coreDe, ...pwaDe, ...statsDe },
+  'pt-BR': { ...commonPtBR, ...shellPtBR, ...tasksPtBR, ...calendarPtBR, ...miscPtBR, ...corePtBR, ...pwaPtBR, ...statsPtBR },
+  ru: { ...commonRu, ...shellRu, ...tasksRu, ...calendarRu, ...miscRu, ...coreRu, ...pwaRu, ...statsRu },
 }

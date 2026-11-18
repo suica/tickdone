@@ -141,7 +141,7 @@ export const useData = () => useSyncExternalStore(subscribe, getData)
 export const subscribeData = subscribe
 
 // ---------------- UI state ----------------
-export type Module = 'tasks' | 'calendar' | 'matrix' | 'pomo' | 'habit' | 'search'
+export type Module = 'tasks' | 'calendar' | 'matrix' | 'pomo' | 'habit' | 'stats' | 'search'
 
 export interface Toast {
   id: string

@@ -43,4 +43,5 @@ export default {
   'common.module.matrix': 'Matriz',
   'common.module.focus': 'Concentración',
   'common.module.habits': 'Hábitos',
+  'common.module.stats': 'Estadísticas',
 } satisfies Catalog<typeof en>

@@ -77,7 +77,10 @@ test('switching the theme and the accent applies at once and survives a reload',
   expect(await rootVar(page, '--primary-soft')).toBe('rgba(130, 80, 223, 0.1)')
   expect(await page.evaluate(() => document.documentElement.dataset.accent)).toBe('violet')
   // The selected theme card is outlined in the new accent
-  expect(await page.locator('.dlg-theme.on .dlg-theme-preview').evaluate((el) => getComputedStyle(el).borderTopColor)).toBe('rgb(130, 80, 223)')
+  // (the border colour transitions, so wait for it to settle)
+  await expect
+    .poll(() => page.locator('.dlg-theme.on .dlg-theme-preview').evaluate((el) => getComputedStyle(el).borderTopColor))
+    .toBe('rgb(130, 80, 223)')
   // The tab icon follows the accent
   expect(await page.locator('link[rel="icon"]').getAttribute('href')).toMatch(/^data:image\/svg\+xml,/)
 

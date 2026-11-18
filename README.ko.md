@@ -68,6 +68,7 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 - ⏰ **알림**: 할 일의 알림 시간이 되면 완료, 다시 알림(5분, 15분, 1시간, 내일), 열기를 고를 수 있는 카드를 보여 주고, 허용하면 시스템 알림도 띄웁니다. TickDone에는 서버가 없어 알림은 탭에서 열려 있거나 설치되어 실행 중일 때만 울리며, 닫혀 있는 동안 시간이 된 알림은 다음에 열 때 표시됩니다.
 - 📲 **앱으로 설치**: 설정 → 정보에서 TickDone을 홈 화면이나 Dock에 추가할 수 있고, 한 번 방문하면 오프라인에서도 열립니다. 새 버전이 나오면 새로고침을 안내합니다.
 - 💾 **백업과 복원**: 모든 데이터를 JSON 파일로 내보내고 다시 가져올 수 있습니다.
+- 🚀 **수천 개의 작업도 빠르게**: 긴 목록과 검색 결과는 화면에 보이는 행만 그리므로, 작업 5,000개짜리 목록도 짧은 목록처럼 빠르게 스크롤하고 전환하고 반응합니다. 드래그 앤 드롭, 키보드, 다중 선택, 완료 애니메이션도 그대로 작동합니다. 변경 사항은 백그라운드에서 저장됩니다.
 
 ## 📸 스크린샷
 
@@ -170,7 +171,7 @@ npm run dev        # http://localhost:5173
 - [ ] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 접근성 ([#25](https://github.com/suica/tickdone/issues/25))
-- [ ] 작업이 수천 개여도 빠르게 ([#26](https://github.com/suica/tickdone/issues/26))
+- [x] 작업이 수천 개여도 빠르게 ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] 테마와 강조 색상 ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] 캘린더: 날짜 없는 작업 계획, 일정 목록 보기 ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] 캘린더 구독 ([#51](https://github.com/suica/tickdone/issues/51))

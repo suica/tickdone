@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react'
 import { setUI, useData, useUI } from '../store'
 import type { Task } from '../types'
 import { Icon } from '../components/Icon'
 import { TaskRow } from '../components/TaskRow'
 import { TaskDetail } from '../components/TaskDetail'
 import { useLocale, useT } from '../i18n'
+import { useListWindow } from '../components/listWindow'
 import './search.css'
 
 const HIST_KEY = 'tickdone:search-history'
@@ -57,6 +58,28 @@ function snippet(text: string, q: string) {
   return (start > 0 ? '…' : '') + one.slice(start, j + q.length + 40) + (j + q.length + 40 < one.length ? '…' : '')
 }
 
+/** The searchable text of a task in lower case, kept per task object (tasks are immutable, so it stays right). */
+const lowered = new WeakMap<Task, { title: string; content: string; subtasks: string[]; tags: string[] }>()
+function lowerOf(t: Task) {
+  let l = lowered.get(t)
+  if (!l) {
+    l = { title: t.title.toLowerCase(), content: t.content.toLowerCase(), subtasks: t.subtasks.map((s) => s.title.toLowerCase()), tags: t.tags.map((x) => x.toLowerCase()) }
+    lowered.set(t, l)
+  }
+  return l
+}
+
+/** The hits of one group, windowed when there are many. */
+function Hits({ hits, render }: { hits: Hit[]; render: (h: Hit) => React.JSX.Element }) {
+  const keys = useMemo(() => hits.map((h) => h.task.id), [hits])
+  const { ref: boxRef, parts } = useListWindow(keys)
+  return (
+    <div className="search-hits" ref={boxRef as Ref<HTMLDivElement>}>
+      {parts.flatMap((p) => (p.kind === 'gap' ? [<div key={'gap:' + p.from} className="list-gap" style={{ height: p.height }} aria-hidden />] : hits.slice(p.from, p.to).map(render)))}
+    </div>
+  )
+}
+
 interface Hit {
   task: Task
   /** Where it matched other than the title (description / subtasks / tags) */
@@ -75,7 +98,8 @@ export default function SearchView() {
   // tasks in archived lists are found only when asked for
   const [withArchived, setWithArchived] = useState(false)
   const hasArchived = data.lists.some((l) => l.archived)
-  const q = query.trim().toLowerCase()
+  // the field follows every key at once; the results follow when there is time (typing never waits for them)
+  const q = useDeferredValue(query.trim().toLowerCase())
 
   useEffect(() => {
     input.current?.focus()
@@ -104,21 +128,23 @@ export default function SearchView() {
     const archived = new Set(withArchived ? [] : data.lists.filter((l) => l.archived).map((l) => l.id))
     for (const task of data.tasks) {
       if (task.deleted || archived.has(task.listId)) continue
+      const low = lowerOf(task)
+      const inTitle = low.title.includes(q)
       let extra: Hit['extra']
-      let ok = has(task.title)
-      if (has(task.content)) {
+      let ok = inTitle
+      if (low.content.includes(q)) {
         ok = true
-        if (!has(task.title)) extra = { label: t('misc.search.inDescription'), text: snippet(task.content, q) }
+        if (!inTitle) extra = { label: t('misc.search.inDescription'), text: snippet(task.content, q) }
       }
-      const st = task.subtasks.find((s) => has(s.title))
-      if (st) {
+      const si = low.subtasks.findIndex((s) => s.includes(q))
+      if (si >= 0) {
         ok = true
-        if (!extra && !has(task.title)) extra = { label: t('misc.search.inSubtask'), text: st.title }
+        if (!extra && !inTitle) extra = { label: t('misc.search.inSubtask'), text: task.subtasks[si].title }
       }
-      const tg = task.tags.find((x) => has(x))
-      if (tg) {
+      const ti = low.tags.findIndex((x) => x.includes(q))
+      if (ti >= 0) {
         ok = true
-        if (!extra && !has(task.title)) extra = { label: t('misc.search.inTag'), text: '#' + tg }
+        if (!extra && !inTitle) extra = { label: t('misc.search.inTag'), text: '#' + task.tags[ti] }
       }
       if (ok) hits.push({ task, extra })
     }
@@ -185,7 +211,7 @@ export default function SearchView() {
   }
 
   const renderHit = (h: Hit) => (
-    <div key={h.task.id} className="search-hit" style={stagger(fadeOrder.get(h.task.id))}>
+    <div key={h.task.id} className="search-hit" style={stagger(fadeOrder.get(h.task.id))} data-vkey={h.task.id}>
       <TaskRow task={h.task} showList />
       {h.extra && (
         <div className="search-snippet">
@@ -229,7 +255,7 @@ export default function SearchView() {
             <span>{t('misc.search.includeArchived')}</span>
           </label>
         )}
-        <div className="search-results" ref={results}>
+        <div className="search-results" ref={results} data-scroller>
           {!q ? (
             history.length > 0 ? (
               <div className="search-history">
@@ -295,7 +321,7 @@ export default function SearchView() {
                     {g.archived && <span className="search-archived-badge">{t('misc.search.archived')}</span>}
                     <span className="search-group-count">{g.hits.length}</span>
                   </div>
-                  {g.hits.map(renderHit)}
+                  <Hits hits={g.hits} render={renderHit} />
                 </div>
               ))}
               {done.length > 0 && (
@@ -305,7 +331,7 @@ export default function SearchView() {
                     <span>{t('common.list.completed')}</span>
                     <span className="search-group-count">{done.length}</span>
                   </div>
-                  {done.map(renderHit)}
+                  <Hits hits={done} render={renderHit} />
                 </div>
               )}
             </>

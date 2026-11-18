@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 'react'
+import { createContext, memo, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 'react'
+import { flushSync } from 'react-dom'
 import { format, parseISO } from 'date-fns'
 import { t as tr, useT, type MessageKey } from '../i18n'
 import { fmtMonthDay, fmtWeekday } from '../i18n/format'
-import { archiveList, clearSelection, getData, getSelection, getUI, setData, setSelection, setUI, toast, uid, updateList, useData, useUI } from '../store'
+import { archiveList, clearSelection, getData, getSelection, getUI, setData, setSelection, setUI, toast, uid, updateList, useData, useUI, useUISel } from '../store'
 import { isBatch, prune, selectAll, stepSelect } from '../selection'
 import type { AppData, GroupBy, Priority, SortBy, Task, TaskList, ViewPrefs } from '../types'
 import { usePhone } from '../viewport'
@@ -19,7 +20,8 @@ import { TaskRow } from './TaskRow'
 import { Timeline } from './Timeline'
 import './timeline.css'
 import { BatchBar, BatchPops, type BatchPop } from './BatchPanel'
-import { batchIds, completeSelected, deleteSelected, quickDate, rowEl, setPriority, startSelecting, visibleOrder } from './batchActions'
+import { batchIds, completeSelected, deleteSelected, quickDate, rowEl, setListOrder, setPriority, startSelecting, visibleOrder } from './batchActions'
+import { usePinnedRows, useListWindow } from './listWindow'
 import './tasks.css'
 
 const GROUP_NAMES: Record<GroupBy, MessageKey> = {
@@ -119,6 +121,41 @@ export function TaskListPane() {
   })
   const dnd = useMemo<TaskDragApi>(() => ({ start: (e, task, row) => startListDrag(e, task, row, env), flipRows: true }), [])
   const exitRef = useExitAnimations([view, groupBy, prefs.sortBy, kanban ? 'k' : 'l', data.settings.showCompleted].join('|'))
+
+  // The rows in display order, from the data (rows outside the window are not in the document): the keyboard,
+  // Shift ranges, Select all and drags of a selection work from it.
+  const doneShown = (data.settings.showCompleted || isDoneView) && done.length > 0 && (isDoneView || !ui.collapsed[view + ':__done'])
+  const order = useMemo(() => {
+    const out: string[] = []
+    const walk = (x: Task) => {
+      out.push(x.id)
+      if (!ui.collapsed['task:' + x.id]) tree.children.get(x.id)?.forEach(walk)
+    }
+    for (const g of groups) if (g.tasks.length && !ui.collapsed[view + ':' + g.key]) g.tasks.forEach(walk)
+    if (doneShown) for (const x of done) out.push(x.id)
+    return [...new Set(out)]
+  }, [groups, tree, done, doneShown, ui.collapsed, view])
+  useLayoutEffect(() => {
+    // the board and the timeline lay rows out their own way: their order is read from the document
+    if (kanban || timeline) return
+    setListOrder(() => order)
+    return () => setListOrder(null)
+  }, [order, kanban, timeline])
+
+  // Rows that stay rendered outside the window: the cursor's and the dragged ones (by their top-level row).
+  const dragged = usePinnedRows()
+  const cursorId = ui.selectedTaskId
+  const pins = useMemo(() => {
+    const parent = new Map<string, string>()
+    tree.children.forEach((kids, id) => kids.forEach((k) => parent.set(k.id, id)))
+    const out = new Set<string>()
+    for (const id of [cursorId, ...dragged]) {
+      let x = id
+      while (x && parent.has(x)) x = parent.get(x)
+      if (x) out.add(x)
+    }
+    return out
+  }, [tree, cursorId, dragged])
 
   // The keyboard in the list (see listKeys below); `d` opens the date picker on the selected rows.
   const [datePop, setDatePop] = useState<{ pop: BatchPop; ids: string[] } | null>(null)
@@ -268,6 +305,7 @@ export function TaskListPane() {
       ) : (
         <div
           className="list-body"
+          data-scroller
           ref={exitRef}
           onClick={(e) => {
             const el = e.target as HTMLElement
@@ -299,14 +337,18 @@ export function TaskListPane() {
               </div>
             )}
             <TaskDragContext.Provider value={dnd}>
+              <PinContext.Provider value={pins}>
               {groups.map((g) =>
                 g.tasks.length === 0 && groupBy !== 'section' ? null : (
                   <GroupSection key={g.key} g={g} name={groupName(g, groupBy, data)} tree={tree} listId={list?.id} showList={showList} collapsed={collapsed(g.key)} onToggle={() => toggleCollapsed(view + ':' + g.key)} keep={groupBy === 'section' && !!g.patch?.sectionId} />
                 ),
               )}
+              </PinContext.Provider>
             </TaskDragContext.Provider>
             {isTrash && open.length > 0 && <TrashHint />}
-            {(data.settings.showCompleted || isDoneView) && done.length > 0 && <DoneSection tasks={done} showList={showList || isDoneView} grouped={isDoneView} view={view} />}
+            <PinContext.Provider value={pins}>
+              {(data.settings.showCompleted || isDoneView) && done.length > 0 && <DoneSection tasks={done} showList={showList || isDoneView} grouped={isDoneView} view={view} />}
+            </PinContext.Provider>
             {open.length === 0 && (done.length === 0 || (!data.settings.showCompleted && !isDoneView)) && <EmptyState view={view} />}
           </div>
         </div>
@@ -406,6 +448,8 @@ function listKeys(e: KeyboardEvent, openDate: (ids: string[], anchor: Anchor) =>
 
 /** Puts the keyboard focus (and its ring) on a row and scrolls it into view. */
 function focusRow(id: string) {
+  // the cursor's row is always rendered, but the change that moved the cursor may not be in the document yet
+  if (!rowEl(id)) flushSync(() => {})
   const row = rowEl(id)
   if (!row) return
   row.tabIndex = 0
@@ -419,21 +463,42 @@ function sectionMenu(e: React.MouseEvent, listId: string | undefined, g: Pick<Gr
   setUI({ menu: { x: e.clientX, y: e.clientY, kind: 'section', id: listId + '/' + g.patch.sectionId } })
 }
 
-/** A task with its subtasks (indented below it, foldable). New tasks grow in from the top. */
-function TaskNode({ task, tree, depth, showList }: { task: Task; tree: TaskTree; depth: number; showList: boolean }) {
-  const ui = useUI()
-  const ref = useRef<HTMLDivElement>(null)
-  const kids = tree.children.get(task.id)
-  const key = 'task:' + task.id
-  const folded = !!ui.collapsed[key]
-  useLayoutEffect(() => maybeEnter(task.id, ref.current), [task.id])
+/** Top-level rows kept rendered outside the list window (see listWindow). */
+const PinContext = createContext<ReadonlySet<string>>(new Set())
+
+/** The rows of a group (or of the completed tasks), windowed when there are many. */
+function NodeRows({ tasks, tree, showList, collapsed }: { tasks: Task[]; tree: TaskTree; showList: boolean; collapsed?: boolean }) {
+  const pins = useContext(PinContext)
+  const keys = useMemo(() => tasks.map((x) => x.id), [tasks])
+  const keep = useMemo(() => (pins.size ? keys.flatMap((k, i) => (pins.has(k) ? [i] : [])) : []), [keys, pins])
+  const { ref: boxRef, parts } = useListWindow(keys, keep)
   return (
-    <div className="task-node" ref={ref} data-exit={task.id} data-motion={'t:' + task.id}>
-      <TaskRow task={task} showList={showList} depth={depth} fold={kids?.length ? { folded, toggle: () => toggleCollapsed(key) } : undefined} />
-      {kids && kids.length > 0 && <Children tasks={kids} tree={tree} depth={depth + 1} showList={showList} folded={folded} />}
+    <div className="group-inner" ref={boxRef as Ref<HTMLDivElement>} inert={collapsed || undefined}>
+      {parts.flatMap((p) =>
+        p.kind === 'gap'
+          ? [<div key={'gap:' + p.from} className="list-gap" style={{ height: p.height }} aria-hidden />]
+          : tasks.slice(p.from, p.to).map((x) => <TaskNode key={x.id} task={x} tree={tree} depth={0} showList={showList} />),
+      )}
     </div>
   )
 }
+
+/** A task with its subtasks (indented below it, foldable). New tasks grow in from the top. */
+const TaskNode = memo(function TaskNode({ task, tree, depth, showList }: { task: Task; tree: TaskTree; depth: number; showList: boolean }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const kids = tree.children.get(task.id)
+  const key = 'task:' + task.id
+  const folded = useUISel((u) => !!u.collapsed[key])
+  const hasKids = !!kids?.length
+  const fold = useMemo(() => (hasKids ? { folded, toggle: () => toggleCollapsed(key) } : undefined), [hasKids, folded, key])
+  useLayoutEffect(() => maybeEnter(task.id, ref.current), [task.id])
+  return (
+    <div className="task-node" ref={ref} data-exit={task.id} data-motion={'t:' + task.id} data-vkey={depth === 0 ? task.id : undefined}>
+      <TaskRow task={task} showList={showList} depth={depth} fold={fold} />
+      {kids && kids.length > 0 && <Children tasks={kids} tree={tree} depth={depth + 1} showList={showList} folded={folded} />}
+    </div>
+  )
+})
 
 function Children({ tasks, tree, depth, showList, folded }: { tasks: Task[]; tree: TaskTree; depth: number; showList: boolean; folded: boolean }) {
   return (
@@ -474,11 +539,7 @@ function GroupSection({ g, name, tree, listId, showList, collapsed, onToggle, ke
         </div>
       )}
       <div className={'group-body' + (collapsed ? ' collapsed' : '')} data-collapsed={collapsed || undefined}>
-        <div className="group-inner" inert={collapsed || undefined}>
-          {g.tasks.map((x) => (
-            <TaskNode key={x.id} task={x} tree={tree} depth={0} showList={showList} />
-          ))}
-        </div>
+        <NodeRows tasks={g.tasks} tree={tree} showList={showList} collapsed={collapsed} />
       </div>
     </section>
   )
@@ -505,11 +566,7 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
               <span>{day === format(new Date(), 'yyyy-MM-dd') ? t('common.today') : day === '—' ? t('common.noDate') : fmtMonthDay(parseISO(day))}</span>
               <span className="group-count">{ts.length}</span>
             </div>
-            <div className="group-inner">
-              {ts.map((x) => (
-                <TaskNode key={x.id} task={x} tree={NO_TREE} depth={0} showList={showList} />
-              ))}
-            </div>
+            <NodeRows tasks={ts} tree={NO_TREE} showList={showList} />
           </section>
         ))}
       </>
@@ -523,11 +580,7 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
         <span className="group-count">{tasks.length}</span>
       </div>
       <div className={'group-body' + (isCollapsed ? ' collapsed' : '')} data-collapsed={isCollapsed || undefined}>
-        <div className="group-inner" inert={isCollapsed || undefined}>
-          {tasks.map((x) => (
-            <TaskNode key={x.id} task={x} tree={NO_TREE} depth={0} showList={showList} />
-          ))}
-        </div>
+        <NodeRows tasks={tasks} tree={NO_TREE} showList={showList} collapsed={isCollapsed} />
       </div>
     </section>
   )

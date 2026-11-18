@@ -1,7 +1,7 @@
-import { useContext, useLayoutEffect, useMemo, useState, type CSSProperties, type MouseEvent } from 'react'
+import { memo, useContext, useLayoutEffect, useMemo, useState, type CSSProperties, type MouseEvent } from 'react'
 import { dueLabel, isOverdue } from '../dates'
 import { useT, type MessageKey } from '../i18n'
-import { deleteTask, getData, setUI, toast, updateTask, useData, useUI } from '../store'
+import { deleteTask, getData, setUI, toast, updateTask, useDataSel, useUISel, type UIState } from '../store'
 import { markdownToText } from '../markdown'
 import type { Task } from '../types'
 import { useMedia, usePhone } from '../viewport'
@@ -10,7 +10,7 @@ import { DatePicker } from './DatePicker'
 import { Icon } from './Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { useRowSwipe, type SwipeSide } from './rowSwipe'
-import { justLanded, toggleWithMotion, useLinger } from './taskMotion'
+import { justLanded, toggleWithMotion, useLingerOf } from './taskMotion'
 import { moveTaskTo, TaskDragContext } from './taskDnd'
 import { clickRow } from './batchActions'
 
@@ -43,7 +43,7 @@ function Burst() {
  */
 export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void }) {
   const t = useT()
-  const lg = useLinger().get(task.id)
+  const lg = useLingerOf(task.id)
   const phase = lg?.phase
   const color = priorityColor(task.priority)
   const cls = phase === 'check' ? ' cb-checking' : phase === 'uncheck' ? ' cb-unchecking' : task.status === 2 ? ' checked' : task.status === -1 ? ' wontdo' : ''
@@ -91,34 +91,52 @@ interface Props {
   dragDisabled?: boolean
 }
 
-export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props) {
+// What a row needs from the UI state, as bits, so a row renders again only when its own state changes.
+const SEL_MULTI = 1
+const SEL_ON = 2
+const SEL_CURSOR = 4
+const SEL_MODE = 8
+function selFlags(u: UIState, id: string): number {
+  const multi = u.selectMode || u.selectedIds.length > 0
+  const on = multi ? u.selectedIds.includes(id) : u.selectedTaskId === id
+  return (multi ? SEL_MULTI : 0) | (on ? SEL_ON : 0) | (u.selectedTaskId === id ? SEL_CURSOR : 0) | (u.selectMode ? SEL_MODE : 0)
+}
+
+/**
+ * A task row. It is memoised and reads only its own part of the stores, so a change to one task (or to the
+ * selection) renders that row again, not every row in the list.
+ */
+export const TaskRow = memo(function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props) {
   const t = useT()
-  const ui = useUI()
-  const data = useData()
+  const sel = useUISel((u) => selFlags(u, task.id))
+  const lists = useDataSel((d) => d.lists)
+  const tags = useDataSel((d) => d.tags)
+  const showDetails = useDataSel((d) => !!d.settings.showDetails)
   const drag = useContext(TaskDragContext)
-  const phase = useLinger().get(task.id)?.phase
+  const phase = useLingerOf(task.id)?.phase
   // On touch screens the title is plain text: a tap opens the task instead of starting to edit it.
   const touch = useMedia('(pointer: coarse)')
   // While several tasks are selected (or in selection mode) the highlight shows the selection; the keyboard
   // cursor (selectedTaskId) is shown by the focus ring.
-  const multi = ui.selectMode || ui.selectedIds.length > 0
-  const selected = multi ? ui.selectedIds.includes(task.id) : ui.selectedTaskId === task.id
-  const cursor = ui.selectedTaskId === task.id
-  const list = data.lists.find((l) => l.id === task.listId)
+  const multi = !!(sel & SEL_MULTI)
+  const selected = !!(sel & SEL_ON)
+  const cursor = !!(sel & SEL_CURSOR)
+  const selectMode = !!(sel & SEL_MODE)
+  const list = lists.find((l) => l.id === task.listId)
   const overdue = isOverdue(task) && !phase
   // "Show details": the start of the notes under the title, on one line
   // the preview shows the notes as plain text, without their Markdown marks
-  const notes = useMemo(() => (task.content.trim() ? markdownToText(task.content).replace(/\s+/g, ' ').trim().slice(0, 200) : ''), [task.content])
+  const notes = useMemo(() => (showDetails && task.content.trim() ? markdownToText(task.content).replace(/\s+/g, ' ').trim().slice(0, 200) : ''), [task.content, showDetails])
   const done = (task.status !== 0 && phase !== 'uncheck') || phase === 'check'
   const subDone = task.subtasks.filter((s) => s.done).length
   // Every open date is blue; overdue ones are red.
   const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : 'var(--primary)'
-  const locked = isLocked(task, data)
+  const locked = isLocked(task, { lists })
   const draggable = !!drag && !locked && !dragDisabled
 
   // Phone list rows: swipe left for date / move / delete, swipe right for complete / pin.
   const phone = usePhone()
-  const swipeable = phone && touch && draggable && !!drag?.flipRows && task.status === 0 && !ui.selectMode
+  const swipeable = phone && touch && draggable && !!drag?.flipRows && task.status === 0 && !selectMode
   const [pop, setPop] = useState<{ kind: 'date' | 'move'; anchor: Anchor; snap: ReturnType<typeof getData> } | null>(null)
   const actions: Record<SwipeSide, SwipeAction[]> = {
     end: [
@@ -178,7 +196,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
       onPointerCancel={swipeable ? swipe.handlers.onPointerCancel : undefined}
       onMouseDown={(e) => {
         // Ctrl / ⌘ / Shift clicks select; they neither focus the title nor select text
-        if (e.shiftKey || e.ctrlKey || e.metaKey || ui.selectMode) e.preventDefault()
+        if (e.shiftKey || e.ctrlKey || e.metaKey || selectMode) e.preventDefault()
       }}
       onClick={(e) => {
         if (swipe.takeClick()) return
@@ -190,6 +208,8 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
       }}
       onContextMenu={(e) => openTaskMenu(e, task.id)}
       data-task-id={task.id}
+      // focusable from script (the keyboard cursor); the list makes one row the Tab stop (roving tabindex)
+      tabIndex={-1}
       data-flip={drag?.flipRows && !dragDisabled ? task.id : undefined}
       data-dnd-row={draggable ? task.id : undefined}
       data-depth={depth}
@@ -213,7 +233,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
           </span>
         )
       )}
-      {ui.selectMode ? (
+      {selectMode ? (
         <span className={'sel-check' + (selected ? ' on' : '')} aria-hidden>
           <Icon name="check" size={12} stroke={3} />
         </span>
@@ -250,7 +270,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
             </span>
           )}
         </div>
-        {data.settings.showDetails && notes && <div className="task-notes">{notes}</div>}
+        {showDetails && notes && <div className="task-notes">{notes}</div>}
         <div className="task-meta">
           {task.pinned && <Icon name="pin" size={13} className="meta-ic meta-pin" />}
           {task.subtasks.length > 0 && (
@@ -262,7 +282,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
           {task.repeat && <Icon name="repeat" size={13} className="meta-ic" />}
           {task.reminder != null && <Icon name="bell" size={13} className="meta-ic" />}
           {task.tags.map((tg) => {
-            const c = data.tags.find((x) => x.name === tg)?.color
+            const c = tags.find((x) => x.name === tg)?.color
             return (
               <span key={tg} className="tag-pill" style={c ? { background: `color-mix(in srgb, ${c} 18%, transparent)`, color: c } : undefined}>
                 {tg}
@@ -323,7 +343,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
         <Popover anchor={pop.anchor} onClose={closePop}>
           <MenuList
             onClose={closePop}
-            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...activeLists(data)].map((l) => ({
+            items={[{ id: 'inbox', name: t('common.list.inbox'), color: undefined as string | undefined }, ...activeLists({ lists })].map((l) => ({
               label: l.name,
               icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name={l.id === 'inbox' ? 'inbox' : 'list'} size={14} />,
               checked: l.id === task.listId,
@@ -334,7 +354,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
       )}
     </>
   )
-}
+})
 
 interface SwipeAction {
   id: string

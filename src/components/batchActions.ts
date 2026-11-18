@@ -2,7 +2,7 @@ import { addDays, nextMonday } from 'date-fns'
 import { completeMany, deleteMany, patchMany, reopenMany, tagMany, tagState, wontDoMany } from '../batch'
 import { fmt } from '../dates'
 import { t } from '../i18n'
-import { clearSelection, getData, getSelection, getUI, playDing, runBatch, setSelection } from '../store'
+import { clearSelection, dingAfterPaint, getData, getSelection, getUI, runBatch, setSelection } from '../store'
 import { after, clickSelect, enterMode, inOrder, selectedIds, type ClickMods } from '../selection'
 import type { Priority, Task } from '../types'
 import { PRIORITY_LEVEL } from './taskDnd'
@@ -11,8 +11,16 @@ import { batchWithMotion, toggleWithMotion } from './taskMotion'
 // What the batch panel, the phone action bar, the keyboard and multi-row drags do to the selected tasks.
 // Every change is one setData call and one toast, so a single undo puts all the tasks back.
 
+// The task list registers its row order (computed from the data) here: with windowing, rows far from the visible
+// part are not in the document, so the document alone cannot tell the order.
+let listOrder: (() => string[]) | null = null
+export function setListOrder(f: (() => string[]) | null) {
+  listOrder = f
+}
+
 /** Ids of the task rows in the list pane, top to bottom, skipping folded groups and subtasks. */
 export function visibleOrder(): string[] {
+  if (listOrder) return listOrder()
   const out: string[] = []
   document.querySelectorAll<HTMLElement>('.list-pane .task-row[data-task-id]').forEach((el) => {
     if (el.closest('[data-collapsed],[inert],.dnd-ghost')) return
@@ -108,7 +116,7 @@ export function completeSelected(ids: string[]) {
   }
   const open = ts.filter((x) => x.status === 0).map((x) => x.id)
   if (batchWithMotion(open, 'check', () => runBatch(t('tasks.batch.completed', { count: open.length }), (x) => completeMany(x, ids)))) {
-    playDing()
+    dingAfterPaint()
     if (!d.settings.showCompleted) leave(ids, order)
   }
 }

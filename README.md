@@ -68,6 +68,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - ⏰ **Reminders**: at a task's reminder time TickDone shows a card with Complete, Snooze (5 min, 15 min, 1 hour, tomorrow) and Open, plus a system notification if you allow it. TickDone has no server, so reminders fire while it is open in a tab or installed and running; ones that came due while it was closed show up when you open it again.
 - 📲 **Install it as an app**: add TickDone to your home screen or dock from Settings → About, and it opens offline after the first visit. When a new version is out, a toast offers to reload.
 - 💾 **Backup and restore**: export everything to a JSON file and import it again.
+- 🚀 **Fast with thousands of tasks**: long lists and search results draw only the rows on screen, so a list of 5,000 tasks scrolls, switches and responds as quickly as a short one, with drag and drop, the keyboard, multi-select and the completion animation working as before. Changes are saved in the background.
 
 ## 📸 Screenshots
 
@@ -170,7 +171,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [ ] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accessibility ([#25](https://github.com/suica/tickdone/issues/25))
-- [ ] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
+- [x] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendar: plan undated tasks, agenda view ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Calendar subscriptions ([#51](https://github.com/suica/tickdone/issues/51))

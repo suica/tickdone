@@ -68,6 +68,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - ⏰ **Rappels** : à l'heure du rappel d'une tâche, TickDone affiche une carte pour la terminer, la reporter (5 min, 15 min, 1 heure, demain) ou l'ouvrir, et une notification système si vous l'autorisez. TickDone n'a pas de serveur : les rappels se déclenchent tant qu'il est ouvert dans un onglet, ou installé et en cours d'exécution ; ceux arrivés pendant qu'il était fermé s'affichent à la prochaine ouverture.
 - 📲 **Installez-le comme une application** : ajoutez TickDone à l'écran d'accueil ou au Dock depuis Paramètres → À propos ; il s'ouvre hors ligne après la première visite. Quand une nouvelle version sort, un message propose de recharger.
 - 💾 **Sauvegarde et restauration** : exportez tout dans un fichier JSON et réimportez-le.
+- 🚀 **Rapide avec des milliers de tâches** : les longues listes et les résultats de recherche n'affichent que les lignes visibles, si bien qu'une liste de 5 000 tâches défile, change et réagit aussi vite qu'une courte, avec le glisser-déposer, le clavier, la sélection multiple et l'animation de fin qui marchent comme avant. Les modifications sont enregistrées en arrière-plan.
 
 ## 📸 Captures d'écran
 
@@ -170,7 +171,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [ ] Plus de règles de répétition ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
-- [ ] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
+- [x] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Abonnements à des calendriers ([#51](https://github.com/suica/tickdone/issues/51))

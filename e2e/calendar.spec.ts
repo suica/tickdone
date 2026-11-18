@@ -106,7 +106,7 @@ test('calendar and matrix follow the chosen language', async ({ page }) => {
   await expect(page.locator('.cal-title')).toHaveText('November 2026')
   await expect(page.locator('.cal-view-btn')).toHaveText('Monat')
   await page.locator('.cal-view-btn').click()
-  await expect(page.locator('.cal-view-menu .menu-label')).toHaveText(['Monat', 'Woche', 'Tag', 'Liste'])
+  await expect(page.locator('.cal-view-menu .menu-label')).toHaveText(['Monat', 'Woche', 'Tag', 'Agenda'])
   await page.keyboard.press('Escape')
   await expect(page.locator('.cal-weekhead > div').first()).toHaveText('Mo')
   const bar = await boxOf(page, '.cal-cell [data-task-id="fees"]')

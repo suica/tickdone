@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject, type PointerEvent as ReactPointerEvent } from 'react'
 import { getData, getUI, setUI, toast, updateTask } from '../store'
 import { fmt, todayStr } from '../dates'
 import { useT } from '../i18n'
@@ -7,6 +7,7 @@ import type { Task } from '../types'
 import { beginDrag } from './calDnd'
 import { flyFrom } from './calMotion'
 import { CalTask } from './calParts'
+import { dropKind, dropPatch, type DropTarget } from './calPlan'
 import type { DayEvent } from './calEvents'
 import { CalEvent, type OpenEvent } from './calEventParts'
 import { clamp, DAY_MIN, DEFAULT_DUR, dayLabel, durOf, fmtDur, snapCeil, snapFloor, snapRound, SNAP, timeLabel, timeRange, toHM, toMin, useColorOf, type AddState } from './calUtil'
@@ -58,7 +59,8 @@ function layoutDay(tasks: Task[], events: DayEvent[] = []): Placed[] {
 }
 
 type Drag =
-  | { kind: 'move'; id: string; day: string | null; allDay: boolean; s: number; len: number }
+  /** `out`: over the unscheduled panel, where a drop removes the date. */
+  | { kind: 'move'; id: string; day: string | null; allDay: boolean; s: number; len: number; out?: boolean }
   | { kind: 'resize'; id: string; day: string; s: number; e: number }
   | { kind: 'create'; day: string; s: number; e: number }
 
@@ -78,10 +80,29 @@ interface Props {
   /** A task just created here: its block expands in. */
   fresh: string | null
   onAdd: (s: AddState) => void
+  /** Filled with a way to start dragging a task from outside the grid (the unscheduled panel). */
+  api?: RefObject<GridApi | null>
+  /** The task being moved and whether it is over the unscheduled panel; null when no move runs. */
+  onMoveState?: (s: { id: string; out: boolean } | null) => void
 }
 
+export interface GridApi {
+  /** Drag `task` from `source` (a row outside the grid) onto a day or a time. */
+  startMove: (e: ReactPointerEvent<HTMLElement>, task: Task, source: HTMLElement) => void
+}
+
+/** The toast text for each kind of drop (see `dropKind`). */
+const DROP_TEXT = {
+  unscheduled: 'calendar.toast.unscheduled',
+  scheduledDay: 'calendar.toast.scheduledDay',
+  scheduledTime: 'calendar.toast.scheduledTime',
+  movedDay: 'calendar.toast.movedToDay',
+  movedTime: 'calendar.toast.movedToTime',
+  movedAllDay: 'calendar.toast.movedToAllDay',
+} as const
+
 /** Week, three-day and day views: an all-day row above a 24-hour grid. */
-export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fresh, onAdd }: Props) {
+export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fresh, onAdd, api, onMoveState }: Props) {
   const colorOf = useColorOf()
   const t = useT()
   const today = todayStr()
@@ -90,8 +111,11 @@ export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fr
   const [drag, setDragState] = useState<Drag | null>(null)
   const dragRef = useRef<Drag | null>(null)
   const setDrag = (d: Drag | null) => {
+    const was = dragRef.current
     dragRef.current = d
     setDragState(d)
+    const m = d?.kind === 'move' ? d : null
+    if (m?.id !== (was?.kind === 'move' ? was.id : undefined) || !!m?.out !== !!(was?.kind === 'move' && was.out)) onMoveState?.(m ? { id: m.id, out: !!m.out } : null)
   }
   /** After a drop: the block lands from where its preview was. */
   const settle = useRef<{ id: string; from?: DOMRect } | null>(null)
@@ -132,8 +156,9 @@ export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fr
     fn()
   }
 
-  // ---- move a task: within the grid (snapped to 15 minutes), between days, to and from the all-day row ----
-  const startMove = (e: ReactPointerEvent<HTMLElement>, task: Task, fromAllDay: boolean, source?: HTMLElement) => {
+  // ---- move a task: within the grid (snapped to 15 minutes), between days, to and from the all-day row,
+  // in from the unscheduled panel and back out to it ----
+  const startMove = (e: ReactPointerEvent<HTMLElement>, task: Task, fromAllDay: boolean, source?: HTMLElement, fromOutside = false) => {
     const src = source ?? e.currentTarget
     const len = durOf(task)
     const col = colAt(src)
@@ -141,35 +166,31 @@ export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fr
     const base = { kind: 'move' as const, id: task.id, len }
     beginDrag(e.nativeEvent, {
       source: src,
-      ghost: false,
+      // A row from outside follows the pointer; inside the grid the preview shows where it lands.
+      ghost: fromOutside,
       onStart: () => setDrag({ ...base, day: task.dueDate ?? null, allDay: fromAllDay, s: task.dueTime ? toMin(task.dueTime) : 0 }),
       onMove: (c) => {
         const colEl = colAt(c.hit)
+        const cell = colEl ? null : allDayAt(c.hit)
+        c.ghost?.classList.toggle('cal-ghost-hidden', !!(colEl || cell))
         if (colEl) {
           const s = clamp(snapRound(minuteAt(c.y, colEl) - grab), 0, DAY_MIN - SNAP)
           return setDrag({ ...base, day: colEl.dataset.day!, allDay: false, s })
         }
-        const cell = allDayAt(c.hit)
-        setDrag({ ...base, day: cell ? cell.dataset.day! : null, allDay: true, s: 0 })
+        const out = !!c.hit?.closest('.cal-unsched')
+        setDrag({ ...base, day: cell ? cell.dataset.day! : null, allDay: true, s: 0, out })
       },
       onDrop: () => {
         const d = dragRef.current
         const cur = taskOf(task.id)
-        if (!d || d.kind !== 'move' || !d.day || !cur) return false
-        let patch: Partial<Task>
-        let text: string
-        if (d.allDay) {
-          if (!cur.dueTime && cur.dueDate === d.day) return false
-          patch = cur.dueTime ? { dueDate: d.day, dueTime: undefined, reminder: undefined, duration: undefined } : { dueDate: d.day }
-          text = cur.dueTime ? t('calendar.toast.movedToAllDay', { date: dayLabel(d.day) }) : t('calendar.toast.movedToDay', { date: dayLabel(d.day) })
-        } else {
-          const hm = toHM(d.s)
-          if (cur.dueTime === hm && cur.dueDate === d.day) return false
-          patch = { dueDate: d.day, dueTime: hm }
-          text = t('calendar.toast.movedToTime', { date: dayLabel(d.day), time: timeLabel(d.s) })
-        }
+        if (!d || d.kind !== 'move' || !cur) return false
+        const to: DropTarget | null = d.out ? 'unscheduled' : d.day ? { day: d.day, time: d.allDay ? undefined : toHM(d.s) } : null
+        const patch = to && dropPatch(cur, to)
+        if (!to || !patch) return false
+        const kind = dropKind(cur, to)
+        const text = to === 'unscheduled' ? t(DROP_TEXT[kind]) : t(DROP_TEXT[kind], { date: dayLabel(to.day), time: to.time ? timeLabel(d.s) : '' })
         const snap = getData()
-        settle.current = { id: task.id, from: rootRef.current?.querySelector('.cal-preview')?.getBoundingClientRect() }
+        if (to !== 'unscheduled') settle.current = { id: task.id, from: rootRef.current?.querySelector('.cal-preview')?.getBoundingClientRect() }
         updateTask(task.id, patch)
         toast(text, snap)
         return true
@@ -177,6 +198,9 @@ export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fr
       onEnd: () => setDrag(null),
     })
   }
+  useLayoutEffect(() => {
+    if (api) api.current = { startMove: (e, task, source) => startMove(e, task, true, source, true) }
+  })
 
   // ---- drag the bottom edge of a block: change its length ----
   const startResize = (e: ReactPointerEvent<HTMLElement>, task: Task) => {

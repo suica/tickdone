@@ -54,6 +54,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - 📝 **Markdown in Notizen**: Überschriften, fett, kursiv, durchgestrichen, Code, Links, Listen, Zitate und Checklisten, die sich direkt in der Notiz abhaken lassen; `**fett**`, `# ` oder `- [ ] ` werden schon beim Tippen formatiert, gespeichert wird die Notiz weiter als Markdown.
 - 🔁 **Wiederholungsregeln**: alle N Tage, Wochen, Monate oder Jahre; gewählte Wochentage; Tag N, der letzte Tag oder der N-te/letzte Wochentag im Monat; ein Datum jedes Jahr; nur Werktage. Endet nach N Malen oder an einem Datum, zählt ab Fälligkeit oder Erledigung, einzelne Termine lassen sich überspringen, und die Schnelleingabe versteht „every 2 weeks“.
 - 📅 **Kalender** mit Monats-, Wochen-, Tages- und Listenansicht. Zieh eine Aufgabe auf einen anderen Tag oder eine andere Uhrzeit, oder zieh die Unterkante eines Blocks, um die Dauer zu ändern.
+- 🗓️ **Im Kalender planen**: Ein Bereich „Ohne Datum“ neben der Wochen- und Tagesansicht (auf dem Handy ein Blatt am unteren Rand) zeigt die offenen Aufgaben ohne Datum, nach Liste gefiltert. Zieh eine auf einen Tag oder eine Uhrzeit, um sie einzuplanen, oder zurück in den Bereich, um das Datum zu entfernen – beides lässt sich in der Meldung rückgängig machen. Die Agenda-Ansicht zeigt die kommenden Tage in einer durchgehenden Liste mit deinen Aufgaben und den Terminen abonnierter Kalender.
 - 🔔 **Kalenderabos**: Abonniere jeden Kalender mit einer iCal-Adresse (.ics oder webcal://), etwa für Arbeit, Schule, Team oder Feiertage, und sieh seine Termine schreibgeschützt und in eigener Farbe im Kalender. Sie aktualisieren sich von selbst und bleiben auch offline verfügbar.
 - 🧭 **Eisenhower-Matrix**: Ordne Aufgaben nach Dringlichkeit und Wichtigkeit ein und zieh sie in einen anderen Quadranten, um ihre Priorität zu ändern.
 - 🍅 **Fokus-Timer** mit Pomodoro- und Stoppuhr-Modus und einem Verlauf vergangener Sitzungen.
@@ -169,7 +170,7 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [ ] Barrierefreiheit ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Schnell auch bei Tausenden von Aufgaben ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))
-- [ ] Kalender: Aufgaben ohne Datum einplanen, Agenda-Ansicht ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Kalender: Aufgaben ohne Datum einplanen, Agenda-Ansicht ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Kalenderabos ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Technik

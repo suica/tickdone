@@ -18,6 +18,8 @@ export interface DragCtx {
   hit: Element | null
   /** Box of the floating copy when the drop happened. */
   ghostRect?: DOMRect
+  /** The floating copy, while there is one (a target may hide it where it draws its own preview). */
+  ghost?: HTMLElement
 }
 
 export interface DragOptions {
@@ -78,7 +80,7 @@ export function beginDrag(ev: PointerEvent, o: DragOptions) {
       if (ae && o.source.contains(ae)) ae.blur()
     }
     window.getSelection()?.removeAllRanges()
-    if (o.ghost !== false) ghost = makeGhost(o.source)
+    if (o.ghost !== false) ghost = c.ghost = makeGhost(o.source)
     document.documentElement.classList.add('cal-dragging')
     hitTest()
     o.onStart?.(c)

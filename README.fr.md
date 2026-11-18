@@ -54,6 +54,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - 📝 **Markdown dans les notes** : titres, gras, italique, barré, code, liens, listes, citations et listes de contrôle à cocher directement dans la note ; tapez `**gras**`, `# ` ou `- [ ] ` et la mise en forme s’applique pendant la saisie, la note restant enregistrée en Markdown.
 - 🔁 **Règles de répétition** : tous les N jours, semaines, mois ou ans ; jours de la semaine choisis ; le jour N, le dernier jour ou le N-ième/dernier jour de semaine du mois ; une date chaque année ; jours ouvrés uniquement. Fin après N fois ou à une date, calcul depuis l’échéance ou l’achèvement, occurrence à ignorer, et « every 2 weeks » reconnu dans l’ajout rapide.
 - 📅 **Calendrier** avec vues mois, semaine, jour et liste. Faites glisser une tâche vers un autre jour ou une autre heure, ou tirez le bord inférieur d'un bloc pour changer sa durée.
+- 🗓️ **Planifier dans le calendrier** : un panneau « Sans date » à côté des vues semaine et jour (une feuille en bas de l'écran sur téléphone) liste les tâches ouvertes qui n'ont pas encore de date, filtrées par liste. Faites-en glisser une sur un jour ou une heure pour la planifier, ou remettez une tâche sur le panneau pour retirer sa date, avec annulation depuis le message. La vue agenda montre les jours à venir dans une seule liste défilante, avec vos tâches et les événements de vos calendriers abonnés.
 - 🔔 **Abonnements à des calendriers** : abonnez-vous à tout calendrier qui publie une adresse iCal (.ics ou webcal://), comme ceux du travail, de l’école, de l’équipe ou des jours fériés, et voyez ses événements dans le calendrier, en lecture seule et dans leur propre couleur. Ils se mettent à jour d’eux-mêmes et restent disponibles hors ligne.
 - 🧭 **Matrice d'Eisenhower** : classez les tâches selon leur urgence et leur importance, et faites-les glisser d'un quadrant à l'autre pour changer leur priorité.
 - 🍅 **Minuteur de concentration** avec modes Pomodoro et chronomètre, et un historique des sessions passées.
@@ -169,7 +170,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [ ] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
 - [ ] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
 - [ ] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
-- [ ] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))
+- [x] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))
 - [x] Abonnements à des calendriers ([#51](https://github.com/suica/tickdone/issues/51))
 
 ## 🧰 Technologies

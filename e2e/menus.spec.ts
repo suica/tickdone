@@ -69,7 +69,7 @@ test.describe('calendar', () => {
     const viewBtn = page.locator('.cal-view-btn')
     await expect(viewBtn).toHaveText('月')
     await viewBtn.click()
-    await expect(page.locator('.cal-view-menu .menu-label')).toHaveText(['月', '周', '日', '列表'])
+    await expect(page.locator('.cal-view-menu .menu-label')).toHaveText(['月', '周', '日', '日程'])
     await page.locator('.cal-view-menu .menu-item', { hasText: '周' }).click()
     await expect(page.locator('.cal-time-day')).toHaveCount(7)
     await expect(viewBtn).toHaveText('周')

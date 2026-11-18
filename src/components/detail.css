@@ -657,11 +657,10 @@ body.col-resizing * {
 
 /* Empty detail: a quiet, neutral mark rather than an accent-coloured badge */
 .detail > .empty svg circle {
-  fill: var(--bg-hint);
-  stroke: var(--border-strong);
-  stroke-width: 1.5;
+  fill: var(--primary-soft);
+  stroke: none;
 }
 .detail > .empty svg path {
-  stroke: var(--text-4);
+  stroke: var(--primary);
   stroke-width: 4;
 }

@@ -1,12 +1,20 @@
-<p align="center"><img src="public/favicon.svg" width="72" height="72" alt="TickDone"></p>
+<div align="center">
 
-<h1 align="center">TickDone</h1>
+<a href="https://tickdone.pages.dev"><img src="public/favicon.svg" width="88" height="88" alt="Logo de TickDone"></a>
 
-<p align="center">Liste de tâches et gestion du temps, directement dans votre navigateur : tâches, calendrier, matrice d'Eisenhower, minuteur de concentration et suivi des habitudes.</p>
+<h1>TickDone</h1>
 
-<p align="center"><a href="https://tickdone.pages.dev"><b>Ouvrir TickDone → tickdone.pages.dev</b></a></p>
+<p><b>Planifiez votre journée, concentrez-vous sur l'essentiel et gardez de bonnes habitudes, directement dans votre navigateur.</b></p>
 
-<p align="center">
+<p>
+  <a href="https://github.com/suica/tickdone/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/suica/tickdone/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="LICENSE"><img alt="Licence MIT" src="https://img.shields.io/badge/licence-MIT-4772fa?style=flat-square"></a>
+  <a href="https://tickdone.pages.dev"><img alt="Démo en ligne" src="https://img.shields.io/badge/démo-tickdone.pages.dev-4772fa?style=flat-square"></a>
+  <a href="#-langues"><img alt="10 langues" src="https://img.shields.io/badge/i18n-10_langues-7c5cff?style=flat-square"></a>
+  <a href="#-contribuer"><img alt="PR bienvenues" src="https://img.shields.io/badge/PR-bienvenues-2fbf71?style=flat-square"></a>
+</p>
+
+<p>
   <a href="README.md">English</a> ·
   <a href="README.zh-CN.md">简体中文</a> ·
   <a href="README.zh-TW.md">繁體中文</a> ·
@@ -19,28 +27,85 @@
   <a href="README.ru.md">Русский</a>
 </p>
 
-![Tâches avec le panneau de détails ouvert](docs/screenshots/desktop-tasks.png)
+<a href="https://tickdone.pages.dev"><img src="docs/hero/hero.fr.png" width="100%" alt="Illustration de TickDone sur un ordinateur portable et un téléphone : listes de tâches, détails d'une tâche et calendrier du mois"></a>
 
-| Calendrier | Matrice d'Eisenhower |
-|---|---|
-| ![Calendrier](docs/screenshots/desktop-calendar.png) | ![Matrice d'Eisenhower](docs/screenshots/desktop-matrix.png) |
-| **Minuteur de concentration** | **Suivi des habitudes** |
-| ![Minuteur de concentration](docs/screenshots/desktop-pomo.png) | ![Suivi des habitudes](docs/screenshots/desktop-habit.png) |
+<p>
+  <a href="https://tickdone.pages.dev"><b>Ouvrir l'application</b></a> ·
+  <a href="#-fonctionnalités"><b>Fonctionnalités</b></a> ·
+  <a href="#-démarrage-rapide"><b>Démarrage rapide</b></a> ·
+  <a href="#️-feuille-de-route"><b>Feuille de route</b></a> ·
+  <a href="#-contribuer"><b>Contribuer</b></a>
+</p>
 
-## Fonctionnalités
+</div>
 
-- **Tâches** : Boîte de réception, Aujourd'hui, Demain, 7 prochains jours, Toutes, Terminées, Abandonnées et Corbeille ; vos propres listes, dossiers et étiquettes ; sous-tâches, notes, priorités, dates et heures d'échéance, rappels et règles de répétition ; épinglage ; un menu contextuel sur chaque tâche ; annulation après avoir terminé ou supprimé une tâche.
-- **Ajout rapide** qui comprend ce que vous tapez et le met en surbrillance : `call mom tomorrow 3pm !high #family ~Personal` définit la date, l'heure, la priorité, l'étiquette et la liste en une seule ligne.
-- **Vues liste et kanban**, avec regroupement et tri.
-- **Calendrier** avec vues mois, semaine et jour.
-- **Matrice d'Eisenhower** pour classer les tâches selon leur urgence et leur importance.
-- **Minuteur de concentration** avec modes Pomodoro et chronomètre, et un historique des sessions passées.
-- **Suivi des habitudes** avec validations, séries et statistiques.
-- **Recherche**, raccourcis clavier et thème sombre.
+TickDone est une liste de tâches et un outil de gestion du temps, gratuit et open source, qui fonctionne dans votre navigateur. Notez vos tâches comme elles vous viennent, placez-les dans le calendrier, classez-les selon leur urgence et leur importance, avancez avec un minuteur de concentration et tenez vos habitudes, le tout au même endroit.
 
-Vos données restent dans votre navigateur (localStorage). Pas de compte, et rien n'est envoyé à un serveur.
+> [!NOTE]
+> **Vos données restent chez vous.** Tout est enregistré dans le stockage local de votre navigateur : pas de compte, pas d'inscription, pas de serveur, et rien de ce que vous saisissez ne quitte votre appareil. Vous pouvez exporter une sauvegarde à tout moment depuis les Réglages.
 
-### Raccourcis clavier
+## ✨ Fonctionnalités
+
+- ✅ **Tâches et listes** : Aujourd'hui, Demain, 7 prochains jours et Boîte de réception, ainsi que Terminées, Abandonnées et Corbeille ; vos propres listes, dossiers et étiquettes ; sous-tâches, notes, priorités, dates et heures d'échéance, rappels et règles de répétition ; épinglage et menu contextuel sur chaque tâche.
+- ⚡ **Ajout rapide intelligent** : tapez `call mom tomorrow 3pm !high #family ~Personal` et TickDone définit la date, l'heure, la priorité, l'étiquette et la liste, en surlignant chaque élément pendant la saisie. Il comprend aussi le chinois.
+- 🗂️ **Vues liste et kanban**, avec regroupement et tri.
+- 📅 **Calendrier** avec vues mois, semaine, jour et liste. Faites glisser une tâche vers un autre jour ou une autre heure, ou tirez le bord inférieur d'un bloc pour changer sa durée.
+- 🧭 **Matrice d'Eisenhower** : classez les tâches selon leur urgence et leur importance, et faites-les glisser d'un quadrant à l'autre pour changer leur priorité.
+- 🍅 **Minuteur de concentration** avec modes Pomodoro et chronomètre, et un historique des sessions passées.
+- 🔥 **Suivi des habitudes** avec validations, séries et statistiques.
+- 🔍 **Recherche** dans les tâches, les étiquettes et les listes.
+- ↩️ **Annulation** depuis la notification après avoir terminé, supprimé ou déplacé une tâche.
+- ⌨️ **Raccourcis clavier** et 🌙 **thème sombre**.
+- 💾 **Sauvegarde et restauration** : exportez tout dans un fichier JSON et réimportez-le.
+
+## 📸 Captures d'écran
+
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/fr/desktop-tasks.png" alt="Tâches"></td>
+  </tr>
+  <tr>
+    <th>Calendrier</th>
+    <th>Matrice</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/fr/desktop-calendar.png" alt="Calendrier"></td>
+    <td><img src="docs/screenshots/fr/desktop-matrix.png" alt="Matrice"></td>
+  </tr>
+  <tr>
+    <th>Concentration</th>
+    <th>Habitudes</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/fr/desktop-focus.png" alt="Concentration"></td>
+    <td><img src="docs/screenshots/fr/desktop-habits.png" alt="Habitudes"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/fr/phone-tasks.png" alt="sur mobile : Tâches"></td>
+    <td><img src="docs/screenshots/fr/phone-calendar.png" alt="sur mobile : Calendrier"></td>
+    <td><img src="docs/screenshots/fr/phone-matrix.png" alt="sur mobile : Matrice"></td>
+    <td><img src="docs/screenshots/fr/phone-focus.png" alt="sur mobile : Concentration"></td>
+    <td><img src="docs/screenshots/fr/phone-habits.png" alt="sur mobile : Habitudes"></td>
+  </tr>
+</table>
+
+## 🚀 Démarrage rapide
+
+**En ligne :** ouvrez [tickdone.pages.dev](https://tickdone.pages.dev). Rien à installer.
+
+**En local** (Node.js 24 requis) :
+
+```sh
+git clone https://github.com/suica/tickdone.git
+cd tickdone
+npm install
+npm run dev        # http://localhost:5173
+```
+
+## ⌨️ Raccourcis clavier
 
 | Touche | Action |
 |---|---|
@@ -51,7 +116,13 @@ Vos données restent dans votre navigateur (localStorage). Pas de compte, et rie
 | `Esc` | Fermer les détails de la tâche |
 | `?` | Afficher tous les raccourcis |
 
-## Feuille de route
+## 🌍 Langues
+
+Ce README existe en 10 langues : English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) et Русский. Toute l'interface est traduite dans ces 10 langues. TickDone suit la langue de votre navigateur, et vous pouvez en changer à tout moment dans les Réglages. L'ajout rapide comprend les dates écrites en anglais ou en chinois, et les mots de priorité dans les 10 langues.
+
+Une traduction vous semble maladroite ? L'anglais fait foi : corrigez le texte dans `src/i18n/` ou dans `README.<locale>.md` et ouvrez une pull request.
+
+## 🗺️ Feuille de route
 
 Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en ligne sur [tickdone.pages.dev](https://tickdone.pages.dev).
 
@@ -62,7 +133,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [ ] Glisser-déposer partout ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Animations ([#3](https://github.com/suica/tickdone/issues/3))
 - [x] Lien GitHub et section « À propos » dans l'app ([#4](https://github.com/suica/tickdone/issues/4))
-- [ ] Interface en 10 langues ([#14](https://github.com/suica/tickdone/issues/14))
+- [x] Interface en 10 langues ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Finitions de l'interface, écran par écran ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Sélection multiple et modification groupée ([#15](https://github.com/suica/tickdone/issues/15))
 - [ ] Navigation au clavier dans les listes de tâches ([#16](https://github.com/suica/tickdone/issues/16))
@@ -79,9 +150,19 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [ ] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
 - [ ] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))
 
-## Développement
+## 🧰 Technologies
 
-Nécessite Node.js 24.
+| Partie | Réalisée avec |
+|---|---|
+| ⚛️ Interface | React 19 et TypeScript |
+| 📆 Dates | date-fns, la seule dépendance d'exécution en dehors de React |
+| ⚡ Build | Vite |
+| 💾 Stockage | `localStorage` dans le navigateur, sans backend |
+| 🧪 Tests | Vitest (unitaires) et Playwright (de bout en bout) |
+| 🧹 Lint | oxlint |
+| ☁️ Hébergement | Cloudflare Pages |
+
+## 🛠️ Développement
 
 ```sh
 npm install
@@ -93,9 +174,10 @@ npm run e2e        # end-to-end tests (Playwright)
 npm run build      # type check and production build into dist/
 ```
 
-Développé avec React 19, TypeScript, Vite et date-fns.
+- 🖼️ La bannière et les captures des README sont générées à partir d'un build de production : `npm run build`, puis `node scripts/promo/render.mjs` (les options sont décrites en tête du [script](scripts/promo/render.mjs)).
+- 🗺️ `node scripts/roadmap.mjs done <issue>` coche un élément de la feuille de route dans tous les README.
 
-## Déploiement
+## 🚢 Déploiement
 
 Le site en ligne est hébergé sur Cloudflare Pages :
 
@@ -104,10 +186,17 @@ npm run build
 npx wrangler pages deploy dist --project-name tickdone --branch main
 ```
 
-## Contribuer
+## 🤝 Contribuer
 
-Les issues et les pull requests sont les bienvenues. Lisez d'abord [AGENTS.md](AGENTS.md) : vous y trouverez les règles du projet (l'anglais comme langue de travail, des traductions pour chaque langue prise en charge, des mises en page adaptatives, les conventions d'animation et de glisser-déposer, et la CI que chaque PR doit passer).
+Les issues et les pull requests sont les bienvenues ! Avant de commencer, lisez [AGENTS.md](AGENTS.md) : il réunit les règles du projet, pour les personnes comme pour les agents de programmation.
 
-## Licence
+- 💬 chaque changement part d'une issue et arrive par une pull request qui la mentionne ;
+- 🌐 l'anglais est la langue de travail, et chaque texte visible par l'utilisateur est traduit dans les 10 langues ;
+- 📐 les écrans fonctionnent à toutes les largeurs, d'un téléphone de 360 px à un écran de 2560 px, avec des conventions communes pour les animations et le glisser-déposer ;
+- ✅ la CI (lint, vérification des types et build, tests unitaires et de bout en bout) doit être au vert avant toute fusion.
 
-[MIT](LICENSE)
+Si TickDone vous aide à avancer, une ⭐ sur GitHub aide d'autres personnes à le découvrir.
+
+## 📄 Licence
+
+[MIT](LICENSE) © 2026 suica

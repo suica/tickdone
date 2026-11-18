@@ -1,11 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { getData, getUI, setUI, toast, updateTask } from '../store'
-import { fmt, todayStr, weekdayName } from '../dates'
+import { fmt, todayStr } from '../dates'
+import { useT } from '../i18n'
+import { fmtWeekday } from '../i18n/format'
 import type { Task } from '../types'
 import { beginDrag } from './calDnd'
 import { flyFrom } from './calMotion'
 import { CalTask } from './calParts'
-import { clamp, DAY_MIN, DEFAULT_DUR, dayLabel, durOf, fmtDur, snapCeil, snapFloor, snapRound, SNAP, toHM, toMin, useColorOf, type AddState } from './calUtil'
+import { clamp, DAY_MIN, DEFAULT_DUR, dayLabel, durOf, fmtDur, snapCeil, snapFloor, snapRound, SNAP, timeLabel, timeRange, toHM, toMin, useColorOf, type AddState } from './calUtil'
 
 interface Placed {
   t: Task
@@ -54,6 +56,9 @@ type Drag =
   | { kind: 'resize'; id: string; day: string; s: number; e: number }
   | { kind: 'create'; day: string; s: number; e: number }
 
+/** Blocks shorter than this (px) show only the title; the time range needs a second line. */
+const TWO_LINES = 34
+
 interface Props {
   days: Date[]
   byDay: Map<string, Task[]>
@@ -66,11 +71,10 @@ interface Props {
   onAdd: (s: AddState) => void
 }
 
-const range = (s: number, e: number) => `${toHM(s)} - ${toHM(Math.min(e, DAY_MIN))}`
-
 /** Week, three-day and day views: an all-day row above a 24-hour grid. */
 export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Props) {
   const colorOf = useColorOf()
+  const t = useT()
   const today = todayStr()
   const rootRef = useRef<HTMLDivElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -120,16 +124,16 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
   }
 
   // ---- move a task: within the grid (snapped to 15 minutes), between days, to and from the all-day row ----
-  const startMove = (e: ReactPointerEvent<HTMLElement>, t: Task, fromAllDay: boolean) => {
-    const src = e.currentTarget
-    const len = durOf(t)
+  const startMove = (e: ReactPointerEvent<HTMLElement>, task: Task, fromAllDay: boolean, source?: HTMLElement) => {
+    const src = source ?? e.currentTarget
+    const len = durOf(task)
     const col = colAt(src)
-    const grab = !fromAllDay && t.dueTime && col ? minuteAt(e.clientY, col) - toMin(t.dueTime) : Math.min(SNAP, len / 2)
-    const base = { kind: 'move' as const, id: t.id, len }
+    const grab = !fromAllDay && task.dueTime && col ? minuteAt(e.clientY, col) - toMin(task.dueTime) : Math.min(SNAP, len / 2)
+    const base = { kind: 'move' as const, id: task.id, len }
     beginDrag(e.nativeEvent, {
       source: src,
       ghost: false,
-      onStart: () => setDrag({ ...base, day: t.dueDate ?? null, allDay: fromAllDay, s: t.dueTime ? toMin(t.dueTime) : 0 }),
+      onStart: () => setDrag({ ...base, day: task.dueDate ?? null, allDay: fromAllDay, s: task.dueTime ? toMin(task.dueTime) : 0 }),
       onMove: (c) => {
         const colEl = colAt(c.hit)
         if (colEl) {
@@ -141,23 +145,23 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
       },
       onDrop: () => {
         const d = dragRef.current
-        const cur = taskOf(t.id)
+        const cur = taskOf(task.id)
         if (!d || d.kind !== 'move' || !d.day || !cur) return false
         let patch: Partial<Task>
         let text: string
         if (d.allDay) {
           if (!cur.dueTime && cur.dueDate === d.day) return false
           patch = cur.dueTime ? { dueDate: d.day, dueTime: undefined, reminder: undefined, duration: undefined } : { dueDate: d.day }
-          text = cur.dueTime ? `已改为 ${dayLabel(d.day)} 全天` : `已移到 ${dayLabel(d.day)}`
+          text = cur.dueTime ? t('calendar.toast.movedToAllDay', { date: dayLabel(d.day) }) : t('calendar.toast.movedToDay', { date: dayLabel(d.day) })
         } else {
           const hm = toHM(d.s)
           if (cur.dueTime === hm && cur.dueDate === d.day) return false
           patch = { dueDate: d.day, dueTime: hm }
-          text = `已改为 ${dayLabel(d.day)} ${hm}`
+          text = t('calendar.toast.movedToTime', { date: dayLabel(d.day), time: timeLabel(d.s) })
         }
         const snap = getData()
-        settle.current = { id: t.id, from: rootRef.current?.querySelector('.cal-preview')?.getBoundingClientRect() }
-        updateTask(t.id, patch)
+        settle.current = { id: task.id, from: rootRef.current?.querySelector('.cal-preview')?.getBoundingClientRect() }
+        updateTask(task.id, patch)
         toast(text, snap)
         return true
       },
@@ -166,30 +170,32 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
   }
 
   // ---- drag the bottom edge of a block: change its length ----
-  const startResize = (e: ReactPointerEvent<HTMLElement>, t: Task) => {
+  const startResize = (e: ReactPointerEvent<HTMLElement>, task: Task) => {
     e.stopPropagation()
-    if (!t.dueDate || !t.dueTime) return
-    const day = t.dueDate
-    const s = toMin(t.dueTime)
+    if (!task.dueDate || !task.dueTime) return
+    const day = task.dueDate
+    const s = toMin(task.dueTime)
     const block = e.currentTarget.closest<HTMLElement>('.cal-task') ?? e.currentTarget
+    // Touch hit-testing can hand the edge to a finger that landed higher up on a short block: that is a move.
+    if (e.pointerType === 'touch' && e.clientY < block.getBoundingClientRect().bottom - e.currentTarget.offsetHeight) return startMove(e, task, false, block)
     beginDrag(e.nativeEvent, {
       source: block,
       ghost: false,
-      onStart: () => setDrag({ kind: 'resize', id: t.id, day, s, e: Math.min(s + durOf(t), DAY_MIN) }),
+      onStart: () => setDrag({ kind: 'resize', id: task.id, day, s, e: Math.min(s + durOf(task), DAY_MIN) }),
       onMove: (c) => {
         const colEl = rootRef.current?.querySelector<HTMLElement>(`.cal-col[data-day="${day}"]`)
         if (!colEl) return
-        setDrag({ kind: 'resize', id: t.id, day, s, e: clamp(snapRound(minuteAt(c.y, colEl)), s + SNAP, DAY_MIN) })
+        setDrag({ kind: 'resize', id: task.id, day, s, e: clamp(snapRound(minuteAt(c.y, colEl)), s + SNAP, DAY_MIN) })
       },
       onDrop: () => {
         const d = dragRef.current
-        const cur = taskOf(t.id)
+        const cur = taskOf(task.id)
         if (!d || d.kind !== 'resize' || !cur) return false
         const len = d.e - d.s
         if (len === Math.min(durOf(cur), DAY_MIN - s)) return false
         const snap = getData()
-        updateTask(t.id, { duration: len })
-        toast(`时长已改为 ${fmtDur(len)}`, snap)
+        updateTask(task.id, { duration: len })
+        toast(t('calendar.toast.duration', { duration: fmtDur(len) }), snap)
         return true
       },
       onEnd: () => setDrag(null),
@@ -243,14 +249,14 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
           const ds = fmt(d)
           return (
             <div key={ds} className={'cal-time-day' + (ds === today ? ' today' : '')}>
-              <span className="wd">{weekdayName(d)}</span>
+              <span className="wd">{fmtWeekday(d)}</span>
               <span className="num">{d.getDate()}</span>
             </div>
           )
         })}
       </div>
       <div className="cal-allday" style={{ gridTemplateColumns: cols }}>
-        <div className="cal-allday-label">全天</div>
+        <div className="cal-allday-label">{t('calendar.allDay')}</div>
         {days.map((d) => {
           const ds = fmt(d)
           const list = (byDay.get(ds) ?? []).filter((t) => !t.dueTime)
@@ -279,7 +285,7 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
           <div className="cal-hours">
             {Array.from({ length: 24 }, (_, h) => (
               <div key={h} className="cal-hour-label" style={{ top: h * hourH }}>
-                {h === 0 ? '' : `${String(h).padStart(2, '0')}:00`}
+                {h === 0 ? '' : timeLabel(h * 60)}
               </div>
             ))}
           </div>
@@ -301,14 +307,15 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
                   const t = p.t
                   const resizing = drag?.kind === 'resize' && drag.id === t.id ? drag : null
                   const end = resizing ? resizing.e : p.e
+                  const height = Math.max(20, px(end - p.s)) - 2
                   return (
                     <div
                       key={t.id}
-                      className={'cal-block-wrap' + (moving?.id === t.id ? ' cal-src' : '') + (resizing ? ' resizing' : '') + (fresh === t.id ? ' cal-fresh' : '')}
+                      className={'cal-block-wrap' + (height < TWO_LINES ? ' short' : '') + (moving?.id === t.id ? ' cal-src' : '') + (resizing ? ' resizing' : '') + (fresh === t.id ? ' cal-fresh' : '')}
                       data-block-id={t.id}
                       style={{
                         top: px(p.s),
-                        height: Math.max(20, px(end - p.s)) - 2,
+                        height,
                         left: `calc(${(p.col / p.cols) * 100}% + 1px)`,
                         width: `calc(${100 / p.cols}% - 3px)`,
                       }}
@@ -317,7 +324,7 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
                         task={t}
                         color={colorOf(t)}
                         block
-                        range={resizing ? range(p.s, end) : undefined}
+                        range={resizing ? timeRange(p.s, end) : undefined}
                         onPointerDown={(e) => startMove(e, t, false)}
                         onResizeDown={(e) => startResize(e, t)}
                       />
@@ -325,15 +332,18 @@ export function TimeGrid({ days, byDay, hourH, labelW, add, fresh, onAdd }: Prop
                   )
                 })}
                 {moving && !moving.allDay && moving.day === ds && movingTask && (
-                  <div className="cal-block-wrap cal-preview" style={{ top: px(moving.s), height: Math.max(20, px(Math.min(moving.len, DAY_MIN - moving.s))) - 2, left: 1, width: 'calc(100% - 3px)' }}>
-                    <CalTask task={movingTask} color={colorOf(movingTask)} block className="lifted" range={range(moving.s, moving.s + moving.len)} />
+                  <div
+                    className={'cal-block-wrap cal-preview' + (px(Math.min(moving.len, DAY_MIN - moving.s)) - 2 < TWO_LINES ? ' short' : '')}
+                    style={{ top: px(moving.s), height: Math.max(20, px(Math.min(moving.len, DAY_MIN - moving.s))) - 2, left: 1, width: 'calc(100% - 3px)' }}
+                  >
+                    <CalTask task={movingTask} color={colorOf(movingTask)} block className="lifted" range={timeRange(moving.s, Math.min(moving.s + moving.len, DAY_MIN))} />
                   </div>
                 )}
                 {draft && draft.day === ds && (
                   <div className="cal-block-wrap cal-draft" style={{ top: px(draft.s), height: Math.max(20, px(draft.e - draft.s)) - 2, left: 1, width: 'calc(100% - 3px)' }}>
                     <div className="cal-draft-box">
-                      <span className="cal-draft-title">无标题</span>
-                      <span className="cal-draft-range">{range(draft.s, draft.e)}</span>
+                      <span className="cal-draft-title">{t('common.untitled')}</span>
+                      <span className="cal-draft-range">{timeRange(draft.s, draft.e)}</span>
                     </div>
                   </div>
                 )}

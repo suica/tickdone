@@ -56,6 +56,18 @@ test.describe('mouse', () => {
   })
 })
 
+test('quadrant names, menu and toast follow the chosen language', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('tickdone-locale', 'ru'))
+  await open(page, 'matrix')
+  await expect(page.locator('.matrix-name')).toHaveText(['Срочно и важно', 'Важно, не срочно', 'Срочно, не важно', 'Не срочно и не важно'])
+  const from = await grabPoint(page, '.matrix-item[data-id="mail"]')
+  const to = await center(page, '.matrix-quad[data-p="3"] .matrix-body')
+  await mouseDrag(page, from, to)
+  await expect(page.locator('.toast')).toContainText('Перенесено в «Важно, не срочно»')
+  await page.locator('.matrix-quad[data-p="3"] .matrix-more').click()
+  await expect(page.locator('.menu')).toContainText('Сортировка')
+})
+
 test.describe('touch on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 

@@ -100,6 +100,20 @@ test.describe('mouse', () => {
   })
 })
 
+test('calendar and matrix follow the chosen language', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('tickdone-locale', 'de'))
+  await open(page, 'calendar', 'month')
+  await expect(page.locator('.cal-title')).toHaveText('November 2026')
+  await expect(page.locator('.cal-seg button')).toHaveText(['Monat', 'Woche', 'Tag', 'Liste'])
+  await expect(page.locator('.cal-weekhead > div').first()).toHaveText('Mo')
+  const bar = await boxOf(page, '.cal-cell [data-task-id="fees"]')
+  const cell = await boxOf(page, `.cal-cell[data-day="${day(-12)}"]`)
+  await mouseDrag(page, { x: bar.x + bar.width / 2, y: bar.y + bar.height / 2 }, { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 })
+  await expect(page.locator('.toast')).toContainText('Auf 6. Nov. verschoben')
+  await page.locator('.cal-seg button', { hasText: 'Woche' }).click()
+  await expect(page.locator('.cal-allday-label')).toHaveText('Ganztägig')
+})
+
 test.describe('touch on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
@@ -152,6 +166,18 @@ test.describe('touch on a phone', () => {
     const to = await timeAt(page, day(2), 12 * 60 + 15, 52)
     await touchDrag(page, { x: chip.x + chip.width / 2, y: chip.y + chip.height / 2 }, to)
     await expect.poll(() => field(page, 'groceries', 'dueTime')).toBe('12:00')
+  })
+
+  test('three-day view: dragging a timed task to the all-day row clears its time', async ({ page }) => {
+    await open(page, 'calendar', 'week')
+    // a long press on the upper part of a short block moves it, even though the finger also covers its bottom edge
+    const b = await boxOf(page, '[data-block-id="walk"]')
+    const cell = await boxOf(page, `.cal-allday-cell[data-day="${day(1)}"]`)
+    await touchDrag(page, { x: b.x + b.width / 2, y: b.y + 6 }, { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 })
+    await expect.poll(() => field(page, 'walk', 'dueDate')).toBe(day(1))
+    expect(await field(page, 'walk', 'dueTime')).toBeUndefined()
+    expect(await field(page, 'walk', 'duration')).toBeUndefined()
+    await expect(page.locator(`.cal-allday-cell[data-day="${day(1)}"] [data-task-id="walk"]`)).toBeVisible()
   })
 
   test('a quick swipe pages to the next month', async ({ page }) => {

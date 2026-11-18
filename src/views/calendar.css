@@ -766,6 +766,8 @@ html.cal-dragging * {
 }
 .cal-dl-count {
   font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--text-3);
 }
 .cal-dl-add {

@@ -50,6 +50,7 @@ export default {
   'tasks.row.showSubtasks': 'Teilaufgaben einblenden',
   'tasks.row.hideSubtasks': 'Teilaufgaben ausblenden',
   'tasks.row.subtasks': 'Teilaufgaben',
+  'tasks.row.priority': 'Priorität: {level}',
   'tasks.quickAdd.placeholder': '+ Aufgabe zu „{list}“ hinzufügen, Eingabe zum Speichern',
   'tasks.quickAdd.placeholderShort': 'Aufgabe zu „{list}“ hinzufügen',
   'tasks.quickAdd.kanbanPlaceholder': '+ Aufgabe hinzufügen',

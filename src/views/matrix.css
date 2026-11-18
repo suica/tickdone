@@ -78,8 +78,9 @@
   height: 18px;
   padding: 0 4px;
   border-radius: 4px;
-  background: var(--q);
-  color: #fff;
+  /* A tinted badge with the quadrant colour pulled toward the text colour, readable in both themes */
+  background: color-mix(in srgb, var(--q) 16%, transparent);
+  color: color-mix(in srgb, var(--q) 72%, var(--text));
   font-size: 11px;
   font-weight: 700;
   display: inline-flex;
@@ -90,7 +91,7 @@
 .matrix-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--q);
+  color: color-mix(in srgb, var(--q) 72%, var(--text));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,6 +106,8 @@
 .matrix-count {
   margin-left: auto;
   font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--text-3);
 }
 .matrix-more {

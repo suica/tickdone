@@ -50,6 +50,7 @@ export default {
   'tasks.row.showSubtasks': 'Afficher les sous-tâches',
   'tasks.row.hideSubtasks': 'Masquer les sous-tâches',
   'tasks.row.subtasks': 'Sous-tâches',
+  'tasks.row.priority': 'Priorité : {level}',
   'tasks.quickAdd.placeholder': '+ Ajouter une tâche à « {list} », Entrée pour enregistrer',
   'tasks.quickAdd.placeholderShort': 'Ajouter une tâche à « {list} »',
   'tasks.quickAdd.kanbanPlaceholder': '+ Ajouter une tâche',

@@ -50,6 +50,7 @@ export default {
   'tasks.row.showSubtasks': 'Показать подзадачи',
   'tasks.row.hideSubtasks': 'Скрыть подзадачи',
   'tasks.row.subtasks': 'Подзадачи',
+  'tasks.row.priority': 'Приоритет: {level}',
   'tasks.quickAdd.placeholder': '+ Добавить задачу в «{list}», Enter — сохранить',
   'tasks.quickAdd.placeholderShort': 'Добавить задачу в «{list}»',
   'tasks.quickAdd.kanbanPlaceholder': '+ Добавить задачу',

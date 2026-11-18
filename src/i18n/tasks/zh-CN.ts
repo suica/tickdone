@@ -50,6 +50,7 @@ export default {
   'tasks.row.showSubtasks': '展开子任务',
   'tasks.row.hideSubtasks': '收起子任务',
   'tasks.row.subtasks': '子任务',
+  'tasks.row.priority': '优先级：{level}',
   'tasks.quickAdd.placeholder': '+ 添加任务至“{list}”，回车即可保存',
   'tasks.quickAdd.placeholderShort': '添加任务至“{list}”',
   'tasks.quickAdd.kanbanPlaceholder': '+ 添加任务',

@@ -131,9 +131,13 @@
   background: var(--bg-hover);
 }
 .side-hint {
-  color: var(--text-4);
+  margin: 2px 10px 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--bg-hint);
+  color: var(--text-3);
   font-size: 12px;
-  padding: 4px 12px 8px 40px;
+  line-height: 1.55;
 }
 /* folding sidebar sections and folders */
 .side-fold {
@@ -366,7 +370,8 @@
   cursor: default;
 }
 .group-head .overdue {
-  color: var(--overdue);
+  /* Headings stay neutral: the red due dates in the rows already mark what is late */
+  color: var(--text);
 }
 /* the pinned group: a pin in the heading, so its rows don't repeat it */
 .group-head .group-pin {
@@ -604,8 +609,9 @@ span.task-title.empty {
   padding: 0 8px;
   height: 20px;
   border-radius: 10px;
-  background: var(--primary-soft);
-  color: var(--primary);
+  /* Tags without a colour of their own are neutral, so the accent blue keeps meaning "date" and "link" */
+  background: var(--bg-hint);
+  color: var(--text-2);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -1152,16 +1158,16 @@ body.dnd-active * {
   .task-main {
     border-bottom: none;
   }
-  /* the list colour as a bar on the card's left edge */
+  /* the list colour as a thin bar on the card's left edge; kept soft, since the list dot in the row repeats it */
   .task-row[style*='--list-c']::after {
     content: '';
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
+    width: 2px;
     background: var(--list-c);
-    opacity: 0.85;
+    opacity: 0.55;
   }
   .task-row.selected {
     background: var(--bg-selected);

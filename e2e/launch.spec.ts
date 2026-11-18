@@ -15,7 +15,7 @@ test('the launch screen follows the saved dark theme before the app script runs'
   await page.route(/\/(assets|src)\/.*\.(js|tsx?)$/, (r) => r.abort())
   await page.reload()
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark')
-  expect(await page.locator('#launch').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(30, 30, 30)')
+  expect(await page.locator('#launch').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(28, 28, 28)')
 })
 
 test('the launch screen is skipped quickly with reduced motion', async ({ page }) => {

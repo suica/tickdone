@@ -34,7 +34,7 @@ const RAIL: { id: Module; icon: string; title: MessageKey }[] = [
 /** Phone bottom bar: every module except search (search lives at the top of the drawer). */
 const TABS = RAIL.filter((r) => r.id !== 'search')
 
-const THEME_COLOR = { light: '#ffffff', dark: '#1e1e1e' }
+const THEME_COLOR = { light: '#ffffff', dark: '#1c1c1c' }
 
 /** Opens the task named in the address bar (#task=<id>), if any, then removes it from the address. */
 function openTaskFromHash() {

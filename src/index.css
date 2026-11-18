@@ -2,10 +2,12 @@
   --primary: #4772fa;
   --primary-soft: rgba(71, 114, 250, 0.1);
   --primary-soft2: rgba(71, 114, 250, 0.18);
+  /* Priority colours mark the checkbox border only. Low is a teal kept apart from the accent blue that dates
+     and links use; "none" is a mid grey so an open checkbox doesn't read as disabled. */
   --p-high: #d52b24;
-  --p-med: #faa80c;
-  --p-low: #4772fa;
-  --p-none: #b6b6b6;
+  --p-med: #f29a0e;
+  --p-low: #1e9eb0;
+  --p-none: #9a9a9a;
   --danger: #e03131;
   --overdue: #e03131;
 
@@ -22,8 +24,10 @@
   --border-strong: #dcdcdc;
   --text: #191919;
   --text-2: #666;
-  --text-3: #999;
+  --text-3: #888;
   --text-4: #bbb;
+  /* Explanatory text in empty sidebar sections sits in a soft rounded box */
+  --bg-hint: rgba(0, 0, 0, 0.035);
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
   --radius: 6px;
   /* Phone surfaces: the grey page behind grouped cards, round header buttons, the dim behind sheets */
@@ -64,29 +68,37 @@
 }
 
 :root[data-theme='dark'] {
-  --primary: #5b82fb;
-  --primary-soft: rgba(91, 130, 251, 0.16);
-  --primary-soft2: rgba(91, 130, 251, 0.26);
-  --bg: #1e1e1e;
+  --primary: #6388fb;
+  --primary-soft: rgba(99, 136, 251, 0.16);
+  --primary-soft2: rgba(99, 136, 251, 0.26);
+  /* Reds a step lighter than in light mode so text in them stays readable on near-black */
+  --danger: #f25555;
+  --overdue: #f25555;
+  --p-high: #ec4b44;
+  /* Neutral near-black surfaces, one small step apart: rail, sidebar, content */
+  --bg: #1c1c1c;
   --bg-rail: #151515;
-  --bg-side: #1a1a1a;
-  --bg-hover: rgba(255, 255, 255, 0.05);
-  --bg-active: #2c2c2c;
-  --bg-selected: #2b2b2b;
-  --bg-input: #2a2a2a;
-  --bg-pop: #2a2a2a;
-  --border: #2e2e2e;
-  --border-strong: #3a3a3a;
-  --text: #e8e8e8;
-  --text-2: #aaa;
-  --text-3: #777;
-  --text-4: #555;
-  --p-none: #666;
+  --bg-side: #191919;
+  --bg-hover: rgba(255, 255, 255, 0.045);
+  --bg-active: #2a2a2a;
+  --bg-selected: #262626;
+  --bg-input: #232323;
+  --bg-pop: #262626;
+  --bg-hint: rgba(255, 255, 255, 0.04);
+  --border: #282828;
+  --border-strong: #363636;
+  --text: #ececec;
+  --text-2: #a8a8a8;
+  --text-3: #858585;
+  --text-4: #6a6a6a;
+  --p-med: #f0a020;
+  --p-low: #3bb3c4;
+  --p-none: #767676;
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
-  --bg-grouped: #111112;
-  --bg-card: #1e1e1e;
-  --bg-round: #2a2a2a;
-  --bg-bar: rgba(40, 40, 40, 0.82);
+  --bg-grouped: #111111;
+  --bg-card: #1c1c1c;
+  --bg-round: #262626;
+  --bg-bar: rgba(38, 38, 38, 0.82);
   --scrim: rgba(0, 0, 0, 0.55);
   --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.35);
   color-scheme: dark;
@@ -425,7 +437,7 @@ select {
   height: 16px;
   border-radius: 3px;
   border: 1.5px solid var(--cb, var(--p-none));
-  background: var(--cb-bg, transparent);
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;

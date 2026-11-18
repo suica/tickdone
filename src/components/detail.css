@@ -456,7 +456,7 @@ body.col-resizing * {
 }
 .detail-meta {
   font-size: 11px;
-  color: var(--text-4);
+  color: var(--text-3);
   padding: 0 20px 10px;
 }
 .prio-row {
@@ -646,4 +646,15 @@ body.col-resizing * {
     position: absolute;
     inset: -10px;
   }
+}
+
+/* Empty detail: a quiet, neutral mark rather than an accent-coloured badge */
+.detail > .empty svg circle {
+  fill: var(--bg-hint);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+.detail > .empty svg path {
+  stroke: var(--text-4);
+  stroke-width: 4;
 }

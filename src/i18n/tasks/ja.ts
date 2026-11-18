@@ -50,6 +50,7 @@ export default {
   'tasks.row.showSubtasks': 'サブタスクを表示',
   'tasks.row.hideSubtasks': 'サブタスクを隠す',
   'tasks.row.subtasks': 'サブタスク',
+  'tasks.row.priority': '優先度：{level}',
   'tasks.quickAdd.placeholder': '+ 「{list}」にタスクを追加（Enter で保存）',
   'tasks.quickAdd.placeholderShort': '「{list}」にタスクを追加',
   'tasks.quickAdd.kanbanPlaceholder': '+ タスクを追加',

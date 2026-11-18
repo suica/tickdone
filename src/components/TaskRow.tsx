@@ -14,6 +14,8 @@ import { toggleWithMotion, useLinger } from './taskMotion'
 import { moveTaskTo, TaskDragContext } from './taskDnd'
 import { clickRow } from './batchActions'
 
+const PRIORITY_LEVEL: Record<Task['priority'], MessageKey> = { 0: 'common.priority.none', 1: 'common.priority.low', 3: 'common.priority.medium', 5: 'common.priority.high' }
+
 /** Check mark drawn with pathLength 1 so it can be stroked in. */
 function Tick() {
   return (
@@ -28,6 +30,7 @@ function Tick() {
  * un-completing plays it backwards.
  */
 export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void }) {
+  const t = useT()
   const phase = useLinger().get(task.id)?.phase
   const color = priorityColor(task.priority)
   const cls = phase === 'check' ? ' cb-checking' : phase === 'uncheck' ? ' cb-unchecking' : task.status === 2 ? ' checked' : task.status === -1 ? ' wontdo' : ''
@@ -35,8 +38,10 @@ export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void
   return (
     <span
       className={'checkbox cb' + cls}
-      style={tinted ? ({ '--cb': color, '--cb-bg': task.priority && !phase ? `color-mix(in srgb, ${color} 8%, transparent)` : undefined } as CSSProperties) : undefined}
+      style={tinted ? ({ '--cb': color } as CSSProperties) : undefined}
       role="checkbox"
+      title={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
+      aria-label={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
       aria-checked={phase ? phase === 'check' : task.status === 2}
       data-no-drag
       onClick={(e) => {

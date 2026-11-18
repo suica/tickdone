@@ -50,6 +50,7 @@ export default {
   'tasks.row.showSubtasks': '하위 할 일 펼치기',
   'tasks.row.hideSubtasks': '하위 할 일 접기',
   'tasks.row.subtasks': '하위 할 일',
+  'tasks.row.priority': '우선순위: {level}',
   'tasks.quickAdd.placeholder': '+ ‘{list}’에 할 일 추가, Enter로 저장',
   'tasks.quickAdd.placeholderShort': '‘{list}’에 할 일 추가',
   'tasks.quickAdd.kanbanPlaceholder': '+ 할 일 추가',

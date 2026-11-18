@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | Suche |
 | `Alt 1`–`Alt 6` | Modul wechseln |
 | `Ctrl/⌘ Z` | Rückgängig, solange die Rückgängig-Meldung angezeigt wird |
-| `Esc` | Aufgabendetails schließen |
+| `Esc` | Auswahl aufheben oder Aufgabendetails schließen |
+| `↑` `↓` / `J` `K` | Vorherige / nächste Aufgabe der Liste |
+| `Shift ↑` `Shift ↓` | Auswahl erweitern |
+| `Ctrl/⌘ Click` | Aufgabe zur Auswahl hinzufügen oder entfernen |
+| `Shift Click` | Bereich von Aufgaben auswählen |
+| `Ctrl/⌘ A` | Alle Aufgaben der Liste auswählen |
+| `Enter` | Titel bearbeiten |
+| `Space` / `Ctrl/⌘ Enter` | Erledigen oder wieder öffnen |
+| `1` `2` `3` `4` | Priorität: hoch, mittel, niedrig, keine |
+| `T` / `M` / `W` | Datum: heute, morgen, nächste Woche |
+| `D` / `Shift D` | Datum wählen / Datum entfernen |
+| `Delete` / `Backspace` | In den Papierkorb (rückgängig über die Meldung) |
 | `?` | Alle Tastenkürzel anzeigen |
 
 ## 🌍 Sprachen
@@ -136,8 +147,8 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [x] GitHub-Link und Info-Bereich in der App ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] Oberfläche in 10 Sprachen ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] UI-Feinschliff, Bildschirm für Bildschirm ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] Mehrfachauswahl und Stapelbearbeitung ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] Tastaturnavigation in Aufgabenlisten ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] Mehrfachauswahl und Stapelbearbeitung ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] Tastaturnavigation in Aufgabenlisten ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] Benachrichtigungen für Erinnerungen ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] Als App installieren und offline nutzen ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Gespeicherte Filter ([#19](https://github.com/suica/tickdone/issues/19))

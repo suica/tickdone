@@ -3,7 +3,11 @@ import { flushSync } from 'react-dom'
 import { addDays } from 'date-fns'
 import { fmt, todayStr } from '../dates'
 import { t, type MessageKey } from '../i18n'
-import { getData, reorderTask, setData, setUI, toast, updateList } from '../store'
+import { patchMany, reorderMany } from '../batch'
+import { getData, getUI, reorderTask, setData, setSelection, setUI, toast, updateList } from '../store'
+import { inOrder } from '../selection'
+import { isPhone } from '../viewport'
+import { startSelecting, visibleOrder } from './batchActions'
 import type { AppData, GroupBy, SortBy, Task } from '../types'
 import { hideLine, highlight, hitAt, pressToDrag, showLine, type DragState } from './dnd'
 import { flip, measure, quietExits } from './taskMotion'
@@ -62,6 +66,8 @@ function patchTasks(id: string, patch: Partial<Task>, d: AppData): AppData {
 export interface SideDrop {
   patch: Partial<Task>
   text: string
+  /** the sidebar entry, for drops of several tasks (each gets its own patch) */
+  view?: string
 }
 
 /** What dropping `task` on a sidebar entry does, or null when it would change nothing. */
@@ -90,16 +96,28 @@ export function sideDrop(view: string, task: Task, d: AppData = getData()): Side
 }
 
 /** Hit-test the sidebar: an entry that accepts the task (highlighted), an entry that does not, or nothing. */
-function sideTarget(el: HTMLElement | null, task: Task): { el: HTMLElement; drop: SideDrop | null } | null {
+function sideTarget(el: HTMLElement | null, task: Task, group?: string[]): { el: HTMLElement; drop: SideDrop | null } | null {
   const item = el?.closest<HTMLElement>('[data-dnd-view]')
   if (!item) return null
-  return { el: item, drop: sideDrop(item.dataset.dndView!, task) }
+  const view = item.dataset.dndView!
+  if (!group) return { el: item, drop: sideDrop(view, task) }
+  // a selection: the entry accepts it when it changes at least one of the tasks
+  const d = getData()
+  const drop = sideDrop(view, task) ?? group.map((id) => d.tasks.find((x) => x.id === id)).map((x) => x && sideDrop(view, x)).find(Boolean) ?? null
+  return { el: item, drop: drop && { ...drop, view } }
 }
 
-function dropOnSide(id: string, drop: SideDrop) {
+function dropOnSide(id: string, drop: SideDrop, group?: string[]) {
   const snap = getData()
-  setData((d) => patchTasks(id, drop.patch, d))
-  if (getUIId() === id && (drop.patch.deleted || 'listId' in drop.patch)) setUI({ selectedTaskId: undefined })
+  if (group && drop.view) {
+    const view = drop.view
+    setData((d) => patchMany(d, group, (x) => sideDrop(view, x, d)?.patch ?? null))
+    // the tasks may have left this view: the selection ends
+    setSelection({ ids: [], cursor: undefined, anchor: undefined, mode: false })
+  } else {
+    setData((d) => patchTasks(id, drop.patch, d))
+    if (getUI().selectedTaskId === id && (drop.patch.deleted || 'listId' in drop.patch)) setUI({ selectedTaskId: undefined })
+  }
   toast(drop.text, snap)
 }
 /** Moves a task as if it had been dropped on the sidebar entry for `view` (toast with undo). */
@@ -107,7 +125,21 @@ export function moveTaskTo(task: Task, view: string) {
   const drop = sideDrop(view, task)
   if (drop) dropOnSide(task.id, drop)
 }
-const getUIId = () => document.querySelector('.task-row.selected')?.getAttribute('data-task-id')
+
+/** The selected tasks when `task` is one of several selected ones: a drag of it moves them all. */
+function dragGroup(task: Task): string[] | undefined {
+  const u = getUI()
+  if (u.selectedIds.length < 2 || !u.selectedIds.includes(task.id)) return undefined
+  return inOrder(visibleOrder(), u.selectedIds)
+}
+
+/** "×3" on the lifted copy of a multi-row drag. */
+function countBadge(ghost: HTMLElement, n: number) {
+  const b = document.createElement('span')
+  b.className = 'dnd-count'
+  b.textContent = String(n)
+  ghost.querySelector('.dnd-lift')?.appendChild(b)
+}
 
 // ---------------- list rows ----------------
 export interface ListGroupInfo {
@@ -129,10 +161,10 @@ interface RowInfo {
   rect: DOMRect
 }
 
-function visibleRows(body: HTMLElement, exclude: HTMLElement): RowInfo[] {
+function visibleRows(body: HTMLElement, exclude: HTMLElement[]): RowInfo[] {
   const out: RowInfo[] = []
   body.querySelectorAll<HTMLElement>('[data-dnd-row]').forEach((el) => {
-    if (exclude.contains(el) || el.closest('[data-collapsed],[inert],[data-done]')) return
+    if (exclude.some((x) => x.contains(el)) || el.closest('[data-collapsed],[inert],[data-done]')) return
     out.push({ el, id: el.dataset.dndRow!, depth: Number(el.dataset.depth ?? 0), group: el.closest<HTMLElement>('[data-group]')?.dataset.group ?? '', rect: el.getBoundingClientRect() })
   })
   return out
@@ -150,6 +182,15 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
     if (!node || !body) return null
     const origGroup = row.closest<HTMLElement>('[data-group]')?.dataset.group ?? ''
     const origDepth = Number(row.dataset.depth ?? 0)
+    // dragging one of several selected tasks moves them all (they stay where they are while the copy moves)
+    const selGroup = dragGroup(task)
+    const others = selGroup
+      ? selGroup
+          .filter((id) => id !== task.id)
+          .map((id) => body.querySelector<HTMLElement>(`[data-dnd-row="${CSS.escape(id)}"]`)?.closest<HTMLElement>('.task-node'))
+          .filter((x): x is HTMLElement => !!x && !x.contains(node) && !node.contains(x))
+      : []
+    const moved = [node, ...others]
     // neighbours before the drag, to recognise a drop that changes nothing
     const all = [...body.querySelectorAll<HTMLElement>('[data-dnd-row]')].filter((el) => !el.closest('[data-collapsed],[inert],[data-done]'))
     const at = all.indexOf(row)
@@ -168,10 +209,12 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
 
     const slotFor = (rows: RowInfo[], group: string, gi: number, s: DragState): ListSlot => {
       const groupRows = rows.filter((r) => r.group === group)
-      let proj = project(groupRows, gi, origDepth, shiftOf(s.dx))
+      // a selection keeps its nesting: no horizontal nesting while several tasks move
+      const shift = selGroup ? 0 : shiftOf(s.dx)
+      let proj = project(groupRows, gi, origDepth, shift)
       let index = gi
       // Dragged left inside its own parent's subtree: move it out, right after that subtree.
-      if (shiftOf(s.dx) === -1 && origDepth > 0 && proj.depth >= origDepth && task.parentId) {
+      if (shift === -1 && origDepth > 0 && proj.depth >= origDepth && task.parentId) {
         const parentRow = groupRows.find((r) => r.id === task.parentId)
         const parentNode = parentRow?.el.closest<HTMLElement>('.task-node')
         const prev = groupRows[gi - 1]
@@ -190,13 +233,13 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
 
     const find = (s: DragState): ListTarget => {
       const el = hitAt(s.x, s.y)
-      const side = sideTarget(el, task)
+      const side = sideTarget(el, task, selGroup)
       if (side) return side.drop ? { kind: 'side', el: side.el, drop: side.drop } : { kind: 'none', el: side.el }
       const br = body.getBoundingClientRect()
       if (s.x < br.left || s.x > br.right) return { kind: 'none' }
       const y = Math.min(Math.max(s.y, br.top), br.bottom)
       if (s.y < br.top - 80 || s.y > br.bottom + 80) return { kind: 'none' }
-      const rows = visibleRows(body, node)
+      const rows = visibleRows(body, moved)
       // over a group header: into that group (its top, or under the header when it shows no rows)
       const head = el?.closest<HTMLElement>('[data-group-head]')
       const headKey = head && body.contains(head) ? head.dataset.groupHead! : undefined
@@ -226,6 +269,14 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
     return {
       source: node,
       ghostOf: row,
+      onStart: (s) => {
+        if (!selGroup) return
+        countBadge(s.ghost, selGroup.length)
+        for (const x of others) x.classList.add('dnd-source')
+      },
+      onEnd: () => {
+        for (const x of others) x.classList.remove('dnd-source')
+      },
       onMove: (s) => {
         target = find(s)
         if (target.kind === 'slot') {
@@ -238,7 +289,7 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
       },
       onDrop: (s) => {
         if (target.kind === 'side') {
-          dropOnSide(task.id, target.drop)
+          dropOnSide(task.id, target.drop, selGroup)
           return 'fade'
         }
         if (target.kind !== 'slot') return false
@@ -246,6 +297,7 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
         const cur = findTask(task.id)
         if (!cur) return false
         const cross = slot.group !== origGroup
+        if (selGroup) return dropGroup(selGroup, slot, cross, s)
         const parentId = slot.proj.parentId
         const oldParent = cur.parentId && getData().tasks.some((x) => x.id === cur.parentId) ? cur.parentId : undefined
         if (!cross && parentId === oldParent && slot.proj.depth === origDepth && slot.prev?.id === origPrev && slot.next?.id === origNext) return false
@@ -270,7 +322,39 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
         toast(listDropText(cross ? g : undefined, env0.groupBy, parentId, oldParent), snap)
         return true
       },
-      onLongPress: (x, y) => setUI({ menu: { x, y, kind: 'task', id: task.id } }),
+      // phones: a long press without moving selects the task (selection mode); elsewhere it opens the task menu
+      onLongPress: (x, y) => (isPhone() ? startSelecting(task.id) : setUI({ menu: { x, y, kind: 'task', id: task.id } })),
+    }
+
+    /** Drops several selected tasks into the slot: one block, in list order, with the group's patch. */
+    function dropGroup(ids: string[], slot: ListSlot, cross: boolean, s: DragState): boolean {
+      const env0 = env.current
+      const g = cross ? env0.groups.get(slot.group) : undefined
+      const moving = new Set(ids)
+      const parentId = slot.proj.parentId
+      const snap = getData()
+      const before = measure(body!)
+      before.set(task.id, s.ghost.getBoundingClientRect())
+      quietExits()
+      flushSync(() => {
+        if (!cross && env0.sortBy !== 'custom' && slot.proj.anchor) env0.setCustomSort()
+        setData((d) => {
+          const placed = slot.proj.anchor ? reorderMany(d, ids, slot.proj.anchor.id, slot.proj.anchor.after) : d
+          return patchMany(placed, ids, (x) => {
+            const p: Partial<Task> = {}
+            if (g?.patch) {
+              Object.assign(p, g.patch)
+              if ('listId' in g.patch && g.patch.listId !== x.listId) p.sectionId = undefined
+            }
+            // tasks whose parent moves with them stay its subtasks; the others take the slot's parent
+            if (!(x.parentId && moving.has(x.parentId)) && x.parentId !== parentId && parentId !== x.id) p.parentId = parentId
+            return Object.keys(p).length ? p : null
+          })
+        })
+      })
+      flip(body!, before)
+      toast(listDropText(g, env0.groupBy, undefined, undefined), snap)
+      return true
     }
   })
 }
@@ -301,6 +385,8 @@ export function startCardDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
     const board = row.closest<HTMLElement>('.kanban')
     if (!card || !board) return null
     const origCol = card.closest<HTMLElement>('[data-kanban-col]')?.dataset.kanbanCol ?? ''
+    // several selected cards: dropping them on the sidebar moves them all
+    const group = dragGroup(task)
     const siblings = [...card.parentElement!.querySelectorAll<HTMLElement>(':scope > [data-dnd-card]')]
     const origPrev = siblings[siblings.indexOf(card) - 1]
     const origNext = siblings[siblings.indexOf(card) + 1]
@@ -308,7 +394,7 @@ export function startCardDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
 
     const find = (s: DragState): CardTarget => {
       const el = hitAt(s.x, s.y)
-      const side = sideTarget(el, task)
+      const side = sideTarget(el, task, group)
       if (side) return side.drop ? { kind: 'side', el: side.el, drop: side.drop } : { kind: 'none', el: side.el }
       const cols = [...board.querySelectorAll<HTMLElement>('[data-kanban-col]')]
       let col = el?.closest<HTMLElement>('[data-kanban-col]') ?? undefined
@@ -348,7 +434,7 @@ export function startCardDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
       },
       onDrop: (s) => {
         if (target.kind === 'side') {
-          dropOnSide(task.id, target.drop)
+          dropOnSide(task.id, target.drop, group)
           return 'fade'
         }
         if (target.kind !== 'card') return false

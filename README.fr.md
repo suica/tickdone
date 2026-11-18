@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | Rechercher |
 | `Alt 1`–`Alt 6` | Changer de module |
 | `Ctrl/⌘ Z` | Annuler, tant que la notification d'annulation est affichée |
-| `Esc` | Fermer les détails de la tâche |
+| `Esc` | Effacer la sélection ou fermer les détails de la tâche |
+| `↑` `↓` / `J` `K` | Tâche précédente / suivante de la liste |
+| `Shift ↑` `Shift ↓` | Étendre la sélection |
+| `Ctrl/⌘ Click` | Ajouter une tâche à la sélection ou l’en retirer |
+| `Shift Click` | Sélectionner une plage de tâches |
+| `Ctrl/⌘ A` | Sélectionner toutes les tâches de la liste |
+| `Enter` | Modifier le titre |
+| `Space` / `Ctrl/⌘ Enter` | Terminer ou rouvrir |
+| `1` `2` `3` `4` | Priorité : haute, moyenne, basse, aucune |
+| `T` / `M` / `W` | Date : aujourd’hui, demain, la semaine prochaine |
+| `D` / `Shift D` | Choisir une date / effacer la date |
+| `Delete` / `Backspace` | Mettre à la corbeille (annulable depuis la notification) |
 | `?` | Afficher tous les raccourcis |
 
 ## 🌍 Langues
@@ -136,8 +147,8 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [x] Lien GitHub et section « À propos » dans l'app ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] Interface en 10 langues ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] Finitions de l'interface, écran par écran ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] Sélection multiple et modification groupée ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] Navigation au clavier dans les listes de tâches ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] Sélection multiple et modification groupée ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] Navigation au clavier dans les listes de tâches ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] Notifications de rappel ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] Installation comme application et utilisation hors ligne ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Filtres enregistrés ([#19](https://github.com/suica/tickdone/issues/19))

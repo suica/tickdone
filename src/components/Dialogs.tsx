@@ -398,8 +398,33 @@ function shortcuts(): { group: string; items: [string, string[]][] }[] {
     {
       group: t('common.module.tasks'),
       items: [
-        [t('misc.keys.deleteTask'), ['Delete']],
+        [t('misc.keys.moveCursor'), ['↑', '↓', 'J', 'K']],
+        [t('misc.keys.firstLast'), ['Home', 'End']],
+        [t('misc.keys.editTitle'), ['Enter']],
+        [t('misc.keys.toggleDone'), ['Space']],
         [t('misc.keys.toggleDone'), [MOD, 'Enter']],
+        [t('misc.keys.deleteTask'), ['Delete']],
+        [t('misc.keys.setPriority'), ['1', '2', '3', '4']],
+        [t('misc.keys.dateToday'), ['T']],
+        [t('misc.keys.dateTomorrow'), ['M']],
+        [t('misc.keys.dateNextWeek'), ['W']],
+        [t('misc.keys.datePick'), ['D']],
+        [t('misc.keys.dateClear'), ['Shift', 'D']],
+      ],
+    },
+    {
+      group: t('misc.keys.selection'),
+      items: [
+        [t('misc.keys.toggleSelect'), [MOD, t('misc.keys.click')]],
+        [t('misc.keys.rangeSelect'), ['Shift', t('misc.keys.click')]],
+        [t('misc.keys.extend'), ['Shift', '↑', '↓']],
+        [t('misc.keys.selectAll'), [MOD, 'A']],
+        [t('misc.keys.clearSelection'), ['Esc']],
+      ],
+    },
+    {
+      group: t('misc.keys.quickAdd'),
+      items: [
         [t('misc.keys.quickDate'), [t('misc.keys.dateExample')]],
         [t('misc.keys.quickPriority'), [priorities]],
         [t('misc.keys.quickTag'), [t('misc.keys.tagExample')]],
@@ -416,7 +441,7 @@ function ShortcutList() {
         <div key={g.group} className="dlg-keys-group">
           <div className="dlg-keys-title">{g.group}</div>
           {g.items.map(([label, keys]) => (
-            <div key={label} className="dlg-keys-row">
+            <div key={label + keys.join('+')} className="dlg-keys-row">
               <span>{label}</span>
               <span className="dlg-kbds">
                 {keys.map((k, i) => (

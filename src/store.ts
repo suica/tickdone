@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { addDays } from 'date-fns'
 import { dueLabel, fmt, nextOccurrence } from './dates'
 import { t } from './i18n'
+import { EMPTY_SELECTION, type Selection } from './selection'
 import type { AppData, Habit, Task, TaskList, ViewPrefs } from './types'
 
 const KEY = 'tickdone:data:v1'
@@ -143,7 +144,14 @@ export interface Menu {
 export interface UIState {
   module: Module
   view: string // 'today' | 'tomorrow' | 'week' | 'inbox' | 'all' | 'completed' | 'wontdo' | 'trash' | 'list:<id>' | 'tag:<name>'
+  /** The task the detail shows and the keyboard is on (the selection's cursor). */
   selectedTaskId?: string
+  /** Tasks selected together (two or more; any number in selection mode). Not persisted. */
+  selectedIds: string[]
+  /** Where a Shift range starts. */
+  selectAnchor?: string
+  /** Selection mode: rows show check marks and a tap selects (phones, or "Select" in the list menu). */
+  selectMode: boolean
   prefs: Record<string, ViewPrefs>
   collapsed: Record<string, boolean>
   sidebarHidden: boolean
@@ -158,7 +166,7 @@ export interface UIState {
 }
 
 function loadUI(): UIState {
-  const base: UIState = { module: 'tasks', view: 'today', prefs: {}, collapsed: {}, sidebarHidden: false, drawerOpen: false, search: '' }
+  const base: UIState = { module: 'tasks', view: 'today', selectedIds: [], selectMode: false, prefs: {}, collapsed: {}, sidebarHidden: false, drawerOpen: false, search: '' }
   try {
     const raw = localStorage.getItem(UI_KEY)
     if (raw) {
@@ -191,6 +199,25 @@ export function setUI(p: Partial<UIState> | ((u: UIState) => Partial<UIState>)) 
   uiSubs.forEach((f) => f())
 }
 export const useUI = () => useSyncExternalStore(uiSubscribe, getUI)
+
+// ---------------- Selection ----------------
+export const getSelection = (u: UIState = ui): Selection => ({ ids: u.selectedIds, cursor: u.selectedTaskId, anchor: u.selectAnchor, mode: u.selectMode })
+export function setSelection(s: Selection) {
+  setUI({ selectedIds: s.ids, selectedTaskId: s.cursor, selectAnchor: s.anchor, selectMode: s.mode })
+}
+/** Ends a multi-selection and selection mode; the cursor stays, so the detail keeps its task. */
+export function clearSelection(keepCursor = true) {
+  setSelection({ ...EMPTY_SELECTION, cursor: keepCursor ? ui.selectedTaskId : undefined, anchor: keepCursor ? ui.selectedTaskId : undefined })
+}
+
+/** Changes several tasks in one step: one toast, one undo back to the data from before. */
+export function runBatch(text: string, change: (d: AppData) => AppData): boolean {
+  const snap = data
+  setData(change)
+  if (data === snap) return false
+  toast(text, snap)
+  return true
+}
 
 let toastTimer: number | undefined
 export function toast(text: string, undo?: AppData) {

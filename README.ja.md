@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | 検索 |
 | `Alt 1`–`Alt 6` | モジュールの切り替え |
 | `Ctrl/⌘ Z` | 元に戻す（取り消し通知の表示中） |
-| `Esc` | タスク詳細を閉じる |
+| `Esc` | 選択を解除、またはタスク詳細を閉じる |
+| `↑` `↓` / `J` `K` | リストの前 / 次のタスク |
+| `Shift ↑` `Shift ↓` | 選択範囲を広げる |
+| `Ctrl/⌘ Click` | タスクを選択に追加・選択から外す |
+| `Shift Click` | タスクを範囲選択 |
+| `Ctrl/⌘ A` | リストのタスクをすべて選択 |
+| `Enter` | タイトルを編集 |
+| `Space` / `Ctrl/⌘ Enter` | 完了 / 未完了に戻す |
+| `1` `2` `3` `4` | 優先度: 高・中・低・なし |
+| `T` / `M` / `W` | 日付: 今日・明日・来週 |
+| `D` / `Shift D` | 日付を選ぶ / 日付をクリア |
+| `Delete` / `Backspace` | ゴミ箱へ移動（通知から元に戻せます） |
 | `?` | ショートカット一覧を表示 |
 
 ## 🌍 言語
@@ -136,8 +147,8 @@ npm run dev        # http://localhost:5173
 - [x] アプリ内の GitHub リンクと「このアプリについて」 ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] UI の 10 言語対応 ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] 画面ごとの UI のブラッシュアップ ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] 複数選択と一括編集 ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] タスクリストのキーボード操作 ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] 複数選択と一括編集 ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] タスクリストのキーボード操作 ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] リマインダー通知 ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] アプリとしてインストールしてオフラインでも使用 ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] 保存済みフィルター ([#19](https://github.com/suica/tickdone/issues/19))

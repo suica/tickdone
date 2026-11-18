@@ -83,7 +83,7 @@ export function Drawer() {
     if (below.matches('input, textarea, [contenteditable="true"]')) below.focus()
     below.click()
   }
-  const edge = !open && ui.module === 'tasks' && !ui.selectedTaskId && !ui.dialog && !ui.menu
+  const edge = !open && ui.module === 'tasks' && !ui.selectedTaskId && !ui.selectMode && !ui.dialog && !ui.menu
 
   return (
     <>

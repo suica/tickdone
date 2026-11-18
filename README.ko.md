@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | 검색 |
 | `Alt 1`–`Alt 6` | 모듈 전환 |
 | `Ctrl/⌘ Z` | 실행 취소(실행 취소 알림이 떠 있는 동안) |
-| `Esc` | 할 일 상세 닫기 |
+| `Esc` | 선택 해제 또는 할 일 상세 닫기 |
+| `↑` `↓` / `J` `K` | 목록의 이전 / 다음 작업 |
+| `Shift ↑` `Shift ↓` | 선택 범위 넓히기 |
+| `Ctrl/⌘ Click` | 작업을 선택에 추가하거나 빼기 |
+| `Shift Click` | 작업 범위 선택 |
+| `Ctrl/⌘ A` | 목록의 모든 작업 선택 |
+| `Enter` | 제목 편집 |
+| `Space` / `Ctrl/⌘ Enter` | 완료 또는 다시 열기 |
+| `1` `2` `3` `4` | 우선순위: 높음, 중간, 낮음, 없음 |
+| `T` / `M` / `W` | 날짜: 오늘, 내일, 다음 주 |
+| `D` / `Shift D` | 날짜 고르기 / 날짜 지우기 |
+| `Delete` / `Backspace` | 휴지통으로 이동 (알림에서 되돌리기) |
 | `?` | 모든 단축키 보기 |
 
 ## 🌍 언어
@@ -136,8 +147,8 @@ npm run dev        # http://localhost:5173
 - [x] 앱 내 GitHub 링크와 정보 화면 ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] 10개 언어 인터페이스 ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] 화면별 UI 다듬기 ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] 다중 선택과 일괄 편집 ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] 작업 목록 키보드 탐색 ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] 다중 선택과 일괄 편집 ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] 작업 목록 키보드 탐색 ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] 알림 시간에 맞춘 알림 표시 ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] 앱으로 설치하고 오프라인에서도 사용 ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] 저장된 필터 ([#19](https://github.com/suica/tickdone/issues/19))

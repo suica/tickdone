@@ -1,0 +1,317 @@
+/* Multi-selection: the selected rows, the keyboard focus ring, the batch panel and the phone action bar. */
+
+/* rows */
+.list-pane .task-row.selected.multi {
+  background: var(--primary-soft);
+}
+@media (hover: hover) {
+  .list-pane .task-row.selected.multi:hover {
+    background: var(--primary-soft2);
+  }
+}
+.task-row.multi .task-main {
+  border-bottom-color: transparent;
+}
+/* The keyboard cursor: a ring inside the row. It shows while the keyboard is in use (Tab, arrows), not after
+   clicks (TaskListPane sets data-input on the pane). */
+.task-row:focus {
+  outline: none;
+}
+.list-pane:not([data-input='pointer']) .task-row:focus-visible,
+.list-pane[data-input='keys'] .task-row:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+/* the round check of selection mode, where the checkbox is */
+.sel-check {
+  width: 20px;
+  height: 20px;
+  margin-top: 10px;
+  margin-left: -2px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-4);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur) var(--ease-spring);
+}
+.sel-check.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  transform: scale(1.06);
+}
+.task-row.multi .task-title {
+  pointer-events: none;
+}
+
+/* the number of tasks on the lifted copy of a multi-row drag */
+.dnd-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ---------------- batch panel (detail column) ---------------- */
+.batch {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 28px 24px 18px;
+  overflow-y: auto;
+  animation: batch-in var(--dur) var(--ease-out);
+}
+@keyframes batch-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.batch-stack {
+  position: relative;
+  height: 92px;
+  margin: 4px auto 18px;
+  width: min(100%, 280px);
+}
+.batch-card {
+  position: absolute;
+  left: calc(var(--i, 0) * 10px);
+  right: calc(var(--i, 0) * 10px);
+  top: calc(var(--i, 0) * 14px);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--bg-pop);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  z-index: calc(3 - var(--i, 0));
+  transform: scale(calc(1 - var(--i, 0) * 0.04));
+  transform-origin: top center;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.batch-card.empty {
+  opacity: 0.5;
+}
+.batch-card-cb {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid var(--text-4);
+  flex-shrink: 0;
+}
+.batch-card-cb.done {
+  background: var(--text-4);
+}
+.batch-card-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.batch-count {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+.batch-more {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.batch-actions {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.batch-act {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text);
+  text-align: left;
+}
+button.batch-act:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+.batch-act:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.batch-act > svg {
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.batch-act.danger,
+.batch-act.danger > svg {
+  color: var(--danger);
+}
+.batch-prio > span {
+  flex: 1;
+}
+.batch-prio-btns {
+  display: flex;
+  gap: 2px;
+}
+.batch-prio-btns .prio-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.batch-prio-btns .prio-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+.batch-prio-btns .prio-btn.on {
+  background: var(--bg-active);
+}
+.batch-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 12px;
+}
+.batch-foot {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.batch-hint {
+  max-width: 300px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--text-3);
+}
+/* narrow tablets: the panel slides over the list like the task detail */
+.batch-layer .batch {
+  padding-top: 36px;
+}
+
+/* ---------------- phone action bar ---------------- */
+.batch-bar {
+  position: fixed;
+  left: max(10px, var(--safe-l));
+  right: max(10px, var(--safe-r));
+  bottom: var(--tabbar-gap);
+  z-index: 60;
+  border-radius: 22px;
+  background: var(--bg-pop);
+  box-shadow: var(--shadow);
+  padding: 4px 6px 6px;
+  animation: batch-bar-in var(--dur) var(--ease-out);
+}
+@keyframes batch-bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+.batch-bar-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 0 4px;
+}
+.batch-bar-count {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.batch-bar-text {
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+}
+.batch-bar-acts {
+  display: flex;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+}
+.batch-bar-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 12px;
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+.batch-bar-btn > span {
+  max-width: 100%;
+  font-size: 10.5px;
+  line-height: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.batch-bar-btn:active:not(:disabled) svg {
+  transform: scale(0.9);
+}
+.batch-bar-btn svg {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.batch-bar-btn:disabled {
+  opacity: 0.4;
+}
+.batch-bar-btn.danger,
+.batch-bar-btn.danger > span {
+  color: var(--danger);
+}
+/* the bar sits over the tab bar; the list scrolls clear of it */
+@media (max-width: 767px) {
+  .list-pane:has(.batch-bar) .list-body {
+    padding-bottom: 150px;
+  }
+  /* the undo toast shows above the bar */
+  body:has(.batch-bar) .toast {
+    bottom: calc(var(--tabbar-gap) + 124px);
+  }
+}

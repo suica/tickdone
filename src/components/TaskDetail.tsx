@@ -6,7 +6,8 @@ import { useT, type MessageKey } from '../i18n'
 import { fmtFullDate, fmtMonthDay, fmtTime } from '../i18n/format'
 import { cancelAnimations, dur, ease, play } from '../motion'
 import { startFocus } from '../pomo'
-import { deleteTask, duplicateTask, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
+import { isBatch } from '../selection'
+import { deleteTask, duplicateTask, getSelection, getUI, setUI, toggleTask, uid, updateTask, useData, useUI, wontDo } from '../store'
 import type { Priority, Subtask, Task } from '../types'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY, priorityColor } from '../views'
@@ -15,6 +16,7 @@ import { Flag, Icon } from './Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { Subtasks } from './Subtasks'
 import { Checkbox } from './TaskRow'
+import { BatchPanel } from './BatchPanel'
 import './detail.css'
 
 /** Priority names from the shared vocabulary. */
@@ -59,6 +61,12 @@ export function TaskDetail({ floating }: { floating?: boolean }) {
   const narrow = useNarrowTablet()
   const task = data.tasks.find((t) => t.id === ui.selectedTaskId)
   const mode: Mode = phone ? 'sheet' : floating ? (tablet ? 'overlay' : 'float') : narrow ? 'overlay' : 'pane'
+  // Several tasks selected in the task list: the batch panel takes the detail's place (phones show an action bar instead).
+  if (!floating && ui.module === 'tasks' && isBatch(getSelection(ui))) {
+    if (mode === 'pane') return <DetailPane width={ui.detailWidth} batch />
+    if (mode === 'overlay') return createPortal(<div className="detail-float detail-overlay batch-layer" data-batch-layer>{<BatchPanel />}</div>, document.body)
+    return null
+  }
   if (mode === 'pane') return <DetailPane task={task} width={ui.detailWidth} />
   if (!task) return null
   if (mode === 'sheet') return <DetailSheet task={task} />
@@ -290,14 +298,16 @@ function DetailSheet({ task }: { task: Task }) {
   )
 }
 
-function DetailPane({ task, width }: { task?: Task; width?: number }) {
+function DetailPane({ task, width, batch }: { task?: Task; width?: number; batch?: boolean }) {
   const ref = useRef<HTMLElement>(null)
   const t = useT()
   const style: CSSProperties | undefined = width ? { flex: `0 1 ${width}px`, maxWidth: 'none' } : undefined
   return (
     <aside className="detail" ref={ref} style={style}>
       <Divider pane={ref} width={width} />
-      {task ? (
+      {batch ? (
+        <BatchPanel />
+      ) : task ? (
         <DetailBody task={task} key={task.id} />
       ) : (
         <div className="empty" style={{ height: '100%' }}>

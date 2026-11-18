@@ -94,6 +94,7 @@
   opacity: 1;
 }
 .matrix-body {
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -115,16 +116,103 @@
 .matrix-add:focus-within {
   opacity: 1;
 }
-@media (max-width: 760px) {
-  .matrix-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
-    grid-auto-rows: minmax(240px, 1fr);
-    overflow-y: auto;
-  }
-}
 @media (hover: none) {
   .matrix-add {
+    opacity: 1;
+  }
+}
+
+/* ---------- drag ---------- */
+.matrix-quad.drag-over {
+  background-image: linear-gradient(var(--primary-soft), var(--primary-soft));
+}
+.matrix-item {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* where the dragged task will be inserted */
+.matrix-drop-line {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--primary);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ---------- phone: 2 x 2, a quadrant opens to fill the grid ---------- */
+@media (max-width: 767px) {
+  .matrix-main {
+    padding: 0 8px 8px;
+  }
+  .matrix-head {
+    height: 48px;
+    padding-left: 8px;
+  }
+  .matrix-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+  .matrix-grid.has-expanded {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .matrix-quad.folded {
+    display: none;
+  }
+  .matrix-quad-head {
+    min-height: 40px;
+    padding: 2px 0 0 8px;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .matrix-no {
+    min-width: 18px;
+    height: 16px;
+    padding: 0 3px;
+    font-size: 10px;
+  }
+  .matrix-name {
+    min-width: 0;
+    font-size: 13px;
+  }
+  .matrix-count {
+    font-size: 11px;
+  }
+  .matrix-fold {
+    flex-shrink: 0;
+    color: var(--text-3);
+    rotate: 180deg;
+  }
+  .matrix-more {
+    width: 32px;
+    height: 40px;
+    opacity: 1;
+  }
+  .matrix-quad:not(.expanded) .matrix-fold {
+    display: none;
+  }
+  .matrix-quad:not(.expanded) .matrix-add {
+    display: none;
+  }
+  /* rows in a small quadrant: title only */
+  .matrix-quad:not(.expanded) .task-meta {
+    display: none;
+  }
+  .matrix-quad:not(.expanded) .task-row {
+    gap: 6px;
+  }
+  .matrix-quad:not(.expanded) .task-title {
+    flex-basis: 0;
+    min-width: 0;
+    font-size: 13px;
+  }
+  .matrix-quad.expanded .matrix-add {
     opacity: 1;
   }
 }

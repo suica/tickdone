@@ -154,7 +154,8 @@
   color: var(--text-2);
 }
 .search-group-count {
-  font-weight: 400;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--text-3);
 }
 .search-group-done .search-group-head {

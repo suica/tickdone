@@ -59,6 +59,7 @@ export default {
   'tasks.row.showSubtasks': 'Show subtasks',
   'tasks.row.hideSubtasks': 'Hide subtasks',
   'tasks.row.subtasks': 'Subtasks',
+  'tasks.row.priority': 'Priority: {level}',
 
   // quick add
   'tasks.quickAdd.placeholder': '+ Add a task to “{list}”, press Enter to save',

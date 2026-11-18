@@ -24,6 +24,9 @@
   --text-4: #bbb;
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
   --radius: 6px;
+  /* 手机底部模块栏高度与安全区 */
+  --tabbar-h: 56px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
 
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;

@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { LOCALES } from '../i18n/locales'
+import { LOCALES } from '../src/i18n/locales'
 
 const roadmap = (file: string) =>
   readFileSync(file, 'utf8')

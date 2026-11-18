@@ -114,6 +114,7 @@
 }
 .search-chip {
   display: inline-flex;
+  max-width: 100%;
   align-items: center;
   gap: 5px;
   height: 28px;
@@ -124,6 +125,12 @@
   color: var(--text);
   font-size: 13px;
   cursor: pointer;
+}
+.search-chip-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .search-chip:hover {
   background: var(--bg-hover);
@@ -184,8 +191,91 @@
 [data-theme='dark'] .search-module mark {
   background: rgba(250, 168, 12, 0.35);
 }
-@media (max-width: 600px) {
+/* Results fade in one after another (each item carries its index in --i) */
+.search-hit,
+.search-group-head,
+.search-chips {
+  animation: search-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+@keyframes search-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-hit,
+  .search-group-head,
+  .search-chips {
+    animation: none;
+  }
+}
+
+@media (hover: none) {
+  .search-history-del {
+    opacity: 1;
+  }
+}
+
+/* Phones: the search bar stays pinned at the top and the results fill the rest */
+@media (max-width: 767px) {
   .search-main {
-    padding: 12px 12px 0;
+    padding: 0;
+  }
+  .search-bar {
+    max-width: none;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-bar-icon {
+    left: 26px;
+  }
+  .search-input {
+    height: 44px;
+    padding: 0 52px 0 42px;
+    font-size: 16px;
+  }
+  .search-clear {
+    right: 14px;
+    width: 40px;
+    height: 40px;
+  }
+  .search-results {
+    max-width: none;
+    padding: 8px 12px 24px;
+  }
+  .search-history-head {
+    padding: 0 0 0 8px;
+  }
+  .search-link {
+    min-height: 40px;
+    padding: 0 8px;
+  }
+  .search-history-item {
+    height: 48px;
+  }
+  .search-history-del {
+    width: 40px;
+    height: 40px;
+  }
+  .search-chips {
+    padding: 4px 0 12px;
+  }
+  .search-chip {
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 20px;
+  }
+  .search-group-head {
+    height: 40px;
+  }
+}
+
+/* Large screens: a slightly wider column */
+@media (min-width: 1920px) {
+  .search-bar,
+  .search-results {
+    max-width: 880px;
   }
 }

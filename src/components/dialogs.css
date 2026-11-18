@@ -128,7 +128,7 @@
   color: var(--text);
 }
 
-/* 色板 */
+/* Color swatches */
 .dlg-colors {
   display: flex;
   flex-wrap: wrap;
@@ -169,7 +169,7 @@
   outline-color: var(--primary);
 }
 
-/* 分段切换 */
+/* Segmented control */
 .dlg-seg {
   display: inline-flex;
   background: var(--bg-input);
@@ -203,7 +203,7 @@
   background: #3a3a3a;
 }
 
-/* 快捷键 */
+/* Keyboard shortcuts */
 .dlg-scroll {
   max-height: 60vh;
   overflow: auto;
@@ -241,7 +241,7 @@
   color: var(--text-2);
 }
 
-/* 设置 */
+/* Settings */
 .dlg-settings {
   height: 520px;
   max-height: calc(100vh - 64px);
@@ -669,4 +669,9 @@
     min-height: 48px;
     font-size: 14px;
   }
+}
+
+/* The language row right under the theme previews gets some room above it */
+.dlg-themes + .dlg-row {
+  margin-top: 12px;
 }

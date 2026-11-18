@@ -1,0 +1,12 @@
+[
+ {
+  "id": "aria-required-attr",
+  "impact": "critical",
+  "nodes": 1
+ },
+ {
+  "id": "color-contrast",
+  "impact": "serious",
+  "nodes": 7
+ }
+]

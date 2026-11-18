@@ -5,6 +5,7 @@ import { fmt, todayStr } from '../dates'
 import { sortTasks } from '../views'
 import type { Priority, Task } from '../types'
 import { usePhone } from '../viewport'
+import { useT, type MessageKey } from '../i18n'
 import { Icon } from '../components/Icon'
 import { Popover, MenuList, anchorOf, type Anchor } from '../components/Popover'
 import { TaskRow } from '../components/TaskRow'
@@ -17,16 +18,16 @@ import './matrix.css'
 
 type Range = 'today' | 'week' | 'all'
 type Sort = 'date' | 'custom'
-const RANGE_NAME: Record<Range, string> = { today: '今天', week: '最近7天', all: '全部' }
+const RANGE_NAME: Record<Range, MessageKey> = { today: 'common.today', week: 'common.list.next7Days', all: 'common.list.all' }
 const RANGE_KEY = 'tickdone:matrix-range'
 const SORT_KEY = 'tickdone:matrix-sort'
 
 // A quadrant is a priority: dropping a task into a quadrant gives it that priority.
-const QUADS: { p: Priority; no: string; name: string; color: string }[] = [
-  { p: 5, no: 'I', name: '重要且紧急', color: 'var(--p-high)' },
-  { p: 3, no: 'II', name: '重要不紧急', color: 'var(--p-med)' },
-  { p: 1, no: 'III', name: '不重要但紧急', color: 'var(--p-low)' },
-  { p: 0, no: 'IV', name: '不重要不紧急', color: 'var(--q-none)' },
+const QUADS: { p: Priority; no: string; name: MessageKey; color: string }[] = [
+  { p: 5, no: 'I', name: 'calendar.matrix.q1', color: 'var(--p-high)' },
+  { p: 3, no: 'II', name: 'calendar.matrix.q2', color: 'var(--p-med)' },
+  { p: 1, no: 'III', name: 'calendar.matrix.q3', color: 'var(--p-low)' },
+  { p: 0, no: 'IV', name: 'calendar.matrix.q4', color: 'var(--q-none)' },
 ]
 
 function load<T extends string>(key: string, fallback: T): Record<number, T> {
@@ -91,6 +92,7 @@ interface DragState {
 export default function MatrixView() {
   const data = useData()
   const ui = useUI()
+  const t = useT()
   const phone = usePhone()
   const [ranges, setRanges] = useState<Record<number, Range>>(() => load<Range>(RANGE_KEY, 'all'))
   const [sorts, setSorts] = useState<Record<number, Sort>>(() => load<Sort>(SORT_KEY, 'date'))
@@ -174,9 +176,9 @@ export default function MatrixView() {
   }
 
   /** Drag a row: to another quadrant (priority) or to another place in its own quadrant (order). */
-  const startDrag = (e: ReactPointerEvent<HTMLElement>, t: Task) => {
-    const id = t.id
-    const from = t.priority
+  const startDrag = (e: ReactPointerEvent<HTMLElement>, task: Task) => {
+    const id = task.id
+    const from = task.priority
     beginDrag(e.nativeEvent, {
       source: e.currentTarget,
       onStart: () => setDrag({ id, from, over: from, index: null, lineTop: 0 }),
@@ -213,7 +215,7 @@ export default function MatrixView() {
         pendingDrop.current = { before, id, from: c.ghostRect }
         if (d.index !== null) placeInQuadrant(ids, id, d.index, { priority: d.over })
         else updateTask(id, { priority: d.over })
-        toast(`已移到「${q.name}」`, snap)
+        toast(t('calendar.matrix.movedTo', { name: t(q.name) }), snap)
         return true
       },
       onEnd: () => setDrag(null),
@@ -224,7 +226,7 @@ export default function MatrixView() {
     <div className={'module matrix-module' + (phone ? ' phone' : '')} ref={rootRef}>
       <div className="matrix-main">
         <div className="matrix-head">
-          <h1>四象限</h1>
+          <h1>{t('common.module.matrix')}</h1>
         </div>
         <div className={'matrix-grid' + (expanded !== null ? ' has-expanded' : '')} ref={gridRef}>
           {QUADS.map((q) => {
@@ -245,13 +247,13 @@ export default function MatrixView() {
                   {...(phone ? { role: 'button', 'aria-expanded': open, tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => (e.key === 'Enter' || e.key === ' ') && toggleExpand(q.p) } : {})}
                 >
                   <span className="matrix-no">{q.no}</span>
-                  <span className="matrix-name">{q.name}</span>
-                  {ranges[q.p] !== 'all' && <span className="matrix-range">{RANGE_NAME[ranges[q.p]]}</span>}
+                  <span className="matrix-name">{t(q.name)}</span>
+                  {ranges[q.p] !== 'all' && <span className="matrix-range">{t(RANGE_NAME[ranges[q.p]])}</span>}
                   <span className="matrix-count">{tasks.length || ''}</span>
                   {phone && <Icon name="chevronDown" size={16} className={'matrix-fold' + (open ? ' open' : '')} />}
                   <button
                     className="icon-btn matrix-more"
-                    title="更多"
+                    title={t('common.more')}
                     onClick={(e) => {
                       e.stopPropagation()
                       setMenu({ p: q.p, anchor: anchorOf(e.currentTarget) })
@@ -262,7 +264,7 @@ export default function MatrixView() {
                 </header>
                 <div className="matrix-body">
                   {tasks.length === 0 ? (
-                    <div className="matrix-empty">没有任务</div>
+                    <div className="matrix-empty">{t('calendar.noTasks')}</div>
                   ) : (
                     tasks.map((t) => (
                       <div
@@ -283,7 +285,7 @@ export default function MatrixView() {
                   {drag?.over === q.p && drag.index !== null && <div className="matrix-drop-line" style={{ top: drag.lineTop - 1 }} />}
                 </div>
                 <div className="matrix-add">
-                  <QuickAdd defaults={{ priority: q.p }} placeholder={`添加任务至「${q.name}」`} compact />
+                  <QuickAdd defaults={{ priority: q.p }} placeholder={t('calendar.matrix.addTo', { name: t(q.name) })} compact />
                 </div>
               </section>
             )
@@ -295,17 +297,17 @@ export default function MatrixView() {
           <MenuList
             onClose={() => setMenu(null)}
             items={[
-              { label: '显示范围', disabled: true },
+              { label: t('calendar.matrix.show'), disabled: true },
               ...(['today', 'week', 'all'] as Range[]).map((r) => ({
-                label: RANGE_NAME[r],
+                label: t(RANGE_NAME[r]),
                 icon: <Icon name={r === 'today' ? 'today' : r === 'week' ? 'week' : 'inbox'} size={16} />,
                 checked: ranges[menu.p] === r,
                 onClick: () => setRange(menu.p, r),
               })),
               { divider: true },
-              { label: '排序', disabled: true },
-              { label: '按时间', icon: <Icon name="clock" size={16} />, checked: sorts[menu.p] !== 'custom', onClick: () => setSort(menu.p, 'date') },
-              { label: '自定义', icon: <Icon name="drag" size={16} />, checked: sorts[menu.p] === 'custom', onClick: () => setSort(menu.p, 'custom') },
+              { label: t('calendar.matrix.sort'), disabled: true },
+              { label: t('calendar.matrix.sortByTime'), icon: <Icon name="clock" size={16} />, checked: sorts[menu.p] !== 'custom', onClick: () => setSort(menu.p, 'date') },
+              { label: t('calendar.matrix.sortCustom'), icon: <Icon name="drag" size={16} />, checked: sorts[menu.p] === 'custom', onClick: () => setSort(menu.p, 'custom') },
             ]}
           />
         </Popover>

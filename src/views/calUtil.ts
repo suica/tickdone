@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { format, parseISO } from 'date-fns'
+import { parseISO } from 'date-fns'
 import { setUI, useData } from '../store'
-import { weekdayName } from '../dates'
+import { getLocale, t } from '../i18n'
+import { fmtMonthDay, fmtMonthYear, fmtTime, fmtWeekday } from '../i18n/format'
 import type { Task } from '../types'
 import type { Anchor } from '../components/Popover'
 
@@ -22,16 +23,39 @@ export const snapRound = (m: number) => Math.round(m / SNAP) * SNAP
 export const snapFloor = (m: number) => Math.floor(m / SNAP) * SNAP
 export const snapCeil = (m: number) => Math.ceil(m / SNAP) * SNAP
 
-/** "45分钟" / "1小时" / "1小时30分钟" */
+/** A length in minutes in the current language: "45 minutes", "1 hour", "1 hour 30 minutes". */
 export function fmtDur(m: number) {
   const h = Math.floor(m / 60)
   const r = m % 60
-  return (h ? `${h}小时` : '') + (r || !h ? `${r}分钟` : '')
+  if (!h) return t('calendar.duration.minutes', { count: r })
+  if (!r) return t('calendar.duration.hours', { count: h })
+  return t('calendar.duration.hoursMinutes', { hours: t('calendar.duration.hours', { count: h }), minutes: t('calendar.duration.minutes', { count: r }) })
 }
-/** "11月18日" */
-export const dayLabel = (ds: string) => format(parseISO(ds), 'M月d日')
-/** "11月18日 周三" */
-export const dayLabelWd = (ds: string) => `${dayLabel(ds)} ${weekdayName(parseISO(ds))}`
+/** "Nov 18" for a yyyy-MM-dd day. */
+export const dayLabel = (ds: string) => fmtMonthDay(parseISO(ds))
+/** A date with its weekday, "Wed, Nov 18"; `fmt` formats the date part. */
+export const withWeekday = (d: Date, fmt: (d: Date) => string = fmtMonthDay) => t('calendar.dateWithWeekday', { date: fmt(d), weekday: fmtWeekday(d) })
+/** "Wed, Nov 18" for a yyyy-MM-dd day. */
+export const dayLabelWd = (ds: string) => withWeekday(parseISO(ds))
+/** A time of day (minutes after midnight) in the current language; the end of the day reads as midnight. */
+export const timeLabel = (min: number) => fmtTime(toHM(min))
+/** "10:00 – 11:30" in the current language. */
+export const timeRange = (s: number, e: number) => t('calendar.timeRange', { start: timeLabel(s), end: timeLabel(e) })
+
+/** Month and year of a span of days: "November 2026", or "November – December 2026" across months. */
+export function monthSpan(a: Date, b: Date) {
+  try {
+    return new Intl.DateTimeFormat(getLocale(), { year: 'numeric', month: 'long' }).formatRange(a, b)
+  } catch {
+    return fmtMonthYear(a)
+  }
+}
+
+/** Whether the current language writes times on a 12-hour clock ("9:00 AM"), which needs wider hour labels. */
+export function twelveHour() {
+  const o = new Intl.DateTimeFormat(getLocale(), { hour: 'numeric' }).resolvedOptions()
+  return o.hourCycle === 'h11' || o.hourCycle === 'h12'
+}
 
 /** Order inside a day: open first, timed before untimed (by time), then priority, then custom order. */
 export function sortDay(a: Task, b: Task) {

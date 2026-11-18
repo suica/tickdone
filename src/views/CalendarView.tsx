@@ -2,7 +2,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEven
 import { addDays, addMonths, addWeeks, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, parseISO, startOfDay, startOfMonth, startOfWeek } from 'date-fns'
 import './calendar.css'
 import { getData, getUI, setUI, toast, updateTask, useData, useUI } from '../store'
-import { fmt, todayStr, weekdayName } from '../dates'
+import { fmt, todayStr } from '../dates'
+import { useT, type MessageKey } from '../i18n'
+import { dateFnsLocale, fmtFullDate, fmtMonthDay, fmtMonthYear, fmtWeekday, localeWeekStart } from '../i18n/format'
 import type { Task } from '../types'
 import { LARGE, useMedia, usePhone } from '../viewport'
 import { Icon } from '../components/Icon'
@@ -13,17 +15,23 @@ import { beginDrag, dragging, useTouchGuard } from './calDnd'
 import { dur, easing, flyFrom, playSlides, snapshotSlides } from './calMotion'
 import { AddPopover, CalTask } from './calParts'
 import { TimeGrid } from './CalTimeGrid'
-import { dayLabel, isTyping, sortDay, useColorOf, type AddState } from './calUtil'
+import { dayLabel, isTyping, monthSpan, sortDay, twelveHour, useColorOf, withWeekday, type AddState } from './calUtil'
 
 type Mode = 'month' | 'week' | 'day' | 'agenda'
-const MODES: { id: Mode; label: string; phone?: string }[] = [
-  { id: 'month', label: '月' },
-  { id: 'week', label: '周', phone: '三日' },
-  { id: 'day', label: '日' },
-  { id: 'agenda', label: '列表' },
+const MODES: { id: Mode; label: MessageKey; phone?: MessageKey }[] = [
+  { id: 'month', label: 'calendar.view.month' },
+  { id: 'week', label: 'calendar.view.week', phone: 'calendar.view.threeDays' },
+  { id: 'day', label: 'calendar.view.day' },
+  { id: 'agenda', label: 'calendar.view.agenda' },
 ]
+/** Titles of the previous / next buttons per view (the phone week view pages by three days). */
+const NAV: Record<'month' | 'week' | 'threeDays' | 'day', [MessageKey, MessageKey]> = {
+  month: ['calendar.nav.prevMonth', 'calendar.nav.nextMonth'],
+  week: ['calendar.nav.prevWeek', 'calendar.nav.nextWeek'],
+  threeDays: ['calendar.nav.prevThreeDays', 'calendar.nav.nextThreeDays'],
+  day: ['calendar.nav.prevDay', 'calendar.nav.nextDay'],
+}
 const MODE_KEY = 'tickdone:cal:mode'
-const WEEK_CN = ['日', '一', '二', '三', '四', '五', '六']
 
 function loadMode(): Mode {
   try {
@@ -63,6 +71,7 @@ interface MonthProps {
 
 function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, onPick }: MonthProps) {
   const colorOf = useColorOf()
+  const t = useT()
   const days = eachDayOfInterval({ start: startOfWeek(startOfMonth(cursor), { weekStartsOn }), end: endOfWeek(endOfMonth(cursor), { weekStartsOn }) })
   const rows = days.length / 7
   const gridRef = useRef<HTMLDivElement>(null)
@@ -102,26 +111,26 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
   })
 
   /** Drag a task (a bar, a row of the picked day, or a bar in the overflow list) onto another day. */
-  const startDrag = (e: ReactPointerEvent<HTMLElement>, t: Task, fromMore = false) => {
+  const startDrag = (e: ReactPointerEvent<HTMLElement>, task: Task, fromMore = false) => {
     beginDrag(e.nativeEvent, {
       source: e.currentTarget,
       onStart: () => {
-        setDrag({ id: t.id, over: t.dueDate ?? null })
+        setDrag({ id: task.id, over: task.dueDate ?? null })
         if (fromMore) setMoreAway(true)
       },
       onMove: (c) => {
         const cell = c.hit?.closest<HTMLElement>('.cal-cell[data-day]')
         const over = cell && gridRef.current?.contains(cell) ? cell.dataset.day! : null
-        if (over !== dragRef.current?.over) setDrag({ id: t.id, over })
+        if (over !== dragRef.current?.over) setDrag({ id: task.id, over })
       },
       onDrop: (c) => {
         const over = dragRef.current?.over
-        const cur = getData().tasks.find((x) => x.id === t.id)
+        const cur = getData().tasks.find((x) => x.id === task.id)
         if (!over || !cur || cur.dueDate === over) return false
         const snap = getData()
-        settle.current = { id: t.id, day: over, from: c.ghostRect }
-        updateTask(t.id, { dueDate: over })
-        toast(`已移到 ${dayLabel(over)}`, snap)
+        settle.current = { id: task.id, day: over, from: c.ghostRect }
+        updateTask(task.id, { dueDate: over })
+        toast(t('calendar.toast.movedToDay', { date: dayLabel(over) }), snap)
         return true
       },
       onEnd: () => {
@@ -139,11 +148,8 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
   return (
     <div className={'cal-month' + (compact ? ' compact' : '')}>
       <div className="cal-weekhead">
-        {Array.from({ length: 7 }, (_, i) => (
-          <div key={i}>
-            {compact ? '' : '周'}
-            {WEEK_CN[(i + weekStartsOn) % 7]}
-          </div>
+        {days.slice(0, 7).map((d) => (
+          <div key={d.getDay()}>{fmtWeekday(d, compact ? 'narrow' : 'short')}</div>
         ))}
       </div>
       <div className="cal-grid" ref={gridRef} data-slide style={compact ? undefined : { gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
@@ -172,7 +178,7 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
               }}
             >
               <div className="cal-cell-head">
-                <span className="cal-daynum">{d.getDate() === 1 && !isSameMonth(d, cursor) && !compact ? format(d, 'M月d日') : d.getDate()}</span>
+                <span className="cal-daynum">{d.getDate() === 1 && !isSameMonth(d, cursor) && !compact ? fmtMonthDay(d) : d.getDate()}</span>
               </div>
               {compact ? (
                 list.length > 0 && (
@@ -239,15 +245,14 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
 /** Everything due on one day (opened from "+n" in a month cell); bars can be dragged out to other days. */
 function MoreList({ date, tasks, dragId, onClose, onDown }: { date: string; tasks: Task[]; dragId: string | null; onClose: () => void; onDown: (e: ReactPointerEvent<HTMLElement>, t: Task) => void }) {
   const colorOf = useColorOf()
+  const t = useT()
   const ref = useRef<HTMLDivElement>(null)
   useTouchGuard(ref)
   return (
     <div ref={ref}>
       <div className="cal-more-head">
-        <span>
-          {format(parseISO(date), 'M月d日')} {weekdayName(parseISO(date))}
-        </span>
-        <button className="icon-btn" onClick={onClose}>
+        <span>{withWeekday(parseISO(date))}</span>
+        <button className="icon-btn" title={t('common.close')} onClick={onClose}>
           <Icon name="close" size={14} />
         </button>
       </div>
@@ -274,21 +279,22 @@ function DayList({
   onAdd: (s: AddState) => void
   onRowDown: (e: ReactPointerEvent<HTMLElement>, t: Task) => void
 }) {
+  const t = useT()
   const d = parseISO(date)
   return (
     <section className="cal-daylist" data-slide>
       <div className="cal-dl-head">
         <span className="cal-dl-date">
-          {format(d, 'M月d日')} {weekdayName(d)}
-          {date === todayStr() && ' · 今天'}
+          {withWeekday(d)}
+          {date === todayStr() && ` · ${t('common.today')}`}
         </span>
         {tasks.length > 0 && <span className="cal-dl-count">{tasks.length}</span>}
-        <button className="icon-btn cal-dl-add" title="添加任务" onClick={(e) => onAdd({ date, anchor: anchorOf(e.currentTarget) })}>
+        <button className="icon-btn cal-dl-add" title={t('calendar.addTask')} onClick={(e) => onAdd({ date, anchor: anchorOf(e.currentTarget) })}>
           <Icon name="plus" size={18} />
         </button>
       </div>
       <div className="cal-dl-body" key={date}>
-        {tasks.length === 0 && <div className="cal-dl-empty">暂无任务</div>}
+        {tasks.length === 0 && <div className="cal-dl-empty">{t('calendar.noTasks')}</div>}
         {tasks.map((t) => (
           <div key={t.id} className={'cal-dl-item' + (dragId === t.id ? ' cal-src' : '')} data-id={t.id} onPointerDownCapture={(e) => onRowDown(e, t)} onDragStartCapture={noNativeDrag}>
             <TaskRow task={t} showList />
@@ -301,13 +307,14 @@ function DayList({
 
 // ---------------- agenda ----------------
 function AgendaView({ cursor, byDay, onAdd }: { cursor: Date; byDay: Map<string, Task[]>; onAdd: (s: AddState) => void }) {
+  const t = useT()
   const today = todayStr()
   const days = eachDayOfInterval({ start: startOfMonth(cursor), end: endOfMonth(cursor) })
     .map(fmt)
     .filter((ds) => byDay.has(ds) || ds === today)
   return (
     <div className="cal-agenda" data-slide>
-      {days.length === 0 && <div className="empty">本月没有安排任务</div>}
+      {days.length === 0 && <div className="empty">{t('calendar.agendaEmpty')}</div>}
       {days.map((ds) => {
         const d = parseISO(ds)
         const list = byDay.get(ds) ?? []
@@ -316,15 +323,15 @@ function AgendaView({ cursor, byDay, onAdd }: { cursor: Date; byDay: Map<string,
             <div className="cal-agenda-head">
               <span className="num">{d.getDate()}</span>
               <span className="wd">
-                {format(d, 'M月')} {weekdayName(d)}
-                {ds === today && ' · 今天'}
+                {format(d, 'LLL', { locale: dateFnsLocale() })} {fmtWeekday(d)}
+                {ds === today && ` · ${t('common.today')}`}
               </span>
-              <button className="icon-btn cal-agenda-add" title="添加任务" onClick={(e) => onAdd({ date: ds, anchor: { x: e.clientX - 280, y: e.clientY + 8, h: 16 } })}>
+              <button className="icon-btn cal-agenda-add" title={t('calendar.addTask')} onClick={(e) => onAdd({ date: ds, anchor: { x: e.clientX - 280, y: e.clientY + 8, h: 16 } })}>
                 <Icon name="plus" size={16} />
               </button>
             </div>
             <div className="cal-agenda-list">
-              {list.length === 0 && <div className="cal-agenda-none">暂无任务</div>}
+              {list.length === 0 && <div className="cal-agenda-none">{t('calendar.noTasks')}</div>}
               {list.map((t) => (
                 <TaskRow key={t.id} task={t} showList />
               ))}
@@ -340,9 +347,10 @@ function AgendaView({ cursor, byDay, onAdd }: { cursor: Date; byDay: Map<string,
 export default function CalendarView() {
   const data = useData()
   const ui = useUI()
+  const t = useT()
   const phone = usePhone()
   const large = useMedia(LARGE)
-  const weekStartsOn = data.settings.weekStartsOn
+  const weekStartsOn = data.settings.weekStartsOn ?? localeWeekStart()
   const [mode, setModeState] = useState<Mode>(loadMode)
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [add, setAdd] = useState<AddState | null>(null)
@@ -470,14 +478,8 @@ export default function CalendarView() {
     freshTimer.current = window.setTimeout(() => setFresh(null), 800)
   }
 
-  let title = format(cursor, 'yyyy年M月')
-  if (mode === 'day') title = format(cursor, 'yyyy年M月d日') + ' ' + weekdayName(cursor)
-  else if (mode === 'week') {
-    const a = days[0]
-    const b = days[days.length - 1]
-    title = isSameMonth(a, b) ? format(a, 'yyyy年M月') : a.getFullYear() === b.getFullYear() ? `${format(a, 'yyyy年M月')} - ${format(b, 'M月')}` : `${format(a, 'yyyy年M月')} - ${format(b, 'yyyy年M月')}`
-  }
-  const stepLabel = mode === 'week' ? (phone ? '三天' : '周') : mode === 'day' ? '天' : '月'
+  const title = mode === 'day' ? withWeekday(cursor, fmtFullDate) : mode === 'week' ? monthSpan(days[0], days[days.length - 1]) : fmtMonthYear(cursor)
+  const [prevTitle, nextTitle] = NAV[mode === 'week' ? (phone ? 'threeDays' : 'week') : mode === 'day' ? 'day' : 'month']
 
   return (
     <div className={'module cal' + (phone ? ' phone' : '')} ref={rootRef}>
@@ -485,13 +487,13 @@ export default function CalendarView() {
         <div className="cal-top">
           <h2 className="cal-title">{title}</h2>
           <div className="cal-nav">
-            <button className="icon-btn" title={`上一${stepLabel}`} onClick={() => step(-1)}>
+            <button className="icon-btn" title={t(prevTitle)} onClick={() => step(-1)}>
               <Icon name="chevronLeft" size={18} />
             </button>
             <button className="btn cal-today" onClick={goToday}>
-              今天
+              {t('common.today')}
             </button>
-            <button className="icon-btn" title={`下一${stepLabel}`} onClick={() => step(1)}>
+            <button className="icon-btn" title={t(nextTitle)} onClick={() => step(1)}>
               <Icon name="chevronRight" size={18} />
             </button>
           </div>
@@ -499,7 +501,7 @@ export default function CalendarView() {
           <div className="cal-seg" role="tablist">
             {MODES.map((m) => (
               <button key={m.id} role="tab" aria-selected={mode === m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}>
-                {phone && m.phone ? m.phone : m.label}
+                {t(phone && m.phone ? m.phone : m.label)}
               </button>
             ))}
           </div>
@@ -510,7 +512,7 @@ export default function CalendarView() {
               <MonthView cursor={cursor} byDay={byDay} weekStartsOn={weekStartsOn} compact={phone} chipH={large ? 23 : 21} fresh={fresh} onAdd={setAdd} onPick={go} />
             )}
             {(mode === 'week' || mode === 'day') && (
-              <TimeGrid days={days} byDay={byDay} hourH={phone ? 52 : large ? 56 : 48} labelW={phone ? 40 : 56} add={add} fresh={fresh} onAdd={setAdd} />
+              <TimeGrid days={days} byDay={byDay} hourH={phone ? 52 : large ? 56 : 48} labelW={(phone ? 40 : 56) + (twelveHour() ? 16 : 0)} add={add} fresh={fresh} onAdd={setAdd} />
             )}
             {mode === 'agenda' && <AgendaView cursor={cursor} byDay={byDay} onAdd={setAdd} />}
           </div>

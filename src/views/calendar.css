@@ -10,7 +10,7 @@
   height: 100%;
 }
 
-/* 顶部栏 */
+/* Top bar */
 .cal-top {
   display: flex;
   align-items: center;
@@ -77,7 +77,7 @@
   flex-direction: column;
 }
 
-/* 任务条 */
+/* Task bars */
 .cal-task {
   --c: var(--primary);
   position: relative;
@@ -151,7 +151,7 @@
   border-color: var(--p-none);
 }
 
-/* 时间轴里的任务块 */
+/* Blocks in the time grid */
 .cal-task.block {
   height: 100%;
   align-items: flex-start;
@@ -164,6 +164,9 @@
 .cal-task.block .cal-cb {
   margin-top: 2px;
 }
+.cal-block-wrap.short .cal-task-range {
+  display: none;
+}
 .cal-task.block .cal-task-range {
   width: 100%;
   padding-left: 16px;
@@ -173,7 +176,7 @@
   overflow: hidden;
 }
 
-/* 月视图 */
+/* Month view */
 .cal-month {
   flex: 1;
   min-height: 0;
@@ -296,7 +299,7 @@
   line-height: 24px;
 }
 
-/* 快速新建 */
+/* Quick add */
 .cal-add-pop {
   padding: 10px;
 }
@@ -306,7 +309,7 @@
   margin-bottom: 6px;
 }
 
-/* 周 / 日视图 */
+/* Week / day view */
 .cal-time {
   flex: 1;
   min-height: 0;
@@ -365,6 +368,9 @@
   color: var(--text-3);
   text-align: right;
   padding: 6px 8px 0 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 .cal-allday-cell {
   border-left: 1px solid var(--border);
@@ -392,6 +398,7 @@
 .cal-hour-label {
   position: absolute;
   right: 8px;
+  white-space: nowrap;
   transform: translateY(-50%);
   font-size: 11px;
   color: var(--text-3);
@@ -432,7 +439,7 @@
   background: #ff4d4f;
 }
 
-/* 列表（议程）视图 */
+/* List (agenda) view */
 .cal-agenda {
   flex: 1;
   min-height: 0;

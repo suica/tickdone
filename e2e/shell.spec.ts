@@ -41,6 +41,10 @@ async function touch(page: Page) {
   }
 }
 
+/** Resolves once the element has no running animations (e.g. a row gliding back after a cancelled drag). */
+const settled = (page: Page, selector: string, nth = 0) =>
+  expect.poll(() => page.locator(selector).nth(nth).evaluate((el) => el.getAnimations().length)).toBe(0)
+
 const centerOf = async (page: Page, selector: string, nth = 0) => {
   const b = (await page.locator(selector).nth(nth).boundingBox())!
   return { x: b.x + b.width / 2, y: b.y + b.height / 2 }
@@ -56,10 +60,14 @@ test.describe('desktop', () => {
     await page.mouse.move(grip.x, grip.y)
     await page.mouse.down()
     for (let i = 1; i <= 8; i++) await page.mouse.move(grip.x, grip.y + ((last.y - grip.y + 12) * i) / 8)
+    await expect(page.locator('.subtask.dragging')).toHaveCount(1)
     await expect(page.locator('.subtask-line')).toHaveCount(1)
     await page.keyboard.press('Escape')
     await page.mouse.up()
+    await expect(page.locator('.subtask.dragging')).toHaveCount(0)
     await expect.poll(() => subtaskTitles(page)).toEqual(ORDER)
+    // the cancelled row glides back to its slot; grab it again once it is there
+    await settled(page, '.subtask')
 
     await page.mouse.move(grip.x, grip.y)
     await page.mouse.down()
@@ -98,10 +106,16 @@ test.describe('desktop', () => {
   })
 })
 
+// Runs in the desktop project with a phone context (412x839, touch, mobile viewport).
 const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = devices['Pixel 7']
 
-test.describe('phone', () => {
+test.describe('phone (Pixel 7 emulation)', () => {
   test.use({ viewport, userAgent, deviceScaleFactor, isMobile, hasTouch })
+
+  test('the phone context is in effect', async ({ page }) => {
+    await page.goto('/')
+    expect(await page.evaluate(() => [innerWidth, matchMedia('(max-width: 767px)').matches, matchMedia('(pointer: coarse)').matches, navigator.maxTouchPoints > 0])).toEqual([412, true, true, true])
+  })
 
   test('bottom bar, edge-swipe drawer with search/settings/GitHub, full-screen detail and bottom sheet', async ({ page }) => {
     await page.goto('/')
@@ -112,10 +126,16 @@ test.describe('phone', () => {
     const t = await touch(page)
     const vw = page.viewportSize()!.width
     await t.drag({ x: 6, y: 400 }, { x: vw - 60, y: 405 })
-    await expect(page.locator('.drawer-layer.open')).toBeVisible()
+    await expect(page.locator('.drawer-layer.open:not([inert])')).toBeVisible()
     for (const name of ['搜索', '设置', 'GitHub']) await expect(page.locator(`.drawer-head [aria-label="${name}"]`)).toBeVisible()
-    await page.locator('.drawer-mask').tap({ position: { x: vw - 20, y: 300 } })
-    await expect(page.locator('.drawer-layer[inert]')).toHaveCount(1)
+    // wait for the slide-in to finish
+    await expect.poll(() => page.locator('.drawer').evaluate((el) => getComputedStyle(el).transform)).toBe('none')
+    // Headless Chromium can drop a tap that comes within a few hundred ms of a swipe that started on a
+    // touch-action:none element (here the edge strip), so tap again until the tap gets through.
+    await expect(async () => {
+      await page.locator('.drawer-mask').tap({ position: { x: vw - 20, y: 300 }, timeout: 1000 })
+      await expect(page.locator('.drawer-layer[inert]')).toHaveCount(1, { timeout: 700 })
+    }).toPass({ timeout: 8000 })
 
     await page.locator('.task-row .task-meta').first().tap()
     const sheetPage = page.locator('.detail-page')
@@ -124,6 +144,12 @@ test.describe('phone', () => {
     const sheet = page.locator('.sheet-layer .popover.sheet')
     await expect(sheet).toBeVisible()
     await expect.poll(async () => Math.round((await sheet.boundingBox())!.width)).toBe(vw)
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.sheet-layer')).toHaveCount(0)
+    // a popover given a fixed width (the date picker asks for 260px) still spans the screen as a sheet
+    await page.locator('.detail-date').tap()
+    await expect(page.locator('.sheet-layer .popover.sheet.dp')).toBeVisible()
+    await expect.poll(async () => Math.round((await page.locator('.popover.sheet.dp').boundingBox())!.width)).toBe(vw)
     await page.keyboard.press('Escape')
     await expect(page.locator('.sheet-layer')).toHaveCount(0)
     await page.locator('.detail-back').tap()

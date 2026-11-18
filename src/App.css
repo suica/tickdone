@@ -67,7 +67,10 @@
 }
 
 /* ---------- Phone: bottom module bar ---------- */
+/* Below every overlay: habit detail (500), task detail page (600), drawer (700), sheets (1000). */
 .tabbar {
+  position: relative;
+  z-index: 100;
   flex-shrink: 0;
   display: flex;
   height: calc(var(--tabbar-h) + var(--safe-b));

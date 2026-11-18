@@ -42,7 +42,7 @@
 TickDone is a free, open-source to-do list and time manager that runs in your browser. Jot tasks down in plain words, see them on a calendar, sort them by urgency and importance, work through them with a focus timer and keep your habits going, all in one place.
 
 > [!NOTE]
-> **Your data stays with you.** Everything is saved in your browser's local storage: there is no account, no sign-up and no server, and nothing you type leaves your device. You can export a backup file at any time from Settings.
+> **Your data stays with you.** Everything is saved in your browser's local storage: there is no account and no sign-up, and your tasks never leave your device. The only thing that goes through TickDone's server is a calendar subscription address, which a small proxy fetches for you without storing anything. You can export a backup file at any time from Settings.
 
 ## ✨ Features
 

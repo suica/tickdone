@@ -42,7 +42,7 @@
 TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abierto que funciona en tu navegador. Apunta tus tareas tal como las dirías, organízalas en el calendario, clasifícalas por urgencia e importancia, sácalas adelante con un temporizador de concentración y mantén tus hábitos, todo en un mismo lugar.
 
 > [!NOTE]
-> **Tus datos son tuyos.** Todo se guarda en el almacenamiento local de tu navegador: no hay cuenta, ni registro, ni servidor, y nada de lo que escribes sale de tu dispositivo. Puedes exportar una copia de seguridad cuando quieras desde Ajustes.
+> **Tus datos son tuyos.** Todo se guarda en el almacenamiento local de tu navegador: no hay cuenta ni registro, y tus tareas nunca salen de tu dispositivo. Lo único que pasa por el servidor de TickDone es la dirección de un calendario al que te suscribes, que un pequeño proxy descarga por ti sin guardar nada. Puedes exportar una copia de seguridad cuando quieras desde Ajustes.
 
 ## ✨ Funciones
 

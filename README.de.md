@@ -42,7 +42,7 @@
 TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die in deinem Browser läuft. Schreib Aufgaben einfach so auf, wie sie dir einfallen, plane sie im Kalender, ordne sie nach Dringlichkeit und Wichtigkeit, arbeite sie mit dem Fokus-Timer ab und bleib bei deinen Gewohnheiten – alles an einem Ort.
 
 > [!NOTE]
-> **Deine Daten bleiben bei dir.** Alles wird im lokalen Speicher deines Browsers gesichert: kein Konto, keine Anmeldung, kein Server, und nichts, was du eingibst, verlässt dein Gerät. Eine Sicherungsdatei kannst du jederzeit in den Einstellungen exportieren.
+> **Deine Daten bleiben bei dir.** Alles wird im lokalen Speicher deines Browsers gesichert: kein Konto, keine Anmeldung, und deine Aufgaben verlassen nie dein Gerät. Über den Server von TickDone läuft nur die Adresse eines abonnierten Kalenders: Ein kleiner Proxy ruft ihn für dich ab und speichert nichts. Eine Sicherungsdatei kannst du jederzeit in den Einstellungen exportieren.
 
 ## ✨ Funktionen
 

@@ -51,6 +51,34 @@ Your data stays in your browser (localStorage). There is no account and nothing 
 | `Esc` | Close task details |
 | `?` | Show all shortcuts |
 
+## Roadmap
+
+Each item links to its issue. Ticked items are live at [tickdone.pages.dev](https://tickdone.pages.dev).
+
+- [x] Tasks, lists, tags, quick add, calendar, matrix, focus timer and habits
+- [x] CI with unit and end-to-end tests ([#7](https://github.com/suica/tickdone/issues/7))
+- [x] Open source: README in 10 languages, MIT license, project rules ([#10](https://github.com/suica/tickdone/issues/10))
+- [ ] Layouts for phones, tablets and large screens ([#8](https://github.com/suica/tickdone/issues/8))
+- [ ] Drag and drop everywhere ([#9](https://github.com/suica/tickdone/issues/9))
+- [ ] Motion ([#3](https://github.com/suica/tickdone/issues/3))
+- [ ] GitHub link and About in the app ([#4](https://github.com/suica/tickdone/issues/4))
+- [ ] Interface in 10 languages ([#14](https://github.com/suica/tickdone/issues/14))
+- [ ] UI polish, screen by screen ([#11](https://github.com/suica/tickdone/issues/11))
+- [ ] Multi-select and batch edit ([#15](https://github.com/suica/tickdone/issues/15))
+- [ ] Keyboard navigation in task lists ([#16](https://github.com/suica/tickdone/issues/16))
+- [ ] Reminder notifications ([#17](https://github.com/suica/tickdone/issues/17))
+- [ ] Install as an app and work offline ([#18](https://github.com/suica/tickdone/issues/18))
+- [ ] Saved filters ([#19](https://github.com/suica/tickdone/issues/19))
+- [ ] Statistics for tasks, focus and habits ([#20](https://github.com/suica/tickdone/issues/20))
+- [ ] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))
+- [ ] Timeline view ([#22](https://github.com/suica/tickdone/issues/22))
+- [ ] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
+- [ ] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
+- [ ] Accessibility ([#25](https://github.com/suica/tickdone/issues/25))
+- [ ] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
+- [ ] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))
+- [ ] Calendar: plan undated tasks, agenda view ([#28](https://github.com/suica/tickdone/issues/28))
+
 ## Development
 
 Requires Node.js 24.

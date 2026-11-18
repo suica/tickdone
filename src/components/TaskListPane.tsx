@@ -125,11 +125,31 @@ export function TaskListPane() {
     if (prefs.groupBy !== 'section') setPrefs({ groupBy: 'section' })
   }
 
+  const setSettings = (p: Partial<AppData['settings']>) => setData((d) => ({ ...d, settings: { ...d.settings, ...p } }))
+  // View (lists only) / grouping and sorting / what each row shows / list actions
   const menuItems: MenuItem[] = [
     ...(list
       ? [
-          { label: t(kanban ? 'tasks.menu.listView' : 'tasks.menu.kanbanView'), icon: <Icon name={kanban ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(list.id, { view: kanban ? 'list' : 'kanban' }) },
-          { label: t('tasks.menu.addSection'), icon: <Icon name="plus" size={15} />, onClick: addSection },
+          {
+            render: (
+              <div className="menu-btn-row list-view-row">
+                <span className="menu-row-label">{t('tasks.menu.view')}</span>
+                {(['list', 'kanban'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    data-view={v}
+                    title={t(v === 'list' ? 'tasks.menu.viewList' : 'tasks.menu.viewKanban')}
+                    aria-label={t(v === 'list' ? 'tasks.menu.viewList' : 'tasks.menu.viewKanban')}
+                    aria-pressed={(list.view ?? 'list') === v}
+                    onClick={() => updateList(list.id, { view: v })}
+                  >
+                    <Icon name={v} size={17} />
+                  </button>
+                ))}
+              </div>
+            ),
+          },
           { divider: true },
         ]
       : []),
@@ -150,12 +170,15 @@ export function TaskListPane() {
       children: (['date', 'title', 'priority', 'custom'] as SortBy[]).map((s) => ({ label: t(SORT_NAMES[s]), checked: s === prefs.sortBy, onClick: () => setPrefs({ sortBy: s }) })),
     },
     { divider: true },
-    {
-      label: t(data.settings.showCompleted ? 'tasks.menu.hideCompleted' : 'tasks.menu.showCompleted'),
-      icon: <Icon name={data.settings.showCompleted ? 'eyeOff' : 'eye'} size={15} />,
-      onClick: () => setData((d) => ({ ...d, settings: { ...d.settings, showCompleted: !d.settings.showCompleted } })),
-    },
-    ...(list ? [{ divider: true }, { label: t('tasks.menu.editList'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: list.id } }) }] : []),
+    { label: t('tasks.menu.showCompleted'), icon: <Icon name="check" size={15} />, checked: data.settings.showCompleted, onClick: () => setSettings({ showCompleted: !data.settings.showCompleted }) },
+    { label: t('tasks.menu.showDetails'), icon: <Icon name="list" size={15} />, checked: !!data.settings.showDetails, onClick: () => setSettings({ showDetails: !data.settings.showDetails }) },
+    ...(list
+      ? [
+          { divider: true },
+          { label: t('tasks.menu.addSection'), icon: <Icon name="plus" size={15} />, onClick: addSection },
+          { label: t('tasks.menu.editList'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: list.id } }) },
+        ]
+      : []),
   ]
 
   return (

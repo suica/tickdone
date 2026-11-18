@@ -245,4 +245,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': 'Im Moment leben',
   'misc.habit.tpl.skincare': 'Hautpflege',
   'misc.habit.tpl.skincare.motto': 'Gut zu sich sein',
+  'misc.settings.calendar': 'Kalender',
+  'misc.settings.showLunar': 'Mondkalender anzeigen',
+  'misc.settings.showLunarDesc': 'Chinesische Mondkalenderdaten und Sonnenperioden in der Monatsansicht',
+  'misc.settings.showWeekNumbers': 'Kalenderwochen anzeigen',
+  'misc.settings.showWeekNumbersDesc': 'Die Kalenderwoche am ersten Tag jeder Woche in der Monatsansicht',
 } satisfies Catalog<typeof en>

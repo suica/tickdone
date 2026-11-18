@@ -18,6 +18,26 @@
   align-items: center;
   flex-shrink: 0;
 }
+.matrix-head .matrix-page-more {
+  margin-right: -6px;
+}
+.matrix-help {
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.matrix-help-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.matrix-help ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-2);
+}
+.matrix-help li + li {
+  margin-top: 4px;
+}
 .matrix-head h1 {
   font-size: 18px;
   font-weight: 600;

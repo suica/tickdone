@@ -43,4 +43,7 @@ export default {
   'shell.toast.sectionDeleted': '分組已刪除，任務移到未分組',
   'shell.subtasks.placeholder': '子任務',
   'shell.subtasks.reordered': '已調整子任務順序',
+  'shell.task.copyLink': '複製連結',
+  'shell.toast.linkCopied': '已複製連結',
+  'shell.toast.taskNotFound': '該任務已不存在',
 } satisfies Catalog<typeof en>

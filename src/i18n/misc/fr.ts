@@ -245,4 +245,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': 'Vivre l’instant',
   'misc.habit.tpl.skincare': 'Soin de la peau',
   'misc.habit.tpl.skincare.motto': 'Prendre soin de soi',
+  'misc.settings.calendar': 'Calendrier',
+  'misc.settings.showLunar': 'Afficher le calendrier lunaire',
+  'misc.settings.showLunarDesc': 'Dates du calendrier lunaire chinois et termes solaires dans la vue mensuelle',
+  'misc.settings.showWeekNumbers': 'Afficher les numéros de semaine',
+  'misc.settings.showWeekNumbersDesc': 'Le numéro de semaine sur le premier jour de chaque semaine dans la vue mensuelle',
 } satisfies Catalog<typeof en>

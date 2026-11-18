@@ -257,4 +257,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': 'Be here now',
   'misc.habit.tpl.skincare': 'Skin care',
   'misc.habit.tpl.skincare.motto': 'Take care of yourself',
+  'misc.settings.calendar': 'Calendar',
+  'misc.settings.showLunar': 'Show lunar calendar',
+  'misc.settings.showLunarDesc': 'Chinese lunar dates and solar terms in the month view',
+  'misc.settings.showWeekNumbers': 'Show week numbers',
+  'misc.settings.showWeekNumbersDesc': 'The week number on the first day of each week in the month view',
 } as const

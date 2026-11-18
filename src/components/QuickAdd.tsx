@@ -49,7 +49,7 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
   const [focused, setFocused] = useState(false)
   const [manual, setManual] = useState<DateValue | null>(null)
   const [prio, setPrio] = useState<Priority | null>(null)
-  const [pop, setPop] = useState<{ kind: 'date' | 'prio' | 'list' | 'tag'; anchor: Anchor } | null>(null)
+  const [pop, setPop] = useState<{ kind: 'date' | 'prio' | 'list' | 'tag' | 'more'; anchor: Anchor } | null>(null)
   const [suggest, setSuggest] = useState<Suggest | null>(null)
   const [sIdx, setSIdx] = useState(0)
   const [listOverride, setListOverride] = useState<string | null>(null)
@@ -147,6 +147,17 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
   const active = sheet || focused || !!text || !!pop
   const hasDate = !!date.dueDate
   const ph = placeholder ?? t(sheet ? 'tasks.quickAdd.placeholderShort' : 'tasks.quickAdd.placeholder', { list: listName })
+
+  /** Add a token the parser understands (!high, ~list, #tag) at the end of the text. */
+  const insertToken = (token: string) => {
+    setText((v) => (v && !v.endsWith(' ') ? v + ' ' : v) + token + ' ')
+    requestAnimationFrame(() => {
+      const el = inputRef.current
+      if (!el) return
+      el.focus()
+      el.setSelectionRange(el.value.length, el.value.length)
+    })
+  }
 
   const addTag = (name: string) => {
     if (!parsed.tags.includes(name)) setText((v) => (v && !v.endsWith(' ') ? v + ' ' : v) + '#' + name + ' ')
@@ -254,6 +265,20 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
               {sheet && <span>{listName}</span>}
             </button>
           )}
+          {!sheet && !compact && (
+            <button
+              type="button"
+              className={'qa-more' + (pop?.kind === 'more' ? ' on' : '')}
+              title={t('tasks.quickAdd.more')}
+              aria-label={t('tasks.quickAdd.more')}
+              aria-haspopup="menu"
+              aria-expanded={pop?.kind === 'more'}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => (pop?.kind === 'more' ? setPop(null) : setPop({ kind: 'more', anchor: anchorOf(e.currentTarget) }))}
+            >
+              <Icon name="chevronDown" size={15} />
+            </button>
+          )}
           {sheet && (
             <button className="qa-send" title={t('common.add')} aria-label={t('common.add')} disabled={!parsed.title.trim()} onClick={submit}>
               <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -287,6 +312,65 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
                 inputRef.current?.focus()
               },
             }))}
+          />
+        </Popover>
+      )}
+      {pop?.kind === 'more' && (
+        <Popover anchor={pop.anchor} onClose={() => setPop(null)} className="qa-more-pop">
+          <MenuList
+            onClose={() => setPop(null)}
+            items={[
+              {
+                render: (
+                  <div className="menu-btn-row qa-prio-row">
+                    <span className="menu-row-label">{t('common.priority')}</span>
+                    {PRIORITY.map((p) => (
+                      <button
+                        key={p.v}
+                        type="button"
+                        data-priority={p.v}
+                        title={t(PRIORITY_NAME[p.v])}
+                        aria-label={t(PRIORITY_NAME[p.v])}
+                        aria-pressed={p.v === priority}
+                        onClick={() => {
+                          setPop(null)
+                          insertToken('!' + t(PRIORITY_TOKEN[p.v]))
+                        }}
+                      >
+                        <Flag color={p.color} size={16} />
+                      </button>
+                    ))}
+                  </div>
+                ),
+              },
+              { divider: true },
+              {
+                label: t('tasks.quickAdd.list'),
+                icon: <Icon name="move" size={15} />,
+                hint: data.lists.length ? undefined : '—',
+                children: data.lists.length
+                  ? data.lists.map((l) => ({
+                      label: l.name,
+                      icon: l.color ? <i className="dot" style={{ background: l.color }} /> : <Icon name="list" size={14} />,
+                      checked: l.id === listId,
+                      // the parser matches a list by the start of its name, so one word is enough
+                      onClick: () => insertToken('~' + l.name.split(/\s/)[0]),
+                    }))
+                  : [{ label: t('common.list.inbox'), disabled: true }],
+              },
+              {
+                label: t('tasks.quickAdd.tags'),
+                icon: <Icon name="tag" size={15} />,
+                children: data.tags.length
+                  ? data.tags.map((tag) => ({
+                      label: tag.name,
+                      icon: <Icon name="tag" size={14} style={tag.color ? { color: tag.color } : undefined} />,
+                      checked: parsed.tags.includes(tag.name),
+                      onClick: () => insertToken('#' + tag.name),
+                    }))
+                  : [{ label: t('tasks.quickAdd.noTags'), disabled: true }],
+              },
+            ]}
           />
         </Popover>
       )}

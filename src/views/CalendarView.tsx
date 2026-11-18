@@ -3,12 +3,12 @@ import { addDays, addMonths, addWeeks, eachDayOfInterval, endOfMonth, endOfWeek,
 import './calendar.css'
 import { getData, getUI, setUI, toast, updateTask, useData, useUI } from '../store'
 import { fmt, todayStr } from '../dates'
-import { useT, type MessageKey } from '../i18n'
+import { useLocale, useT, type MessageKey } from '../i18n'
 import { dateFnsLocale, fmtFullDate, fmtMonthDay, fmtMonthYear, fmtWeekday, localeWeekStart } from '../i18n/format'
 import type { Task } from '../types'
 import { LARGE, useMedia, usePhone } from '../viewport'
 import { Icon } from '../components/Icon'
-import { anchorOf, Popover, type Anchor } from '../components/Popover'
+import { anchorOf, MenuList, Popover, type Anchor } from '../components/Popover'
 import { TaskDetail } from '../components/TaskDetail'
 import { TaskRow } from '../components/TaskRow'
 import { beginDrag, dragging, useTouchGuard } from './calDnd'
@@ -16,6 +16,8 @@ import { dur, easing, flyFrom, playSlides, snapshotSlides } from './calMotion'
 import { AddPopover, CalTask } from './calParts'
 import { TimeGrid } from './CalTimeGrid'
 import { dayLabel, isTyping, monthSpan, sortDay, twelveHour, useColorOf, withWeekday, type AddState } from './calUtil'
+import { capChips, weekNumber } from './monthCell'
+import { lunarLabel } from '../lunar'
 
 type Mode = 'month' | 'week' | 'day' | 'agenda'
 const MODES: { id: Mode; label: MessageKey; phone?: MessageKey }[] = [
@@ -24,6 +26,7 @@ const MODES: { id: Mode; label: MessageKey; phone?: MessageKey }[] = [
   { id: 'day', label: 'calendar.view.day' },
   { id: 'agenda', label: 'calendar.view.agenda' },
 ]
+const MODE_ICON: Record<Mode, string> = { month: 'calendar', week: 'week', day: 'today', agenda: 'list' }
 /** Titles of the previous / next buttons per view (the phone week view pages by three days). */
 const NAV: Record<'month' | 'week' | 'threeDays' | 'day', [MessageKey, MessageKey]> = {
   month: ['calendar.nav.prevMonth', 'calendar.nav.nextMonth'],
@@ -65,11 +68,16 @@ interface MonthProps {
   compact: boolean
   chipH: number
   fresh: string | null
+  /** Chinese lunar labels in simplified or traditional characters, or none. */
+  lunar: 'hans' | 'hant' | null
+  weekNumbers: boolean
   onAdd: (s: AddState) => void
   onPick: (d: Date) => void
+  /** "+N more": open that day in the day view. */
+  onOpenDay: (date: string) => void
 }
 
-function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, onPick }: MonthProps) {
+function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, lunar, weekNumbers, onAdd, onPick, onOpenDay }: MonthProps) {
   const colorOf = useColorOf()
   const t = useT()
   const days = eachDayOfInterval({ start: startOfWeek(startOfMonth(cursor), { weekStartsOn }), end: endOfWeek(endOfMonth(cursor), { weekStartsOn }) })
@@ -82,8 +90,6 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
     dragRef.current = d
     setDragState(d)
   }
-  const [more, setMore] = useState<{ date: string; anchor: Anchor } | null>(null)
-  const [moreAway, setMoreAway] = useState(false)
   const settle = useRef<{ id: string; day: string; from?: DOMRect } | null>(null)
   const today = todayStr()
   const picked = fmt(cursor)
@@ -110,14 +116,11 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
     if (mark && d) mark.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: d, easing: easing('--ease-out') })
   })
 
-  /** Drag a task (a bar, a row of the picked day, or a bar in the overflow list) onto another day. */
-  const startDrag = (e: ReactPointerEvent<HTMLElement>, task: Task, fromMore = false) => {
+  /** Drag a task (a bar or a row of the picked day) onto another day. */
+  const startDrag = (e: ReactPointerEvent<HTMLElement>, task: Task) => {
     beginDrag(e.nativeEvent, {
       source: e.currentTarget,
-      onStart: () => {
-        setDrag({ id: task.id, over: task.dueDate ?? null })
-        if (fromMore) setMoreAway(true)
-      },
+      onStart: () => setDrag({ id: task.id, over: task.dueDate ?? null }),
       onMove: (c) => {
         const cell = c.hit?.closest<HTMLElement>('.cal-cell[data-day]')
         const over = cell && gridRef.current?.contains(cell) ? cell.dataset.day! : null
@@ -133,32 +136,28 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
         toast(t('calendar.toast.movedToDay', { date: dayLabel(over) }), snap)
         return true
       },
-      onEnd: () => {
-        setDrag(null)
-        if (fromMore) {
-          setMoreAway(false)
-          setMore(null)
-        }
-      },
+      onEnd: () => setDrag(null),
     })
   }
 
   const pickedTasks = byDay.get(picked) ?? []
 
   return (
-    <div className={'cal-month' + (compact ? ' compact' : '')}>
+    <div className={'cal-month' + (compact ? ' compact' : '') + (lunar ? ' lunar' : '')}>
       <div className="cal-weekhead">
         {days.slice(0, 7).map((d) => (
           <div key={d.getDay()}>{fmtWeekday(d, compact ? 'narrow' : 'short')}</div>
         ))}
       </div>
       <div className="cal-grid" ref={gridRef} data-slide style={compact ? undefined : { gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
-        {days.map((d) => {
+        {days.map((d, i) => {
           const ds = fmt(d)
           const list = byDay.get(ds) ?? []
-          const overflow = list.length > fit
-          const shown = overflow ? list.slice(0, fit - 1) : list
+          const cap = capChips(list.length, fit)
+          const shown = list.slice(0, cap.shown)
           const dow = d.getDay()
+          const label = lunar ? lunarLabel(ds, lunar === 'hant') : undefined
+          const week = weekNumbers && i % 7 === 0 ? weekNumber(d, weekStartsOn) : 0
           return (
             <div
               key={ds}
@@ -179,6 +178,16 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
             >
               <div className="cal-cell-head">
                 <span className="cal-daynum">{d.getDate() === 1 && !isSameMonth(d, cursor) && !compact ? fmtMonthDay(d) : d.getDate()}</span>
+                {(week > 0 || label) && (
+                  <span className="cal-cell-sub">
+                    {week > 0 && (
+                      <span className="cal-weeknum" title={t('calendar.weekNumberTitle', { week })}>
+                        {t('calendar.weekNumber', { week })}
+                      </span>
+                    )}
+                    {label && <span className={'cal-lunar' + (label.term ? ' term' : '')}>{label.text}</span>}
+                  </span>
+                )}
               </div>
               {compact ? (
                 list.length > 0 && (
@@ -200,16 +209,16 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
                       onPointerDown={(e) => startDrag(e, t)}
                     />
                   ))}
-                  {overflow && (
+                  {cap.more > 0 && (
                     <button
                       className="cal-more"
+                      title={withWeekday(d)}
                       onClick={(e) => {
                         e.stopPropagation()
-                        const r = e.currentTarget.closest('.cal-cell')!.getBoundingClientRect()
-                        setMore({ date: ds, anchor: { x: r.left - 1, y: r.top - 1, h: 0 } })
+                        onOpenDay(ds)
                       }}
                     >
-                      +{list.length - shown.length}
+                      {t('calendar.more', { count: cap.more })}
                     </button>
                   )}
                 </div>
@@ -227,40 +236,6 @@ function MonthView({ cursor, byDay, weekStartsOn, compact, chipH, fresh, onAdd, 
           onRowDown={(e, t) => rowDown(e, (ev) => startDrag(ev, t))}
         />
       )}
-      {more && (
-        <Popover anchor={more.anchor} onClose={() => setMore(null)} width={240} className={'cal-more-pop' + (moreAway ? ' cal-away' : '')}>
-          <MoreList
-            date={more.date}
-            tasks={byDay.get(more.date) ?? []}
-            dragId={drag?.id ?? null}
-            onClose={() => setMore(null)}
-            onDown={(e, t) => startDrag(e, t, true)}
-          />
-        </Popover>
-      )}
-    </div>
-  )
-}
-
-/** Everything due on one day (opened from "+n" in a month cell); bars can be dragged out to other days. */
-function MoreList({ date, tasks, dragId, onClose, onDown }: { date: string; tasks: Task[]; dragId: string | null; onClose: () => void; onDown: (e: ReactPointerEvent<HTMLElement>, t: Task) => void }) {
-  const colorOf = useColorOf()
-  const t = useT()
-  const ref = useRef<HTMLDivElement>(null)
-  useTouchGuard(ref)
-  return (
-    <div ref={ref}>
-      <div className="cal-more-head">
-        <span>{withWeekday(parseISO(date))}</span>
-        <button className="icon-btn" title={t('common.close')} onClick={onClose}>
-          <Icon name="close" size={14} />
-        </button>
-      </div>
-      <div className="cal-more-list">
-        {tasks.map((t) => (
-          <CalTask key={t.id} task={t} color={colorOf(t)} showTime className={dragId === t.id ? 'cal-src' : ''} onPointerDown={(e) => onDown(e, t)} />
-        ))}
-      </div>
     </div>
   )
 }
@@ -348,8 +323,12 @@ export default function CalendarView() {
   const data = useData()
   const ui = useUI()
   const t = useT()
+  const locale = useLocale()
   const phone = usePhone()
   const large = useMedia(LARGE)
+  const chinese = locale === 'zh-CN' || locale === 'zh-TW'
+  const lunar = (data.settings.showLunar ?? chinese) ? (locale === 'zh-TW' ? 'hant' : 'hans') : null
+  const [viewMenu, setViewMenu] = useState<Anchor | null>(null)
   const weekStartsOn = data.settings.weekStartsOn ?? localeWeekStart()
   const [mode, setModeState] = useState<Mode>(loadMode)
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
@@ -478,7 +457,29 @@ export default function CalendarView() {
     freshTimer.current = window.setTimeout(() => setFresh(null), 800)
   }
 
-  const title = mode === 'day' ? withWeekday(cursor, fmtFullDate) : mode === 'week' ? monthSpan(days[0], days[days.length - 1]) : fmtMonthYear(cursor)
+  /** "+N more" in a month cell: show that day on its own. */
+  const openDay = (ds: string) => {
+    setCursor(parseISO(ds))
+    setMode('day')
+  }
+  /** "+": a new task on the picked day, or today when it is in view, else the first day in view. */
+  const newTask = (el: Element) => {
+    const today = startOfDay(new Date())
+    const date = phone || mode === 'day' ? cursor : periodOf(today) === period ? today : mode === 'week' ? days[0] : cursor
+    setAdd({ date: fmt(date), anchor: anchorOf(el) })
+  }
+
+  // Phones leave the title less room next to the tools: short month names, no year on a single day.
+  const title =
+    mode === 'day'
+      ? withWeekday(cursor, phone ? fmtMonthDay : fmtFullDate)
+      : mode === 'week' || phone
+        ? monthSpan(mode === 'week' ? days[0] : cursor, mode === 'week' ? days[days.length - 1] : cursor, phone ? 'short' : 'long')
+        : fmtMonthYear(cursor)
+  const modeLabel = (m: Mode) => {
+    const x = MODES.find((y) => y.id === m)!
+    return phone && x.phone ? x.phone : x.label
+  }
   const [prevTitle, nextTitle] = NAV[mode === 'week' ? (phone ? 'threeDays' : 'week') : mode === 'day' ? 'day' : 'month']
 
   return (
@@ -486,30 +487,58 @@ export default function CalendarView() {
       <div className="cal-main">
         <div className="cal-top">
           <h2 className="cal-title">{title}</h2>
-          <div className="cal-nav">
-            <button className="icon-btn" title={t(prevTitle)} onClick={() => step(-1)}>
-              <Icon name="chevronLeft" size={18} />
-            </button>
-            <button className="btn cal-today" onClick={goToday}>
-              {t('common.today')}
-            </button>
-            <button className="icon-btn" title={t(nextTitle)} onClick={() => step(1)}>
-              <Icon name="chevronRight" size={18} />
-            </button>
-          </div>
           <div className="cal-spacer" />
-          <div className="cal-seg" role="tablist">
-            {MODES.map((m) => (
-              <button key={m.id} role="tab" aria-selected={mode === m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}>
-                {t(phone && m.phone ? m.phone : m.label)}
+          <div className="cal-tools">
+            <button className="btn cal-tool cal-add" title={t('calendar.newTask')} aria-label={t('calendar.newTask')} onClick={(e) => newTask(e.currentTarget)}>
+              <Icon name="plus" size={16} />
+            </button>
+            <button
+              className="btn cal-tool cal-view-btn"
+              title={t('calendar.changeView')}
+              aria-haspopup="menu"
+              aria-expanded={!!viewMenu}
+              onClick={(e) => setViewMenu(viewMenu ? null : anchorOf(e.currentTarget))}
+            >
+              <span>{t(modeLabel(mode))}</span>
+              <Icon name="chevronDown" size={14} />
+            </button>
+            <div className="cal-nav" role="group">
+              <button className="btn cal-tool" title={t(prevTitle)} aria-label={t(prevTitle)} onClick={() => step(-1)}>
+                <Icon name="chevronLeft" size={16} />
               </button>
-            ))}
+              <button className="btn cal-tool cal-today" onClick={goToday}>
+                {t('common.today')}
+              </button>
+              <button className="btn cal-tool" title={t(nextTitle)} aria-label={t(nextTitle)} onClick={() => step(1)}>
+                <Icon name="chevronRight" size={16} />
+              </button>
+            </div>
           </div>
         </div>
+        {viewMenu && (
+          <Popover anchor={viewMenu} onClose={() => setViewMenu(null)} className="cal-view-menu">
+            <MenuList
+              onClose={() => setViewMenu(null)}
+              items={MODES.map((m) => ({ label: t(modeLabel(m.id)), icon: <Icon name={MODE_ICON[m.id]} size={15} />, checked: mode === m.id, onClick: () => setMode(m.id) }))}
+            />
+          </Popover>
+        )}
         <div className="cal-body" ref={bodyRef}>
           <div key={mode} className={'cal-view' + (viewAnim ? ' cal-view-in' : '')}>
             {mode === 'month' && (
-              <MonthView cursor={cursor} byDay={byDay} weekStartsOn={weekStartsOn} compact={phone} chipH={large ? 23 : 21} fresh={fresh} onAdd={setAdd} onPick={go} />
+              <MonthView
+                cursor={cursor}
+                byDay={byDay}
+                weekStartsOn={weekStartsOn}
+                compact={phone}
+                chipH={large ? 23 : 21}
+                fresh={fresh}
+                lunar={lunar}
+                weekNumbers={!!data.settings.showWeekNumbers}
+                onAdd={setAdd}
+                onPick={go}
+                onOpenDay={openDay}
+              />
             )}
             {(mode === 'week' || mode === 'day') && (
               <TimeGrid days={days} byDay={byDay} hourH={phone ? 52 : large ? 56 : 48} labelW={(phone ? 40 : 56) + (twelveHour() ? 16 : 0)} add={add} fresh={fresh} onAdd={setAdd} />

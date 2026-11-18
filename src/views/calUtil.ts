@@ -42,10 +42,10 @@ export const timeLabel = (min: number) => fmtTime(toHM(min))
 /** "10:00 – 11:30" in the current language. */
 export const timeRange = (s: number, e: number) => t('calendar.timeRange', { start: timeLabel(s), end: timeLabel(e) })
 
-/** Month and year of a span of days: "November 2026", or "November – December 2026" across months. */
-export function monthSpan(a: Date, b: Date) {
+/** Month and year of a span of days: "November 2026", or "November – December 2026" across months ("Nov 2026" when short). */
+export function monthSpan(a: Date, b: Date, month: 'long' | 'short' = 'long') {
   try {
-    return new Intl.DateTimeFormat(getLocale(), { year: 'numeric', month: 'long' }).formatRange(a, b)
+    return new Intl.DateTimeFormat(getLocale(), { year: 'numeric', month }).formatRange(a, b)
   } catch {
     return fmtMonthYear(a)
   }
@@ -96,3 +96,4 @@ export const isTyping = (el: EventTarget | null) => {
   const n = el as HTMLElement | null
   return !!n && (n.tagName === 'INPUT' || n.tagName === 'TEXTAREA' || n.isContentEditable)
 }
+

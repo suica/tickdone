@@ -43,4 +43,7 @@ export default {
   'shell.toast.sectionDeleted': '섹션을 삭제했습니다. 할 일은 섹션 없음으로 이동했습니다.',
   'shell.subtasks.placeholder': '하위 할 일',
   'shell.subtasks.reordered': '하위 할 일 순서를 바꿨습니다',
+  'shell.task.copyLink': '링크 복사',
+  'shell.toast.linkCopied': '링크를 복사했습니다',
+  'shell.toast.taskNotFound': '이 작업은 더 이상 없습니다',
 } satisfies Catalog<typeof en>

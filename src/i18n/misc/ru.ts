@@ -245,4 +245,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': 'Живите моментом',
   'misc.habit.tpl.skincare': 'Уход за кожей',
   'misc.habit.tpl.skincare.motto': 'Берегите себя',
+  'misc.settings.calendar': 'Календарь',
+  'misc.settings.showLunar': 'Показывать лунный календарь',
+  'misc.settings.showLunarDesc': 'Даты китайского лунного календаря и сезоны в виде «Месяц»',
+  'misc.settings.showWeekNumbers': 'Показывать номера недель',
+  'misc.settings.showWeekNumbersDesc': 'Номер недели в первый день каждой недели в виде «Месяц»',
 } satisfies Catalog<typeof en>

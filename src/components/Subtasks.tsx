@@ -33,6 +33,10 @@ export function Subtasks({ task, ro, set, focusSub, setFocusSub, addSubAfter }: 
   const refocus = useRef<string | null>(null)
 
   useEffect(() => blockTouchScrollWhileDragging(listRef.current), [])
+  // A row asked for from outside (a task's menu) may already be drawn when it is picked: focus it then.
+  useEffect(() => {
+    if (focusSub) listRef.current?.querySelector<HTMLInputElement>(`[data-sub-id="${CSS.escape(focusSub)}"] input`)?.focus()
+  }, [focusSub])
 
   useLayoutEffect(() => {
     const list = listRef.current

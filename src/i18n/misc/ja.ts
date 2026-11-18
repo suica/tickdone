@@ -245,4 +245,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': '今に集中',
   'misc.habit.tpl.skincare': 'スキンケア',
   'misc.habit.tpl.skincare.motto': '自分を大切に',
+  'misc.settings.calendar': 'カレンダー',
+  'misc.settings.showLunar': '旧暦を表示',
+  'misc.settings.showLunarDesc': '月表示に中国の旧暦の日付と二十四節気を表示',
+  'misc.settings.showWeekNumbers': '週番号を表示',
+  'misc.settings.showWeekNumbersDesc': '月表示で各週の初日に週番号を表示',
 } satisfies Catalog<typeof en>

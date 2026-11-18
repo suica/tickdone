@@ -43,4 +43,7 @@ export default {
   'shell.toast.sectionDeleted': 'Раздел удалён. Задачи остались без раздела.',
   'shell.subtasks.placeholder': 'Подзадача',
   'shell.subtasks.reordered': 'Порядок подзадач изменён',
+  'shell.task.copyLink': 'Копировать ссылку',
+  'shell.toast.linkCopied': 'Ссылка скопирована',
+  'shell.toast.taskNotFound': 'Этой задачи больше нет',
 } satisfies Catalog<typeof en>

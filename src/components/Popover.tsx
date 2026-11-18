@@ -228,6 +228,8 @@ export interface MenuItem {
   onClick?: () => void
   /** Submenu */
   children?: MenuItem[]
+  /** A custom row (a row of buttons, a note) shown instead of a clickable item; the menu stays open. */
+  render?: ReactNode
 }
 
 /** Dropdown and context menu list */
@@ -244,6 +246,10 @@ export function MenuList({ items, onClose }: { items: MenuItem[]; onClose: () =>
       {items.map((it, i) =>
         it.divider ? (
           <div key={i} className="menu-divider" />
+        ) : it.render ? (
+          <div key={i} className="menu-custom" onMouseEnter={() => setSub(null)}>
+            {it.render}
+          </div>
         ) : (
           <div
             key={i}

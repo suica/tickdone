@@ -3,12 +3,13 @@ import { addDays, addWeeks, startOfWeek } from 'date-fns'
 import { fmt, todayStr } from '../dates'
 import { useT } from '../i18n'
 import { startFocus } from '../pomo'
-import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, updateList, updateTask, useData, useUI, wontDo } from '../store'
+import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
+import { copyText, taskLink } from '../taskLink'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
-import { PRIORITY_NAME } from './TaskDetail'
+import { editSubtaskSoon, PRIORITY_NAME } from './TaskDetail'
 import './ctxmenu.css'
 
 export function ContextMenu() {
@@ -89,6 +90,17 @@ export function ContextMenu() {
         </div>
       )
       items = [
+        {
+          label: tr('shell.detail.addSubtask'),
+          icon: <Icon name="subtask" size={15} />,
+          onClick: () => {
+            // a new empty checklist row, edited in the task's detail
+            const sub = { id: uid(), title: '', done: false }
+            editSubtaskSoon(sub.id)
+            set({ subtasks: [...t.subtasks, sub] })
+            setUI({ menu: undefined, selectedTaskId: t.id })
+          },
+        },
         { label: tr(t.pinned ? 'shell.task.unpin' : 'shell.task.pin'), icon: <Icon name="pin" size={15} />, onClick: () => set({ pinned: !t.pinned }) },
         { label: tr(t.status === -1 ? 'shell.task.reopen' : 'shell.task.wontDo'), icon: <Icon name="wontdo" size={15} />, onClick: () => (t.status === -1 ? set({ status: 0, completedAt: undefined }) : wontDo(t.id)) },
         {
@@ -117,6 +129,11 @@ export function ContextMenu() {
         },
         { label: tr('shell.task.startFocus'), icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(t.id); setUI({ module: 'pomo' }) } },
         { label: tr('shell.task.duplicate'), icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(t.id) },
+        {
+          label: tr('shell.task.copyLink'),
+          icon: <Icon name="link" size={15} />,
+          onClick: () => void copyText(taskLink(t.id)).then((ok) => ok && toast(tr('shell.toast.linkCopied'))),
+        },
         { divider: true },
         { label: tr('common.delete'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTask(t.id) },
       ]

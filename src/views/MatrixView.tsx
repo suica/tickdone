@@ -21,6 +21,15 @@ type Sort = 'date' | 'custom'
 const RANGE_NAME: Record<Range, MessageKey> = { today: 'common.today', week: 'common.list.next7Days', all: 'common.list.all' }
 const RANGE_KEY = 'tickdone:matrix-range'
 const SORT_KEY = 'tickdone:matrix-sort'
+const DONE_KEY = 'tickdone:matrix-done'
+
+function loadDone() {
+  try {
+    return localStorage.getItem(DONE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 // A quadrant is a priority: dropping a task into a quadrant gives it that priority.
 const QUADS: { p: Priority; no: string; name: MessageKey; color: string }[] = [
@@ -97,6 +106,17 @@ export default function MatrixView() {
   const [ranges, setRanges] = useState<Record<number, Range>>(() => load<Range>(RANGE_KEY, 'all'))
   const [sorts, setSorts] = useState<Record<number, Sort>>(() => load<Sort>(SORT_KEY, 'date'))
   const [menu, setMenu] = useState<{ p: Priority; anchor: Anchor } | null>(null)
+  const [pageMenu, setPageMenu] = useState<Anchor | null>(null)
+  const [help, setHelp] = useState<Anchor | null>(null)
+  const [showDone, setShowDoneState] = useState(loadDone)
+  const setShowDone = (v: boolean) => {
+    setShowDoneState(v)
+    try {
+      localStorage.setItem(DONE_KEY, v ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }
   const [drag, setDragState] = useState<DragState | null>(null)
   const dragRef = useRef<DragState | null>(null)
   const setDrag = (d: DragState | null) => {
@@ -125,11 +145,16 @@ export default function MatrixView() {
   const byQuad = useMemo(() => {
     const today = todayStr()
     const week = fmt(addDays(parseISO(today), 6))
-    const live = data.tasks.filter((t) => !t.deleted && t.status === 0 && !t.parentId)
+    const live = data.tasks.filter((t) => !t.deleted && !t.parentId && (t.status === 0 || (showDone && t.status === 2)))
     const m: Record<number, Task[]> = {}
-    for (const q of QUADS) m[q.p] = sortTasks(live.filter((t) => t.priority === q.p && inRange(t, ranges[q.p], today, week)), sorts[q.p] === 'custom' ? 'custom' : 'date')
+    for (const q of QUADS) {
+      const mine = live.filter((t) => t.priority === q.p && inRange(t, ranges[q.p], today, week))
+      // completed tasks (when shown) follow the open ones, the latest first
+      const done = mine.filter((t) => t.status !== 0).sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))
+      m[q.p] = [...sortTasks(mine.filter((t) => t.status === 0), sorts[q.p] === 'custom' ? 'custom' : 'date'), ...done]
+    }
     return m
-  }, [data.tasks, ranges, sorts])
+  }, [data.tasks, ranges, sorts, showDone])
   const byQuadRef = useRef(byQuad)
   useLayoutEffect(() => {
     byQuadRef.current = byQuad
@@ -227,6 +252,10 @@ export default function MatrixView() {
       <div className="matrix-main">
         <div className="matrix-head">
           <h1>{t('common.module.matrix')}</h1>
+          <div style={{ flex: 1 }} />
+          <button className="icon-btn matrix-page-more" title={t('common.more')} aria-label={t('common.more')} onClick={(e) => setPageMenu(anchorOf(e.currentTarget))}>
+            <Icon name="more" size={20} stroke={2.6} />
+          </button>
         </div>
         <div className={'matrix-grid' + (expanded !== null ? ' has-expanded' : '')} ref={gridRef}>
           {QUADS.map((q) => {
@@ -310,6 +339,28 @@ export default function MatrixView() {
               { label: t('calendar.matrix.sortCustom'), icon: <Icon name="drag" size={16} />, checked: sorts[menu.p] === 'custom', onClick: () => setSort(menu.p, 'custom') },
             ]}
           />
+        </Popover>
+      )}
+      {pageMenu && (
+        <Popover anchor={pageMenu} onClose={() => setPageMenu(null)}>
+          <MenuList
+            onClose={() => setPageMenu(null)}
+            items={[
+              { label: t('calendar.matrix.showCompleted'), icon: <Icon name="check" size={15} />, checked: showDone, onClick: () => setShowDone(!showDone) },
+              { divider: true },
+              { label: t('calendar.matrix.howTo'), icon: <Icon name="info" size={15} />, onClick: () => setHelp(pageMenu) },
+            ]}
+          />
+        </Popover>
+      )}
+      {help && (
+        <Popover anchor={help} onClose={() => setHelp(null)} width={300} className="matrix-help">
+          <div className="matrix-help-title">{t('calendar.matrix.howTo')}</div>
+          <ul>
+            <li>{t('calendar.matrix.howTo1')}</li>
+            <li>{t('calendar.matrix.howTo2')}</li>
+            <li>{t('calendar.matrix.howTo3')}</li>
+          </ul>
         </Popover>
       )}
       {ui.selectedTaskId && <TaskDetail floating />}

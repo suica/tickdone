@@ -7,9 +7,10 @@ import { Drawer } from './components/Drawer'
 import { Sidebar } from './components/Sidebar'
 import { TaskListPane } from './components/TaskListPane'
 import { closeDetail, TaskDetail } from './components/TaskDetail'
-import { useT, type MessageKey } from './i18n'
+import { t as tr, useT, type MessageKey } from './i18n'
 import { GITHUB_URL } from './links'
-import { getUI, setUI, undoToast, useData, useUI, type Module } from './store'
+import { getData, getUI, setUI, toast, undoToast, useData, useUI, type Module } from './store'
+import { taskIdFromHash, viewOfTask } from './taskLink'
 import { usePhone } from './viewport'
 import CalendarView from './views/CalendarView'
 import MatrixView from './views/MatrixView'
@@ -30,6 +31,17 @@ const TABS = RAIL.filter((r) => r.id !== 'search')
 
 const THEME_COLOR = { light: '#ffffff', dark: '#1e1e1e' }
 
+/** Opens the task named in the address bar (#task=<id>), if any, then removes it from the address. */
+function openTaskFromHash() {
+  const id = taskIdFromHash(location.hash)
+  if (!id) return
+  history.replaceState(null, '', location.pathname + location.search)
+  const d = getData()
+  const task = d.tasks.find((x) => x.id === id)
+  if (!task) return toast(tr('shell.toast.taskNotFound'))
+  setUI({ module: 'tasks', view: viewOfTask(task, d.lists.map((l) => l.id)), selectedTaskId: id, menu: undefined, dialog: undefined, drawerOpen: false })
+}
+
 const openModule = (id: Module) => setUI({ module: id, selectedTaskId: undefined })
 
 export default function App() {
@@ -42,6 +54,13 @@ export default function App() {
     document.documentElement.dataset.theme = data.settings.theme
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[data.settings.theme] ?? THEME_COLOR.light)
   }, [data.settings.theme])
+
+  // A task link (#task=<id>) opens that task, on load and when the address changes.
+  useEffect(() => {
+    openTaskFromHash()
+    window.addEventListener('hashchange', openTaskFromHash)
+    return () => window.removeEventListener('hashchange', openTaskFromHash)
+  }, [])
 
   // The drawer belongs to the phone layout; picking a list or another module closes it.
   useEffect(() => {

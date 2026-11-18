@@ -43,4 +43,7 @@ export default {
   'shell.toast.sectionDeleted': 'Abschnitt gelöscht. Die Aufgaben sind jetzt ohne Abschnitt.',
   'shell.subtasks.placeholder': 'Teilaufgabe',
   'shell.subtasks.reordered': 'Teilaufgaben neu angeordnet',
+  'shell.task.copyLink': 'Link kopieren',
+  'shell.toast.linkCopied': 'Link kopiert',
+  'shell.toast.taskNotFound': 'Diese Aufgabe gibt es nicht mehr',
 } satisfies Catalog<typeof en>

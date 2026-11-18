@@ -109,6 +109,12 @@ export interface Settings {
   weekStartsOn: 0 | 1
   theme: 'light' | 'dark'
   showCompleted: boolean
+  /** Lunar dates and solar terms in the calendar; unset = on for Chinese, off otherwise. */
+  showLunar?: boolean
+  /** Week numbers in the month view. */
+  showWeekNumbers?: boolean
+  /** A preview of each task's notes under its title in task lists. */
+  showDetails?: boolean
 }
 
 export interface AppData {

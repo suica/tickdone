@@ -290,6 +290,32 @@
 .qa-tool.on {
   color: var(--primary);
 }
+/* The ∨ menu at the right end: priority, list and tag tokens */
+.qa-more {
+  height: 28px;
+  width: 24px;
+  margin-left: 2px;
+  padding-left: 4px;
+  border-left: 1px solid var(--border);
+  border-radius: 0 4px 4px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+}
+.qa-more svg {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.qa-more:hover,
+.qa-more.on {
+  color: var(--text);
+}
+.qa-more.on svg {
+  transform: rotate(180deg);
+}
+.qa-more-pop .menu {
+  min-width: 220px;
+}
 .qa-suggest {
   position: absolute;
   top: 100%;
@@ -450,6 +476,20 @@
 .task-row.selected .task-main,
 .task-row:hover .task-main {
   border-bottom-color: transparent;
+}
+/* "Show details": the notes under the title, below the meta when the row wraps */
+.task-notes {
+  order: 3;
+  flex: 1 0 100%;
+  min-width: 0;
+  margin-top: -8px;
+  padding-bottom: 7px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .task-title-wrap {
   flex: 1 1 160px;

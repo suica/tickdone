@@ -43,4 +43,7 @@ export default {
   'shell.toast.sectionDeleted': 'セクションを削除しました。タスクはセクションなしになりました。',
   'shell.subtasks.placeholder': 'サブタスク',
   'shell.subtasks.reordered': 'サブタスクを並べ替えました',
+  'shell.task.copyLink': 'リンクをコピー',
+  'shell.toast.linkCopied': 'リンクをコピーしました',
+  'shell.toast.taskNotFound': 'このタスクはもう存在しません',
 } satisfies Catalog<typeof en>

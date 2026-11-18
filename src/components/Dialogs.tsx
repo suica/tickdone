@@ -600,6 +600,13 @@ function GeneralTab() {
           onChange={(v) => setSettings({ weekStartsOn: v })}
         />
       </Row>
+      <div className="dlg-sub">{t('misc.settings.calendar')}</div>
+      <Row label={t('misc.settings.showLunar')} desc={t('misc.settings.showLunarDesc')}>
+        <Switch checked={s.showLunar ?? (locale === 'zh-CN' || locale === 'zh-TW')} onChange={(v) => setSettings({ showLunar: v })} />
+      </Row>
+      <Row label={t('misc.settings.showWeekNumbers')} desc={t('misc.settings.showWeekNumbersDesc')}>
+        <Switch checked={!!s.showWeekNumbers} onChange={(v) => setSettings({ showWeekNumbers: v })} />
+      </Row>
       <div className="dlg-sub">{t('common.module.tasks')}</div>
       <Row label={t('misc.settings.showCompleted')} desc={t('misc.settings.showCompletedDesc')}>
         <Switch checked={s.showCompleted} onChange={(v) => setSettings({ showCompleted: v })} />

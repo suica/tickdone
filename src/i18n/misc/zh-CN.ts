@@ -245,4 +245,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': '专注当下',
   'misc.habit.tpl.skincare': '护肤',
   'misc.habit.tpl.skincare.motto': '爱自己',
+  'misc.settings.calendar': '日历',
+  'misc.settings.showLunar': '显示农历',
+  'misc.settings.showLunarDesc': '在月视图中显示农历日期和节气',
+  'misc.settings.showWeekNumbers': '显示周数',
+  'misc.settings.showWeekNumbersDesc': '在月视图每周的第一天显示周数',
 } satisfies Catalog<typeof en>

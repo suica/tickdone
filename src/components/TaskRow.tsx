@@ -78,6 +78,8 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const selected = ui.selectedTaskId === task.id
   const list = data.lists.find((l) => l.id === task.listId)
   const overdue = isOverdue(task) && !phase
+  // "Show details": the start of the notes under the title, on one line
+  const notes = task.content.trim().replace(/\s+/g, ' ').slice(0, 200)
   const done = (task.status !== 0 && phase !== 'uncheck') || phase === 'check'
   const subDone = task.subtasks.filter((s) => s.done).length
   // Every open date is blue; overdue ones are red.
@@ -197,6 +199,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
             </span>
           )}
         </div>
+        {data.settings.showDetails && notes && <div className="task-notes">{notes}</div>}
         <div className="task-meta">
           {task.pinned && <Icon name="pin" size={13} className="meta-ic meta-pin" />}
           {task.subtasks.length > 0 && (

@@ -245,4 +245,9 @@ export default {
   'misc.habit.tpl.lessPhone.motto': '지금 이 순간에 집중',
   'misc.habit.tpl.skincare': '피부 관리',
   'misc.habit.tpl.skincare.motto': '나를 아끼기',
+  'misc.settings.calendar': '캘린더',
+  'misc.settings.showLunar': '음력 표시',
+  'misc.settings.showLunarDesc': '월 보기에 중국 음력 날짜와 절기를 표시',
+  'misc.settings.showWeekNumbers': '주 번호 표시',
+  'misc.settings.showWeekNumbersDesc': '월 보기에서 각 주의 첫날에 주 번호를 표시',
 } satisfies Catalog<typeof en>

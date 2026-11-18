@@ -66,6 +66,12 @@ export function TaskDetail({ floating }: { floating?: boolean }) {
 }
 
 /** Closes the task detail. Floating panels slide out to the right, the phone sheet slides down. */
+/** A subtask to start editing as soon as the detail of its task shows it (set from outside the detail). */
+let pendingSubtask: string | null = null
+export function editSubtaskSoon(id: string) {
+  pendingSubtask = id
+}
+
 export function closeDetail() {
   const id = getUI().selectedTaskId
   if (!id) return
@@ -416,6 +422,14 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
   useEffect(() => {
     if (!task.title) titleRef.current?.querySelector('textarea')?.focus()
   }, [])
+
+  // "Add subtask" from a task's menu: edit the new row once it is here
+  useEffect(() => {
+    if (pendingSubtask && task.subtasks.some((x) => x.id === pendingSubtask)) {
+      setFocusSub(pendingSubtask)
+      pendingSubtask = null
+    }
+  }, [task.id, task.subtasks])
 
   const addSubAfter = (idx: number) => {
     const s: Subtask = { id: uid(), title: '', done: false }

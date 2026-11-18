@@ -41,4 +41,7 @@ export default {
   'shell.toast.sectionDeleted': 'Section deleted. Its tasks are now ungrouped.',
   'shell.subtasks.placeholder': 'Subtask',
   'shell.subtasks.reordered': 'Subtasks reordered',
+  'shell.task.copyLink': 'Copy link',
+  'shell.toast.linkCopied': 'Link copied',
+  'shell.toast.taskNotFound': 'This task no longer exists',
 } as const

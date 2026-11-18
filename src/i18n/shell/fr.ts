@@ -43,4 +43,7 @@ export default {
   'shell.toast.sectionDeleted': 'Section supprimée. Ses tâches ne sont plus dans une section.',
   'shell.subtasks.placeholder': 'Sous-tâche',
   'shell.subtasks.reordered': 'Sous-tâches réorganisées',
+  'shell.task.copyLink': 'Copier le lien',
+  'shell.toast.linkCopied': 'Lien copié',
+  'shell.toast.taskNotFound': 'Cette tâche n’existe plus',
 } satisfies Catalog<typeof en>

@@ -115,7 +115,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | 搜尋 |
 | `Alt 1`–`Alt 6` | 切換模組 |
 | `Ctrl/⌘ Z` | 復原（復原提示顯示期間） |
-| `Esc` | 關閉任務詳情 |
+| `Esc` | 取消選取，或關閉任務詳情 |
+| `↑` `↓` / `J` `K` | 清單中的上一個 / 下一個任務 |
+| `Shift ↑` `Shift ↓` | 擴大選取範圍 |
+| `Ctrl/⌘ Click` | 把任務加入選取，或從選取中移除 |
+| `Shift Click` | 選取一段任務 |
+| `Ctrl/⌘ A` | 選取清單中的所有任務 |
+| `Enter` | 編輯標題 |
+| `Space` / `Ctrl/⌘ Enter` | 完成或重新開啟 |
+| `1` `2` `3` `4` | 優先順序：高、中、低、無 |
+| `T` / `M` / `W` | 日期：今天、明天、下週 |
+| `D` / `Shift D` | 選擇日期 / 清除日期 |
+| `Delete` / `Backspace` | 移到垃圾桶（可在提示中復原） |
 | `?` | 顯示所有快速鍵 |
 
 ## 🌍 語言
@@ -137,8 +148,8 @@ npm run dev        # http://localhost:5173
 - [x] App 內的 GitHub 連結與「關於」頁面 ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] 介面支援 10 種語言 ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] 逐一打磨每個畫面 ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] 多選與批次編輯 ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] 任務列表的鍵盤導覽 ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] 多選與批次編輯 ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] 任務列表的鍵盤導覽 ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] 提醒通知 ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] 可安裝為 App 並離線使用 ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] 可儲存的篩選條件 ([#19](https://github.com/suica/tickdone/issues/19))

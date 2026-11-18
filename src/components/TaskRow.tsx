@@ -11,6 +11,7 @@ import { anchorOf, MenuList, Popover, type Anchor } from './Popover'
 import { useRowSwipe, type SwipeSide } from './rowSwipe'
 import { toggleWithMotion, useLinger } from './taskMotion'
 import { moveTaskTo, TaskDragContext } from './taskDnd'
+import { clickRow } from './batchActions'
 
 /** Check mark drawn with pathLength 1 so it can be stroked in. */
 function Tick() {
@@ -75,7 +76,11 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const phase = useLinger().get(task.id)?.phase
   // On touch screens the title is plain text: a tap opens the task instead of starting to edit it.
   const touch = useMedia('(pointer: coarse)')
-  const selected = ui.selectedTaskId === task.id
+  // While several tasks are selected (or in selection mode) the highlight shows the selection; the keyboard
+  // cursor (selectedTaskId) is shown by the focus ring.
+  const multi = ui.selectMode || ui.selectedIds.length > 0
+  const selected = multi ? ui.selectedIds.includes(task.id) : ui.selectedTaskId === task.id
+  const cursor = ui.selectedTaskId === task.id
   const list = data.lists.find((l) => l.id === task.listId)
   const overdue = isOverdue(task) && !phase
   // "Show details": the start of the notes under the title, on one line
@@ -88,7 +93,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
 
   // Phone list rows: swipe left for date / move / delete, swipe right for complete / pin.
   const phone = usePhone()
-  const swipeable = phone && touch && draggable && !!drag?.flipRows && task.status === 0
+  const swipeable = phone && touch && draggable && !!drag?.flipRows && task.status === 0 && !ui.selectMode
   const [pop, setPop] = useState<{ kind: 'date' | 'move'; anchor: Anchor; snap: ReturnType<typeof getData> } | null>(null)
   const actions: Record<SwipeSide, SwipeAction[]> = {
     end: [
@@ -132,7 +137,7 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const row = (
     <div
       ref={swipe.rowRef}
-      className={'task-row' + (selected ? ' selected' : '') + (done && !phase ? ' done' : '') + (phase ? ' is-' + phase + 'ing' : '') + (fold ? ' has-children' : '') + (swipeable ? ' swipeable' : '')}
+      className={'task-row' + (selected ? ' selected' : '') + (multi && selected ? ' multi' : '') + (cursor ? ' cursor' : '') + (done && !phase ? ' done' : '') + (phase ? ' is-' + phase + 'ing' : '') + (fold ? ' has-children' : '') + (swipeable ? ' swipeable' : '')}
       style={list?.color && depth === 0 ? ({ '--list-c': list.color } as CSSProperties) : undefined}
       onPointerDown={
         draggable
@@ -146,9 +151,17 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
       onPointerMove={swipeable ? swipe.handlers.onPointerMove : undefined}
       onPointerUp={swipeable ? swipe.handlers.onPointerUp : undefined}
       onPointerCancel={swipeable ? swipe.handlers.onPointerCancel : undefined}
-      onClick={() => {
+      onMouseDown={(e) => {
+        // Ctrl / ⌘ / Shift clicks select; they neither focus the title nor select text
+        if (e.shiftKey || e.ctrlKey || e.metaKey || ui.selectMode) e.preventDefault()
+      }}
+      onClick={(e) => {
         if (swipe.takeClick()) return
-        setUI({ selectedTaskId: task.id })
+        // multi-selection belongs to the task list; elsewhere a click just opens the task
+        if (!e.currentTarget.closest('.list-pane')) return setUI({ selectedTaskId: task.id })
+        clickRow(task.id, { toggle: e.ctrlKey || e.metaKey, range: e.shiftKey })
+        // the keyboard goes on from the clicked row (unless the click went into its title)
+        if (!(e.target as HTMLElement).closest('input')) e.currentTarget.focus({ preventScroll: true })
       }}
       onContextMenu={(e) => openTaskMenu(e, task.id)}
       data-task-id={task.id}
@@ -175,7 +188,13 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
           </span>
         )
       )}
-      <Checkbox task={task} />
+      {ui.selectMode ? (
+        <span className={'sel-check' + (selected ? ' on' : '')} aria-hidden>
+          <Icon name="check" size={12} stroke={3} />
+        </span>
+      ) : (
+        <Checkbox task={task} />
+      )}
       <div className="task-main">
         <div className="task-title-wrap">
           {touch ? (
@@ -189,7 +208,14 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
               onFocus={() => setUI({ selectedTaskId: task.id })}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur()
+                // Enter / Esc leave the title; the keyboard goes on from the row
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  const row = swipe.rowRef.current
+                  if (row) row.focus({ preventScroll: true })
+                  else (e.target as HTMLInputElement).blur()
+                }
               }}
             />
           )}

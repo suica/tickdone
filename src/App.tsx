@@ -9,7 +9,9 @@ import { TaskListPane } from './components/TaskListPane'
 import { closeDetail, TaskDetail } from './components/TaskDetail'
 import { t as tr, useT, type MessageKey } from './i18n'
 import { GITHUB_URL } from './links'
-import { getData, getUI, setUI, toast, undoToast, useData, useUI, type Module } from './store'
+import { clearSelection, getData, getSelection, getUI, setUI, toast, undoToast, useData, useUI, type Module } from './store'
+import { escapeSelection } from './components/batchActions'
+import { isBatch } from './selection'
 import { taskIdFromHash, viewOfTask } from './taskLink'
 import { usePhone } from './viewport'
 import { startFeedSync } from './feeds'
@@ -71,6 +73,12 @@ export default function App() {
     if (getUI().drawerOpen) setUI({ drawerOpen: false })
   }, [phone, ui.view, ui.module])
 
+  // A selection belongs to one list: another list or module ends it.
+  useEffect(() => {
+    const u = getUI()
+    if (u.selectMode || u.selectedIds.length) clearSelection(false)
+  }, [ui.view, ui.module])
+
   // Global keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -99,7 +107,11 @@ export default function App() {
         setUI({ module: 'tasks' })
         setTimeout(() => document.querySelector<HTMLInputElement>('.quick-add-input')?.focus(), 0)
       } else if (e.key === '?') setUI({ dialog: { kind: 'shortcuts' } })
-      else if (e.key === 'Escape' && ui.selectedTaskId) closeDetail()
+      else if (e.key === 'Escape') {
+        // a multi-selection or selection mode ends first; then the detail closes
+        if (escapeSelection()) return
+        if (ui.selectedTaskId) closeDetail()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -141,7 +153,8 @@ export default function App() {
         {ui.module === 'search' && <SearchView />}
       </div>
 
-      {phone && (
+      {/* in selection mode the action bar takes the tab bar's place */}
+      {phone && !(ui.module === 'tasks' && isBatch(getSelection(ui))) && (
         <nav className="tabbar">
           {TABS.map((r) => (
             <button key={r.id} className={'tabbar-btn' + (ui.module === r.id ? ' active' : '')} title={t(r.title)} aria-label={t(r.title)} aria-current={ui.module === r.id ? 'page' : undefined} onClick={() => openModule(r.id)}>

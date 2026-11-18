@@ -71,7 +71,7 @@ export function PhoneQuickAdd({ defaults }: { defaults: Partial<Task> }) {
     window.addEventListener('pointercancel', up)
   }
 
-  const hidden = !!ui.selectedTaskId || ui.drawerOpen || state !== 'closed'
+  const hidden = !!ui.selectedTaskId || ui.selectMode || ui.drawerOpen || state !== 'closed'
   return (
     <>
       {!hidden && (

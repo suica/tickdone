@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | Buscar |
 | `Alt 1`–`Alt 6` | Trocar de módulo |
 | `Ctrl/⌘ Z` | Desfazer, enquanto o aviso de desfazer estiver na tela |
-| `Esc` | Fechar os detalhes da tarefa |
+| `Esc` | Limpar a seleção ou fechar os detalhes da tarefa |
+| `↑` `↓` / `J` `K` | Tarefa anterior / próxima da lista |
+| `Shift ↑` `Shift ↓` | Ampliar a seleção |
+| `Ctrl/⌘ Click` | Adicionar uma tarefa à seleção ou tirá-la |
+| `Shift Click` | Selecionar um intervalo de tarefas |
+| `Ctrl/⌘ A` | Selecionar todas as tarefas da lista |
+| `Enter` | Editar o título |
+| `Space` / `Ctrl/⌘ Enter` | Concluir ou reabrir |
+| `1` `2` `3` `4` | Prioridade: alta, média, baixa, nenhuma |
+| `T` / `M` / `W` | Data: hoje, amanhã, semana que vem |
+| `D` / `Shift D` | Escolher uma data / remover a data |
+| `Delete` / `Backspace` | Mover para a lixeira (dá para desfazer no aviso) |
 | `?` | Mostrar todos os atalhos |
 
 ## 🌍 Idiomas
@@ -136,8 +147,8 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [x] Link do GitHub e seção Sobre no app ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] Interface em 10 idiomas ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] Refinamento da interface, tela por tela ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] Seleção múltipla e edição em lote ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] Navegação pelo teclado nas listas de tarefas ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] Seleção múltipla e edição em lote ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] Navegação pelo teclado nas listas de tarefas ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] Notificações de lembretes ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] Instalar como app e usar offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Filtros salvos ([#19](https://github.com/suica/tickdone/issues/19))

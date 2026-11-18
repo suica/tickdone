@@ -2,8 +2,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 
 import { format, parseISO } from 'date-fns'
 import { t as tr, useT, type MessageKey } from '../i18n'
 import { fmtMonthDay, fmtWeekday } from '../i18n/format'
-import { deleteTask, getData, setData, setUI, toast, uid, updateList, useData, useUI } from '../store'
-import type { AppData, GroupBy, SortBy, Task, TaskList, ViewPrefs } from '../types'
+import { clearSelection, getData, getSelection, getUI, setData, setSelection, setUI, toast, uid, updateList, useData, useUI } from '../store'
+import { isBatch, prune, selectAll, stepSelect } from '../selection'
+import type { AppData, GroupBy, Priority, SortBy, Task, TaskList, ViewPrefs } from '../types'
 import { usePhone } from '../viewport'
 import { defaultPrefs, groupTasks, sortTasks, tasksForView, viewDefaults, type Group } from '../views'
 import { Icon } from './Icon'
@@ -14,6 +15,8 @@ import { PhoneQuickAdd } from './QuickAddSheet'
 import { SMART_NAME, startCardDrag, startColumnDrag, startListDrag, TaskDragContext, type KanbanEnv, type ListEnv, type TaskDragApi } from './taskDnd'
 import { buildTree, countTree, type TaskTree } from './taskTree'
 import { TaskRow } from './TaskRow'
+import { BatchBar, BatchPops, type BatchPop } from './BatchPanel'
+import { batchIds, completeSelected, deleteSelected, quickDate, rowEl, setPriority, startSelecting, visibleOrder } from './batchActions'
 import './tasks.css'
 
 const GROUP_NAMES: Record<GroupBy, MessageKey> = {
@@ -89,6 +92,7 @@ export function TaskListPane() {
   const canAdd = !isTrash && !isDoneView
   const showList = !view.startsWith('list:') && view !== 'inbox'
   const kanban = list?.view === 'kanban'
+  const batch = isBatch(getSelection(ui))
 
   const setPrefs = (p: Partial<ViewPrefs>) => setUI((u) => ({ prefs: { ...u.prefs, [view]: { ...(u.prefs[view] ?? defaultPrefs(view)), ...p } } }))
   const collapsed = (k: string) => !!ui.collapsed[view + ':' + k]
@@ -106,16 +110,34 @@ export function TaskListPane() {
   const dnd = useMemo<TaskDragApi>(() => ({ start: (e, task, row) => startListDrag(e, task, row, env), flipRows: true }), [])
   const exitRef = useExitAnimations([view, groupBy, prefs.sortBy, kanban ? 'k' : 'l', data.settings.showCompleted].join('|'))
 
-  // Delete / Backspace deletes the selected task
+  // The keyboard in the list (see listKeys below); `d` opens the date picker on the selected rows.
+  const [datePop, setDatePop] = useState<{ pop: BatchPop; ids: string[] } | null>(null)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const el = e.target as HTMLElement
-      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return
-      if ((e.key === 'Delete' || e.key === 'Backspace') && getUIId()) deleteTask(getUIId()!)
+      // the focus ring follows the keyboard, not the mouse
+      if (NAV_KEYS.has(e.key)) document.querySelector('.list-pane')?.setAttribute('data-input', 'keys')
+      listKeys(e, (ids, anchor) => setDatePop({ pop: { kind: 'date', anchor }, ids }))
     }
+    const onPointer = () => document.querySelector('.list-pane')?.setAttribute('data-input', 'pointer')
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('pointerdown', onPointer, true)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('pointerdown', onPointer, true)
+    }
   }, [])
+
+  // Roving tabindex: Tab reaches the list once, on the cursor row (or the first row); arrows move inside it.
+  // Rows that left the view drop out of the selection.
+  useEffect(() => {
+    const order = visibleOrder()
+    const sel = getSelection()
+    const next = prune(order, sel)
+    if (next !== sel) setSelection(next)
+    const rows = [...document.querySelectorAll<HTMLElement>('.list-pane .task-row[data-task-id]')]
+    const cur = rows.find((r) => r.dataset.taskId === sel.cursor && order.includes(sel.cursor!)) ?? rows.find((r) => r.dataset.taskId === order[0])
+    for (const r of rows) r.tabIndex = r === cur ? 0 : -1
+  })
 
   const addSection = () => {
     if (!list) return
@@ -172,6 +194,8 @@ export function TaskListPane() {
     { divider: true },
     { label: t('tasks.menu.showCompleted'), icon: <Icon name="check" size={15} />, checked: data.settings.showCompleted, onClick: () => setSettings({ showCompleted: !data.settings.showCompleted }) },
     { label: t('tasks.menu.showDetails'), icon: <Icon name="list" size={15} />, checked: !!data.settings.showDetails, onClick: () => setSettings({ showDetails: !data.settings.showDetails }) },
+    { divider: true },
+    { label: t('tasks.menu.select'), icon: <Icon name="check" size={15} />, checked: ui.selectMode, onClick: () => (ui.selectMode ? clearSelection(false) : startSelecting()) },
     ...(list
       ? [
           { divider: true },
@@ -229,7 +253,10 @@ export function TaskListPane() {
           ref={exitRef}
           onClick={(e) => {
             const el = e.target as HTMLElement
-            if (el === e.currentTarget || el.classList.contains('list-content')) setUI({ selectedTaskId: undefined })
+            if (el === e.currentTarget || el.classList.contains('list-content')) {
+              if (ui.selectMode) return
+              setSelection({ ids: [], cursor: undefined, anchor: undefined, mode: false })
+            }
           }}
         >
           <div className="list-content" key={view}>
@@ -251,15 +278,103 @@ export function TaskListPane() {
           </div>
         </div>
       )}
-      {phone && canAdd && <PhoneQuickAdd defaults={kanban && list ? { listId: list.id } : viewDefaults(view)} />}
+      {phone && canAdd && !batch && <PhoneQuickAdd defaults={kanban && list ? { listId: list.id } : viewDefaults(view)} />}
+      {phone && batch && <BatchBar />}
+      {datePop && <BatchPops pop={datePop.pop} ids={datePop.ids} data={raw} onClose={() => setDatePop(null)} />}
     </main>
   )
 }
 
-const getUIId = () => {
-  // the selected row (the key handler ignores keys typed into inputs)
-  const sel = document.querySelector('.task-row.selected')
-  return sel?.getAttribute('data-task-id') ?? undefined
+const NAV_KEYS = new Set(['Tab', 'ArrowDown', 'ArrowUp', 'Home', 'End', 'j', 'k', 'J', 'K'])
+const PRIORITY_KEYS: Record<string, Priority> = { '1': 5, '2': 3, '3': 1, '4': 0 }
+
+/**
+ * Keys in the task list. They only act when the keyboard is in the list (on a row, or on nothing), never
+ * while typing in a field or while a dialog, menu or picker is open.
+ */
+function listKeys(e: KeyboardEvent, openDate: (ids: string[], anchor: Anchor) => void) {
+  const u = getUI()
+  if (u.module !== 'tasks' || u.dialog || u.menu || e.defaultPrevented || e.isComposing) return
+  if (document.querySelector('.popover, .sheet-layer, .modal-mask, .dlg-mask, .detail-sheet-layer, .qa-sheet')) return
+  const el = e.target as HTMLElement
+  if (el.closest('input, textarea, select, button, a, [contenteditable="true"]')) return
+  if (el !== document.body && !el.closest('.list-pane')) return
+  const mod = e.metaKey || e.ctrlKey
+  const key = e.key
+  const order = visibleOrder()
+  const move = (next: ReturnType<typeof stepSelect>) => {
+    e.preventDefault()
+    setSelection(next)
+    if (next.cursor) focusRow(next.cursor)
+  }
+
+  const lower = key.toLowerCase()
+  if (!mod && !e.altKey && (key === 'ArrowDown' || key === 'ArrowUp' || lower === 'j' || lower === 'k')) {
+    const down = key === 'ArrowDown' || lower === 'j'
+    return move(stepSelect(order, getSelection(), down ? 1 : -1, e.shiftKey))
+  }
+  if (!mod && !e.altKey && (key === 'Home' || key === 'End')) return move(stepSelect(order, getSelection(), key === 'Home' ? -order.length : order.length, e.shiftKey))
+  if (mod && !e.altKey && lower === 'a') {
+    if (!order.length) return
+    return move(selectAll(order, getSelection()))
+  }
+
+  const ids = batchIds()
+  if (!ids.length) return
+  const cursor = getUI().selectedTaskId
+  if ((key === 'Enter' && mod) || (key === ' ' && !mod && !e.altKey)) {
+    e.preventDefault()
+    return completeSelected(ids)
+  }
+  if (key === 'Enter' && !e.altKey && !e.shiftKey) {
+    // edit the title of the task under the cursor
+    if (!cursor) return
+    const input = rowEl(cursor)?.querySelector<HTMLInputElement>('input.task-title')
+    e.preventDefault()
+    if (input && !input.readOnly) {
+      input.focus()
+      input.setSelectionRange(input.value.length, input.value.length)
+    } else document.querySelector<HTMLTextAreaElement>('.detail-title')?.focus()
+    return
+  }
+  if ((key === 'Delete' || key === 'Backspace') && !e.altKey) {
+    e.preventDefault()
+    deleteSelected(ids)
+    const next = getUI().selectedTaskId
+    if (next) requestAnimationFrame(() => focusRow(next))
+    return
+  }
+  if (e.altKey) return
+  const prio = PRIORITY_KEYS[key] ?? (mod ? PRIORITY_KEYS[e.code?.replace('Digit', '') ?? ''] : undefined)
+  if (prio !== undefined && !e.shiftKey) {
+    e.preventDefault()
+    return setPriority(ids, prio)
+  }
+  if (mod) return
+  const k = lower
+  if (k === 'd' && e.shiftKey) {
+    e.preventDefault()
+    return quickDate(ids, 'clear')
+  }
+  if (e.shiftKey) return
+  if (k === 't' || k === 'm' || k === 'w') {
+    e.preventDefault()
+    return quickDate(ids, k === 't' ? 'today' : k === 'm' ? 'tomorrow' : 'nextWeek')
+  }
+  if (k === 'd') {
+    e.preventDefault()
+    const row = (cursor && ids.includes(cursor) ? rowEl(cursor) : null) ?? rowEl(ids[0])
+    openDate(ids, row ? anchorOf(row.querySelector('.task-main') ?? row) : { x: innerWidth / 2, y: innerHeight / 3 })
+  }
+}
+
+/** Puts the keyboard focus (and its ring) on a row and scrolls it into view. */
+function focusRow(id: string) {
+  const row = rowEl(id)
+  if (!row) return
+  row.tabIndex = 0
+  row.focus({ preventScroll: true })
+  row.scrollIntoView({ block: 'nearest' })
 }
 
 function sectionMenu(e: React.MouseEvent, listId: string | undefined, g: Pick<Group, 'patch'>) {

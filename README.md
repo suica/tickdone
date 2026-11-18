@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | Search |
 | `Alt 1`–`Alt 6` | Switch module |
 | `Ctrl/⌘ Z` | Undo, while the undo toast is showing |
-| `Esc` | Close task details |
+| `Esc` | Clear the selection, or close task details |
+| `↑` `↓` / `J` `K` | Previous / next task in the list |
+| `Shift ↑` `Shift ↓` | Extend the selection |
+| `Ctrl/⌘ Click` | Add a task to the selection, or take it out |
+| `Shift Click` | Select a range of tasks |
+| `Ctrl/⌘ A` | Select all tasks in the list |
+| `Enter` | Edit the title |
+| `Space` / `Ctrl/⌘ Enter` | Complete or reopen |
+| `1` `2` `3` `4` | Priority: high, medium, low, none |
+| `T` / `M` / `W` | Date: today, tomorrow, next week |
+| `D` / `Shift D` | Pick a date / clear the date |
+| `Delete` / `Backspace` | Move to the Trash (undo from the toast) |
 | `?` | Show all shortcuts |
 
 ## 🌍 Languages
@@ -136,8 +147,8 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [x] GitHub link and About in the app ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] Interface in 10 languages ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] UI polish, screen by screen ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] Multi-select and batch edit ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] Keyboard navigation in task lists ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] Multi-select and batch edit ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] Keyboard navigation in task lists ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] Reminder notifications ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] Install as an app and work offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Saved filters ([#19](https://github.com/suica/tickdone/issues/19))

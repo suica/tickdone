@@ -114,7 +114,18 @@ npm run dev        # http://localhost:5173
 | `Ctrl/⌘ F` | Buscar |
 | `Alt 1`–`Alt 6` | Cambiar de módulo |
 | `Ctrl/⌘ Z` | Deshacer, mientras se muestra el aviso para deshacer |
-| `Esc` | Cerrar los detalles de la tarea |
+| `Esc` | Quitar la selección o cerrar los detalles de la tarea |
+| `↑` `↓` / `J` `K` | Tarea anterior / siguiente de la lista |
+| `Shift ↑` `Shift ↓` | Ampliar la selección |
+| `Ctrl/⌘ Click` | Añadir una tarea a la selección o quitarla |
+| `Shift Click` | Seleccionar un rango de tareas |
+| `Ctrl/⌘ A` | Seleccionar todas las tareas de la lista |
+| `Enter` | Editar el título |
+| `Space` / `Ctrl/⌘ Enter` | Completar o reabrir |
+| `1` `2` `3` `4` | Prioridad: alta, media, baja, ninguna |
+| `T` / `M` / `W` | Fecha: hoy, mañana, la semana que viene |
+| `D` / `Shift D` | Elegir una fecha / quitar la fecha |
+| `Delete` / `Backspace` | Mover a la papelera (se deshace desde el aviso) |
 | `?` | Ver todos los atajos |
 
 ## 🌍 Idiomas
@@ -136,8 +147,8 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Enlace a GitHub y sección Acerca de en la app ([#4](https://github.com/suica/tickdone/issues/4))
 - [x] Interfaz en 10 idiomas ([#14](https://github.com/suica/tickdone/issues/14))
 - [x] Pulido de la interfaz, pantalla por pantalla ([#11](https://github.com/suica/tickdone/issues/11))
-- [ ] Selección múltiple y edición en lote ([#15](https://github.com/suica/tickdone/issues/15))
-- [ ] Navegación con el teclado en las listas de tareas ([#16](https://github.com/suica/tickdone/issues/16))
+- [x] Selección múltiple y edición en lote ([#15](https://github.com/suica/tickdone/issues/15))
+- [x] Navegación con el teclado en las listas de tareas ([#16](https://github.com/suica/tickdone/issues/16))
 - [ ] Notificaciones de recordatorios ([#17](https://github.com/suica/tickdone/issues/17))
 - [ ] Instalar como app y usar sin conexión ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Filtros guardados ([#19](https://github.com/suica/tickdone/issues/19))

@@ -1,21 +1,59 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 'react'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
+import { t as tr, useT, type MessageKey } from '../i18n'
+import { fmtMonthDay, fmtWeekday } from '../i18n/format'
 import { deleteTask, getData, setData, setUI, toast, uid, updateList, useData, useUI } from '../store'
 import type { AppData, GroupBy, SortBy, Task, TaskList, ViewPrefs } from '../types'
 import { usePhone } from '../viewport'
-import { defaultPrefs, groupTasks, sortTasks, tasksForView, viewDefaults, viewTitle, type Group } from '../views'
+import { defaultPrefs, groupTasks, sortTasks, tasksForView, viewDefaults, type Group } from '../views'
 import { Icon } from './Icon'
 import { maybeEnter, useExitAnimations, useLinger, withLinger } from './taskMotion'
 import { anchorOf, MenuList, Popover, type Anchor, type MenuItem } from './Popover'
 import { QuickAdd } from './QuickAdd'
 import { PhoneQuickAdd } from './QuickAddSheet'
-import { startCardDrag, startColumnDrag, startListDrag, TaskDragContext, type KanbanEnv, type ListEnv, type TaskDragApi } from './taskDnd'
+import { SMART_NAME, startCardDrag, startColumnDrag, startListDrag, TaskDragContext, type KanbanEnv, type ListEnv, type TaskDragApi } from './taskDnd'
 import { buildTree, countTree, type TaskTree } from './taskTree'
 import { TaskRow } from './TaskRow'
 import './tasks.css'
 
-const GROUP_NAMES: Record<GroupBy, string> = { date: '时间', list: '清单', priority: '优先级', tag: '标签', none: '无', section: '自定义分组' }
-const SORT_NAMES: Record<SortBy, string> = { date: '时间', title: '标题', priority: '优先级', custom: '自定义' }
+const GROUP_NAMES: Record<GroupBy, MessageKey> = {
+  date: 'tasks.groupBy.date',
+  list: 'tasks.groupBy.list',
+  priority: 'common.priority',
+  tag: 'tasks.groupBy.tag',
+  none: 'tasks.groupBy.none',
+  section: 'tasks.groupBy.section',
+}
+const SORT_NAMES: Record<SortBy, MessageKey> = { date: 'tasks.sortBy.date', title: 'tasks.sortBy.title', priority: 'common.priority', custom: 'tasks.sortBy.custom' }
+
+/** The heading of a view: smart list name, list name or #tag. */
+function viewName(view: string, d: AppData): string {
+  if (SMART_NAME[view]) return tr(SMART_NAME[view])
+  if (view.startsWith('list:')) return d.lists.find((l) => 'list:' + l.id === view)?.name ?? ''
+  if (view.startsWith('tag:')) return '#' + view.slice(4)
+  return ''
+}
+
+/** The heading of a group, from its key (see views.groupTasks); names that come from user data stay as they are. */
+function groupName(g: Group, groupBy: GroupBy, d: AppData): string {
+  if (groupBy === 'date') {
+    if (g.key === '0-overdue') return tr('common.overdue')
+    if (g.key === '1-today') return tr('common.today')
+    if (g.key === '2-tomorrow') return tr('common.tomorrow')
+    if (g.key === '3-week') return tr('common.list.next7Days')
+    if (g.key === '4-later') return tr('common.later')
+    if (g.key === '9-none') return tr('common.noDate')
+    if (g.key.startsWith('3-') && g.patch?.dueDate) {
+      const day = parseISO(g.patch.dueDate)
+      return fmtMonthDay(day) + ' ' + fmtWeekday(day)
+    }
+  }
+  if (groupBy === 'priority' && g.patch?.priority !== undefined) return tr(PRIORITY_NAME[g.patch.priority])
+  if (groupBy === 'list') return g.patch?.listId === 'inbox' || !g.patch?.listId ? tr('common.list.inbox') : (d.lists.find((l) => l.id === g.patch!.listId)?.name ?? g.name)
+  if (groupBy === 'tag') return g.key === '9' ? tr('tasks.group.noTag') : '#' + g.key.slice(1)
+  return g.name
+}
+const PRIORITY_NAME: Record<number, MessageKey> = { 5: 'common.priorityGroup.high', 3: 'common.priorityGroup.medium', 1: 'common.priorityGroup.low', 0: 'common.priorityGroup.none' }
 const NO_TREE: TaskTree = { roots: [], children: new Map() }
 
 function MenuIcon() {
@@ -29,6 +67,7 @@ function MenuIcon() {
 const toggleCollapsed = (key: string) => setUI((u) => ({ collapsed: { ...u.collapsed, [key]: !u.collapsed[key] } }))
 
 export function TaskListPane() {
+  const t = useT()
   const ui = useUI()
   const raw = useData()
   const linger = useLinger()
@@ -43,7 +82,7 @@ export function TaskListPane() {
   const groupBy: GroupBy = prefs.groupBy === 'section' && !list ? 'none' : prefs.groupBy
   const tree = useMemo(() => buildTree(sortTasks(open, prefs.sortBy)), [open, prefs.sortBy])
   const groups = useMemo(() => groupTasks(tree.roots, groupBy, data, view), [tree, groupBy, data, view])
-  const title = viewTitle(view, data)
+  const title = viewName(view, data)
   const isTrash = view === 'trash'
   const isDoneView = view === 'completed' || view === 'wontdo'
   const canAdd = !isTrash && !isDoneView
@@ -60,7 +99,7 @@ export function TaskListPane() {
       groupBy,
       sortBy: prefs.sortBy,
       setCustomSort: () => setPrefs({ sortBy: 'custom' }),
-      groups: new Map(groups.map((g) => [g.key, { name: g.name, patch: g.patch }])),
+      groups: new Map(groups.map((g) => [g.key, { name: groupName(g, groupBy, data), patch: g.patch }])),
     }
   })
   const dnd = useMemo<TaskDragApi>(() => ({ start: (e, task, row) => startListDrag(e, task, row, env), flipRows: true }), [])
@@ -79,7 +118,7 @@ export function TaskListPane() {
 
   const addSection = () => {
     if (!list) return
-    const name = prompt('分组名称', '新分组')
+    const name = prompt(t('tasks.section.name'), t('tasks.section.new'))
     if (!name) return
     updateList(list.id, { sections: [...list.sections, { id: uid(), name }] })
     if (prefs.groupBy !== 'section') setPrefs({ groupBy: 'section' })
@@ -88,45 +127,45 @@ export function TaskListPane() {
   const menuItems: MenuItem[] = [
     ...(list
       ? [
-          { label: kanban ? '切换为列表视图' : '切换为看板视图', icon: <Icon name={kanban ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(list.id, { view: kanban ? 'list' : 'kanban' }) },
-          { label: '添加分组', icon: <Icon name="plus" size={15} />, onClick: addSection },
+          { label: t(kanban ? 'tasks.menu.listView' : 'tasks.menu.kanbanView'), icon: <Icon name={kanban ? 'list' : 'kanban'} size={15} />, onClick: () => updateList(list.id, { view: kanban ? 'list' : 'kanban' }) },
+          { label: t('tasks.menu.addSection'), icon: <Icon name="plus" size={15} />, onClick: addSection },
           { divider: true },
         ]
       : []),
     {
-      label: '分组',
+      label: t('tasks.menu.groupBy'),
       icon: <Icon name="matrix" size={15} />,
-      hint: GROUP_NAMES[groupBy],
+      hint: t(GROUP_NAMES[groupBy]),
       children: (list ? (['section', 'date', 'priority', 'tag', 'none'] as GroupBy[]) : (['date', 'list', 'priority', 'tag', 'none'] as GroupBy[])).map((g) => ({
-        label: GROUP_NAMES[g],
+        label: t(GROUP_NAMES[g]),
         checked: g === groupBy,
         onClick: () => setPrefs({ groupBy: g }),
       })),
     },
     {
-      label: '排序',
+      label: t('tasks.menu.sortBy'),
       icon: <Icon name="sort" size={15} />,
-      hint: SORT_NAMES[prefs.sortBy],
-      children: (['date', 'title', 'priority', 'custom'] as SortBy[]).map((s) => ({ label: SORT_NAMES[s], checked: s === prefs.sortBy, onClick: () => setPrefs({ sortBy: s }) })),
+      hint: t(SORT_NAMES[prefs.sortBy]),
+      children: (['date', 'title', 'priority', 'custom'] as SortBy[]).map((s) => ({ label: t(SORT_NAMES[s]), checked: s === prefs.sortBy, onClick: () => setPrefs({ sortBy: s }) })),
     },
     { divider: true },
     {
-      label: data.settings.showCompleted ? '隐藏已完成' : '显示已完成',
+      label: t(data.settings.showCompleted ? 'tasks.menu.hideCompleted' : 'tasks.menu.showCompleted'),
       icon: <Icon name={data.settings.showCompleted ? 'eyeOff' : 'eye'} size={15} />,
       onClick: () => setData((d) => ({ ...d, settings: { ...d.settings, showCompleted: !d.settings.showCompleted } })),
     },
-    ...(list ? [{ divider: true }, { label: '编辑清单', icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: list.id } }) }] : []),
+    ...(list ? [{ divider: true }, { label: t('tasks.menu.editList'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'list', id: list.id } }) }] : []),
   ]
 
   return (
     <main className="list-pane">
       <header className="list-head">
         {phone ? (
-          <button className="icon-btn list-head-btn" title="清单" aria-label="打开侧栏" onClick={() => setUI({ drawerOpen: true })}>
+          <button className="icon-btn list-head-btn" title={t('tasks.header.openSidebar')} aria-label={t('tasks.header.openSidebar')} onClick={() => setUI({ drawerOpen: true })}>
             <MenuIcon />
           </button>
         ) : (
-          <button className="icon-btn list-head-btn" title={ui.sidebarHidden ? '展开侧边栏' : '收起侧边栏'} onClick={() => setUI({ sidebarHidden: !ui.sidebarHidden })}>
+          <button className="icon-btn list-head-btn" title={t(ui.sidebarHidden ? 'tasks.header.showSidebar' : 'tasks.header.hideSidebar')} onClick={() => setUI({ sidebarHidden: !ui.sidebarHidden })}>
             <Icon name="sidebar" size={18} />
           </button>
         )}
@@ -137,17 +176,17 @@ export function TaskListPane() {
             className="btn"
             style={{ height: 28 }}
             onClick={() => {
-              if (!confirm('确定清空垃圾桶？此操作无法撤销')) return
+              if (!confirm(t('tasks.trash.confirmEmpty'))) return
               const snap = getData()
-              setData((d) => ({ ...d, tasks: d.tasks.filter((t) => !t.deleted) }))
-              toast('垃圾桶已清空', snap)
+              setData((d) => ({ ...d, tasks: d.tasks.filter((x) => !x.deleted) }))
+              toast(t('tasks.trash.emptied'), snap)
             }}
           >
-            清空
+            {t('tasks.trash.empty')}
           </button>
         )}
         {!isTrash && !isDoneView && (
-          <button className="icon-btn list-head-btn" title="更多" onClick={(e) => setMenu(anchorOf(e.currentTarget))}>
+          <button className="icon-btn list-head-btn" title={t('common.more')} onClick={(e) => setMenu(anchorOf(e.currentTarget))}>
             <Icon name="more" size={20} stroke={2.6} />
           </button>
         )}
@@ -178,7 +217,7 @@ export function TaskListPane() {
             <TaskDragContext.Provider value={dnd}>
               {groups.map((g) =>
                 g.tasks.length === 0 && groupBy !== 'section' ? null : (
-                  <GroupSection key={g.key} g={g} tree={tree} listId={list?.id} showList={showList} collapsed={collapsed(g.key)} onToggle={() => toggleCollapsed(view + ':' + g.key)} keep={groupBy === 'section' && !!g.patch?.sectionId} />
+                  <GroupSection key={g.key} g={g} name={groupName(g, groupBy, data)} tree={tree} listId={list?.id} showList={showList} collapsed={collapsed(g.key)} onToggle={() => toggleCollapsed(view + ':' + g.key)} keep={groupBy === 'section' && !!g.patch?.sectionId} />
                 ),
               )}
             </TaskDragContext.Provider>
@@ -233,13 +272,14 @@ function Children({ tasks, tree, depth, showList, folded }: { tasks: Task[]; tre
   )
 }
 
-function GroupSection({ g, tree, listId, showList, collapsed, onToggle, keep }: { g: Group; tree: TaskTree; listId?: string; showList: boolean; collapsed: boolean; onToggle: () => void; keep: boolean }) {
+function GroupSection({ g, name, tree, listId, showList, collapsed, onToggle, keep }: { g: Group; name: string; tree: TaskTree; listId?: string; showList: boolean; collapsed: boolean; onToggle: () => void; keep: boolean }) {
+  const t = useT()
   return (
     <section className="group" data-group={g.key} data-exit={'group:' + g.key} data-keep={keep || undefined}>
-      {g.name && (
+      {name && (
         <div className={'group-head' + (collapsed ? ' is-collapsed' : '')} data-group-head={g.key} onClick={onToggle} onContextMenu={(e) => sectionMenu(e, listId, g)}>
           <Icon name="chevronDown" size={14} className="chev" />
-          <span className={g.overdue ? 'overdue' : ''}>{g.name}</span>
+          <span className={g.overdue ? 'overdue' : ''}>{name}</span>
           <span className="group-count">{countTree(g.tasks, tree.children)}</span>
           {g.overdue && (
             <button
@@ -248,19 +288,19 @@ function GroupSection({ g, tree, listId, showList, collapsed, onToggle, keep }: 
                 e.stopPropagation()
                 const snap = getData()
                 const today = format(new Date(), 'yyyy-MM-dd')
-                setData((d) => ({ ...d, tasks: d.tasks.map((t) => (g.tasks.some((x) => x.id === t.id) ? { ...t, dueDate: today } : t)) }))
-                toast('已顺延到今天', snap)
+                setData((d) => ({ ...d, tasks: d.tasks.map((x) => (g.tasks.some((y) => y.id === x.id) ? { ...x, dueDate: today } : x)) }))
+                toast(t('tasks.overdue.postponed'), snap)
               }}
             >
-              顺延
+              {t('tasks.overdue.postpone')}
             </button>
           )}
         </div>
       )}
       <div className={'group-body' + (collapsed ? ' collapsed' : '')} data-collapsed={collapsed || undefined}>
         <div className="group-inner" inert={collapsed || undefined}>
-          {g.tasks.map((t) => (
-            <TaskNode key={t.id} task={t} tree={tree} depth={0} showList={showList} />
+          {g.tasks.map((x) => (
+            <TaskNode key={x.id} task={x} tree={tree} depth={0} showList={showList} />
           ))}
         </div>
       </div>
@@ -269,28 +309,29 @@ function GroupSection({ g, tree, listId, showList, collapsed, onToggle, keep }: 
 }
 
 function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showList: boolean; grouped: boolean; view: string }) {
+  const t = useT()
   const ui = useUI()
   const key = view + ':__done'
   const isCollapsed = !!ui.collapsed[key]
   if (grouped) {
     // the completed / won't-do views group by completion day
     const byDay = new Map<string, Task[]>()
-    for (const t of tasks) {
-      const k = t.completedAt ? format(new Date(t.completedAt), 'yyyy-MM-dd') : '—'
+    for (const x of tasks) {
+      const k = x.completedAt ? format(new Date(x.completedAt), 'yyyy-MM-dd') : '—'
       if (!byDay.has(k)) byDay.set(k, [])
-      byDay.get(k)!.push(t)
+      byDay.get(k)!.push(x)
     }
     return (
       <>
         {[...byDay].map(([day, ts]) => (
           <section className="group" key={day} data-group={'done:' + day} data-done data-exit={'done:' + day}>
             <div className="group-head static">
-              <span>{day === format(new Date(), 'yyyy-MM-dd') ? '今天' : format(new Date(day), 'M月d日')}</span>
+              <span>{day === format(new Date(), 'yyyy-MM-dd') ? t('common.today') : day === '—' ? t('common.noDate') : fmtMonthDay(parseISO(day))}</span>
               <span className="group-count">{ts.length}</span>
             </div>
             <div className="group-inner">
-              {ts.map((t) => (
-                <TaskNode key={t.id} task={t} tree={NO_TREE} depth={0} showList={showList} />
+              {ts.map((x) => (
+                <TaskNode key={x.id} task={x} tree={NO_TREE} depth={0} showList={showList} />
               ))}
             </div>
           </section>
@@ -302,13 +343,13 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
     <section className="group group-done" data-group="__done" data-done data-exit="__done">
       <div className={'group-head' + (isCollapsed ? ' is-collapsed' : '')} onClick={() => toggleCollapsed(key)}>
         <Icon name="chevronDown" size={14} className="chev" />
-        <span>已完成</span>
+        <span>{t('common.list.completed')}</span>
         <span className="group-count">{tasks.length}</span>
       </div>
       <div className={'group-body' + (isCollapsed ? ' collapsed' : '')} data-collapsed={isCollapsed || undefined}>
         <div className="group-inner" inert={isCollapsed || undefined}>
-          {tasks.map((t) => (
-            <TaskNode key={t.id} task={t} tree={NO_TREE} depth={0} showList={showList} />
+          {tasks.map((x) => (
+            <TaskNode key={x.id} task={x} tree={NO_TREE} depth={0} showList={showList} />
           ))}
         </div>
       </div>
@@ -317,19 +358,24 @@ function DoneSection({ tasks, showList, grouped, view }: { tasks: Task[]; showLi
 }
 
 function TrashHint() {
-  return <div className="trash-hint">垃圾桶中的任务可右键恢复或永久删除</div>
+  const t = useT()
+  return <div className="trash-hint">{t('tasks.trash.hint')}</div>
+}
+
+const EMPTY: Record<string, [MessageKey, MessageKey?]> = {
+  today: ['tasks.empty.today', 'tasks.empty.todayHint'],
+  tomorrow: ['tasks.empty.tomorrow', 'tasks.empty.tomorrowHint'],
+  week: ['tasks.empty.week', 'tasks.empty.weekHint'],
+  completed: ['tasks.empty.completed'],
+  wontdo: ['tasks.empty.wontDo'],
+  trash: ['tasks.empty.trash'],
 }
 
 function EmptyState({ view }: { view: string }) {
-  const msg: Record<string, [string, string]> = {
-    today: ['今天没有任务', '享受轻松的一天，或添加新任务'],
-    tomorrow: ['明天还没有安排', '提前计划，从容应对'],
-    week: ['最近 7 天没有任务', '添加任务，规划你的一周'],
-    completed: ['还没有已完成的任务', ''],
-    wontdo: ['没有已放弃的任务', ''],
-    trash: ['垃圾桶是空的', ''],
-  }
-  const [a, b] = msg[view] ?? ['没有任务', '添加任务，开始高效的一天']
+  const t = useT()
+  const [ka, kb] = EMPTY[view] ?? ['tasks.empty.default', 'tasks.empty.defaultHint']
+  const a = t(ka)
+  const b = kb ? t(kb) : ''
   return (
     <div className="empty">
       <svg width="120" height="96" viewBox="0 0 120 96" fill="none">
@@ -347,10 +393,11 @@ function EmptyState({ view }: { view: string }) {
 
 // ---------------- kanban ----------------
 function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskList; data: AppData; sortBy: SortBy; setCustomSort: () => void; boardRef: Ref<HTMLDivElement> }) {
+  const t = useT()
   const listId = list.id
-  const tree = useMemo(() => buildTree(sortTasks(data.tasks.filter((t) => t.listId === listId && !t.deleted && t.status === 0), sortBy)), [data.tasks, listId, sortBy])
-  const cols = [{ id: undefined as string | undefined, name: '未分组' }, ...list.sections]
-  const sectionOf = (t: Task) => (t.sectionId && list.sections.some((s) => s.id === t.sectionId) ? t.sectionId : undefined)
+  const tree = useMemo(() => buildTree(sortTasks(data.tasks.filter((x) => x.listId === listId && !x.deleted && x.status === 0), sortBy)), [data.tasks, listId, sortBy])
+  const cols = [{ id: undefined as string | undefined, name: t('tasks.section.none') }, ...list.sections]
+  const sectionOf = (x: Task) => (x.sectionId && list.sections.some((s) => s.id === x.sectionId) ? x.sectionId : undefined)
   const env = useRef<KanbanEnv>({ listId, sortBy, setCustomSort, columns: new Map() })
   useLayoutEffect(() => {
     env.current = { listId, sortBy, setCustomSort, columns: new Map(cols.map((c) => [c.id ?? '', c.name])) }
@@ -362,7 +409,7 @@ function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskLis
     <div className="kanban" ref={boardRef} key={listId}>
       <TaskDragContext.Provider value={dnd}>
         {cols.map((c) => {
-          const ts = tree.roots.filter((t) => sectionOf(t) === c.id)
+          const ts = tree.roots.filter((x) => sectionOf(x) === c.id)
           if (!c.id && ts.length === 0 && list.sections.length > 0) return null
           const k = c.id ?? ''
           return (
@@ -376,11 +423,11 @@ function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskLis
                 <span className="group-count">{countTree(ts, tree.children)}</span>
               </div>
               <div className="kanban-add">
-                <QuickAdd defaults={{ listId, sectionId: c.id }} placeholder="+ 添加任务" compact />
+                <QuickAdd defaults={{ listId, sectionId: c.id }} placeholder={t('tasks.quickAdd.kanbanPlaceholder')} compact />
               </div>
               <div className="kanban-cards">
-                {ts.map((t) => (
-                  <KanbanCard key={t.id} task={t} tree={tree} />
+                {ts.map((x) => (
+                  <KanbanCard key={x.id} task={x} tree={tree} />
                 ))}
               </div>
             </div>
@@ -392,7 +439,7 @@ function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskLis
           <input
             className="input"
             autoFocus
-            placeholder="分组名称"
+            placeholder={t('tasks.section.name')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={() => setAdding(false)}
@@ -407,7 +454,7 @@ function Kanban({ list, data, sortBy, setCustomSort, boardRef }: { list: TaskLis
           />
         ) : (
           <button className="kanban-new-btn" onClick={() => setAdding(true)}>
-            <Icon name="plus" size={16} /> 添加分组
+            <Icon name="plus" size={16} /> {t('tasks.menu.addSection')}
           </button>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react'
+import { useT } from '../i18n'
 import { setData, setUI, useData, useUI } from '../store'
 import type { TaskList } from '../types'
 import { isPhone } from '../viewport'
@@ -6,6 +7,7 @@ import { SMART, SMART_BOTTOM, tasksForView } from '../views'
 import { pressToDrag } from './dnd'
 import { Icon } from './Icon'
 import { startFolderDrag, startListItemDrag } from './sideDnd'
+import { SMART_NAME } from './taskDnd'
 
 /** Open a view; inside the phone drawer this also closes the drawer. */
 function go(view: string) {
@@ -70,6 +72,7 @@ function Item({ view, icon, name, count, color, indent, menu, menuId, listId, fo
 }
 
 function SectionHead({ id, title, onAdd }: { id: string; title: string; onAdd?: (e: React.MouseEvent) => void }) {
+  const t = useT()
   const ui = useUI()
   const collapsed = !!ui.collapsed['side:' + id]
   return (
@@ -80,7 +83,7 @@ function SectionHead({ id, title, onAdd }: { id: string; title: string; onAdd?: 
       {onAdd && (
         <button
           className="side-add"
-          title="添加"
+          title={t('common.add')}
           onClick={(e) => {
             e.stopPropagation()
             onAdd(e)
@@ -105,11 +108,12 @@ function Fold({ open, children, ...rest }: { open: boolean; children: ReactNode 
 }
 
 export function Sidebar() {
+  const t = useT()
   const data = useData()
   const ui = useUI()
   const counts = useMemo(() => {
     const c: Record<string, number> = {}
-    const views = [...SMART.map((s) => s.id), ...data.lists.map((l) => 'list:' + l.id), ...data.tags.map((t) => 'tag:' + t.name)]
+    const views = [...SMART.map((s) => s.id), ...data.lists.map((l) => 'list:' + l.id), ...data.tags.map((tag) => 'tag:' + tag.name)]
     for (const v of views) c[v] = tasksForView(v, data).open.length
     return c
   }, [data])
@@ -137,11 +141,11 @@ export function Sidebar() {
     <aside className="sidebar">
       <div className="side-scroll">
         {SMART.map((s) => (
-          <Item key={s.id} view={s.id} icon={<Icon name={s.icon} size={18} />} name={s.name} count={counts[s.id]} />
+          <Item key={s.id} view={s.id} icon={<Icon name={s.icon} size={18} />} name={t(SMART_NAME[s.id])} count={counts[s.id]} />
         ))}
 
         <div className="side-divider" />
-        <SectionHead id="lists" title="清单" onAdd={() => setAddMenu((v) => !v)} />
+        <SectionHead id="lists" title={t('tasks.sidebar.lists')} onAdd={() => setAddMenu((v) => !v)} />
         {addMenu && (
           <div className="side-add-menu" onMouseLeave={() => setAddMenu(false)}>
             <button
@@ -150,7 +154,7 @@ export function Sidebar() {
                 dialog('list')
               }}
             >
-              <Icon name="list" size={15} /> 添加清单
+              <Icon name="list" size={15} /> {t('tasks.sidebar.addList')}
             </button>
             <button
               onClick={() => {
@@ -158,7 +162,7 @@ export function Sidebar() {
                 dialog('folder')
               }}
             >
-              <Icon name="folder" size={15} /> 添加文件夹
+              <Icon name="folder" size={15} /> {t('tasks.sidebar.addFolder')}
             </button>
           </div>
         )}
@@ -186,20 +190,20 @@ export function Sidebar() {
             </div>
           ))}
           {listsIn(undefined).map((l) => listItem(l))}
-          {data.lists.length === 0 && <div className="side-hint">使用清单分类管理任务</div>}
+          {data.lists.length === 0 && <div className="side-hint">{t('tasks.sidebar.listsHint')}</div>}
         </Fold>
 
-        <SectionHead id="tags" title="标签" onAdd={() => dialog('tag')} />
+        <SectionHead id="tags" title={t('tasks.sidebar.tags')} onAdd={() => dialog('tag')} />
         <Fold open={!ui.collapsed['side:tags']}>
-          {data.tags.map((t) => (
-            <Item key={t.name} view={'tag:' + t.name} icon={<Icon name="tag" size={17} />} color={t.color} name={t.name} count={counts['tag:' + t.name]} menu="tag" menuId={t.name} />
+          {data.tags.map((tag) => (
+            <Item key={tag.name} view={'tag:' + tag.name} icon={<Icon name="tag" size={17} />} color={tag.color} name={tag.name} count={counts['tag:' + tag.name]} menu="tag" menuId={tag.name} />
           ))}
-          {data.tags.length === 0 && <div className="side-hint">以标签的维度展示不同清单的任务</div>}
+          {data.tags.length === 0 && <div className="side-hint">{t('tasks.sidebar.tagsHint')}</div>}
         </Fold>
 
         <div className="side-divider" />
         {SMART_BOTTOM.map((s) => (
-          <Item key={s.id} view={s.id} icon={<Icon name={s.icon} size={18} />} name={s.name} />
+          <Item key={s.id} view={s.id} icon={<Icon name={s.icon} size={18} />} name={t(SMART_NAME[s.id])} />
         ))}
       </div>
     </aside>

@@ -1,3 +1,95 @@
 // Sidebar, task list, task rows, quick add, kanban. English is the source: add keys here first, then to every other locale in this folder.
 export default {
+  // sidebar
+  'tasks.sidebar.lists': 'Lists',
+  'tasks.sidebar.tags': 'Tags',
+  'tasks.sidebar.addList': 'Add list',
+  'tasks.sidebar.addFolder': 'Add folder',
+  'tasks.sidebar.listsHint': 'Use lists to organize your tasks',
+  'tasks.sidebar.tagsHint': 'Tags gather tasks from every list',
+
+  // list header and its menu
+  'tasks.header.openSidebar': 'Open sidebar',
+  'tasks.header.showSidebar': 'Show sidebar',
+  'tasks.header.hideSidebar': 'Hide sidebar',
+  'tasks.menu.listView': 'Switch to list view',
+  'tasks.menu.kanbanView': 'Switch to kanban view',
+  'tasks.menu.addSection': 'Add section',
+  'tasks.menu.groupBy': 'Group by',
+  'tasks.menu.sortBy': 'Sort by',
+  'tasks.menu.showCompleted': 'Show completed',
+  'tasks.menu.hideCompleted': 'Hide completed',
+  'tasks.menu.editList': 'Edit list',
+  'tasks.groupBy.date': 'Date',
+  'tasks.groupBy.list': 'List',
+  'tasks.groupBy.tag': 'Tag',
+  'tasks.groupBy.section': 'Section',
+  'tasks.groupBy.none': 'None',
+  'tasks.sortBy.date': 'Date',
+  'tasks.sortBy.title': 'Title',
+  'tasks.sortBy.custom': 'Custom',
+
+  // groups and sections
+  'tasks.section.name': 'Section name',
+  'tasks.section.new': 'New section',
+  'tasks.section.none': 'No section',
+  'tasks.group.noTag': 'No tag',
+  'tasks.overdue.postpone': 'Postpone',
+  'tasks.overdue.postponed': 'Moved to today',
+
+  // trash
+  'tasks.trash.empty': 'Empty',
+  'tasks.trash.confirmEmpty': "Empty the trash? This can't be undone.",
+  'tasks.trash.emptied': 'Trash emptied',
+  'tasks.trash.hint': "Open a task's menu to restore it or delete it forever",
+
+  // empty views
+  'tasks.empty.today': 'No tasks for today',
+  'tasks.empty.todayHint': 'Enjoy a relaxed day, or add a new task',
+  'tasks.empty.tomorrow': 'Nothing planned for tomorrow',
+  'tasks.empty.tomorrowHint': 'Plan ahead and take it easy',
+  'tasks.empty.week': 'No tasks in the next 7 days',
+  'tasks.empty.weekHint': 'Add tasks to plan your week',
+  'tasks.empty.completed': 'No completed tasks yet',
+  'tasks.empty.wontDo': "No tasks marked as won't do",
+  'tasks.empty.trash': 'The trash is empty',
+  'tasks.empty.default': 'No tasks',
+  'tasks.empty.defaultHint': 'Add a task to get your day going',
+
+  // task rows
+  'tasks.row.showSubtasks': 'Show subtasks',
+  'tasks.row.hideSubtasks': 'Hide subtasks',
+  'tasks.row.subtasks': 'Subtasks',
+
+  // quick add
+  'tasks.quickAdd.placeholder': '+ Add a task to “{list}”, press Enter to save',
+  'tasks.quickAdd.placeholderShort': 'Add a task to “{list}”',
+  'tasks.quickAdd.kanbanPlaceholder': '+ Add task',
+  'tasks.quickAdd.addTask': 'Add task',
+  'tasks.quickAdd.date': 'Set date',
+  'tasks.quickAdd.tags': 'Tags',
+  'tasks.quickAdd.list': 'List',
+  'tasks.quickAdd.noTags': 'Type # to add a tag',
+  // inserted after "!" by the priority suggestions; must be words the quick-add parser recognises
+  'tasks.quickAdd.token.high': 'high',
+  'tasks.quickAdd.token.medium': 'medium',
+  'tasks.quickAdd.token.low': 'low',
+  'tasks.quickAdd.token.none': 'none',
+
+  // drag and drop (undo toasts)
+  'tasks.dnd.movedTo': 'Moved to “{name}”',
+  'tasks.dnd.priority': 'Priority: {name}',
+  'tasks.dnd.tagAdded': 'Tag “{tag}” added',
+  'tasks.dnd.completed': 'Completed “{title}”',
+  'tasks.dnd.wontDo': "Marked as won't do",
+  'tasks.dnd.deleted': 'Deleted. You can restore it from the Trash',
+  'tasks.dnd.nested': 'Now a subtask of “{title}”',
+  'tasks.dnd.unnested': 'No longer a subtask',
+  'tasks.dnd.reordered': 'Order updated',
+  'tasks.dnd.sectionsReordered': 'Sections reordered',
+  'tasks.dnd.listsReordered': 'Lists reordered',
+  'tasks.dnd.foldersReordered': 'Folders reordered',
+  'tasks.dnd.intoFolder': 'Moved into “{name}”',
+  'tasks.dnd.outOfFolder': 'Moved out of the folder',
+  'tasks.dnd.folder': 'Folder',
 } as const

@@ -5,6 +5,7 @@ import type { TaskList } from '../types'
 import { isPhone } from '../viewport'
 import { activeLists, openCounts, SMART, SMART_BOTTOM } from '../views'
 import { pressToDrag } from './dnd'
+import { menuPoint } from '../menuPoint'
 import { Icon } from './Icon'
 import { startFilterDrag, startFolderDrag, startListItemDrag } from './sideDnd'
 import { FILTER_PREFIX, sortedFilters } from '../filters'
@@ -48,12 +49,22 @@ function Item({ view, icon, name, count, color, indent, menu, menuId, listId, fo
       data-folder={listId ? (folder ?? '') : undefined}
       data-side-filter={filterId}
       data-flip={listId ? 'list:' + listId : filterId ? 'filter:' + filterId : undefined}
+      // a link-like entry: Tab reaches it, Enter or Space opens the view, the menu key opens its menu
+      role="link"
+      tabIndex={0}
+      aria-current={ui.view === view ? 'page' : undefined}
       onClick={() => go(view)}
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return
+        e.preventDefault()
+        go(view)
+      }}
       onContextMenu={
         menu
           ? (e) => {
               e.preventDefault()
-              menuAt(menu, menuId!, e.clientX, e.clientY)
+              const p = menuPoint(e)
+              menuAt(menu, menuId!, p.x, p.y)
             }
           : undefined
       }
@@ -160,7 +171,7 @@ export function Sidebar() {
   )
 
   return (
-    <aside className="sidebar">
+    <nav className="sidebar" aria-label={t('misc.a11y.lists')}>
       <div className="side-scroll">
         {SMART.map((s) => (
           <Item key={s.id} view={s.id} icon={<Icon name={s.icon} size={18} />} name={t(SMART_NAME[s.id])} count={counts[s.id]} />
@@ -267,6 +278,6 @@ export function Sidebar() {
           </div>
         )}
       </div>
-    </aside>
+    </nav>
   )
 }

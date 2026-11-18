@@ -333,4 +333,16 @@ export default {
   'misc.keys.datePick': '날짜 고르기',
   'misc.keys.dateClear': '날짜 지우기',
   'misc.keys.quickAdd': '빠른 추가',
+  // accessibility: landmarks, the skip link, names of icon-only controls, keyboard moves
+  'misc.a11y.skipToContent': '본문으로 건너뛰기',
+  'misc.a11y.modules': '모듈',
+  'misc.a11y.lists': '목록과 필터',
+  'misc.a11y.filterIcon': '아이콘 {n}',
+  'misc.a11y.moveUp': '위로 이동',
+  'misc.a11y.moveDown': '아래로 이동',
+  'misc.a11y.movedUp': '위로 이동했습니다',
+  'misc.a11y.movedDown': '아래로 이동했습니다',
+  'misc.a11y.notifications': '알림',
+  'misc.a11y.tasks': '작업',
+  'misc.a11y.removeTag': '{tag} 제거',
 } satisfies Catalog<typeof en>

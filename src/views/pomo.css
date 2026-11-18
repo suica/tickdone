@@ -4,8 +4,10 @@
   background: var(--bg);
 }
 .pomo-view.is-break {
-  --pomo-accent: #35b36b;
-  --pomo-ring-bg: rgba(53, 179, 107, 0.12);
+  /* dark enough for the white label on the break button (AA) */
+  --pomo-accent: #288650;
+  --pomo-on-accent: #ffffff;
+  --pomo-ring-bg: rgba(40, 134, 80, 0.12);
 }
 
 /* ---- Timer ---- */
@@ -229,11 +231,11 @@
   background: var(--primary-soft);
 }
 .is-break .pomo-btn:hover {
-  background: rgba(53, 179, 107, 0.1);
+  background: rgba(40, 134, 80, 0.1);
 }
 .pomo-btn.primary {
   background: var(--pomo-accent);
-  color: #fff;
+  color: var(--pomo-on-accent, var(--on-primary));
 }
 .pomo-btn.primary:hover {
   background: var(--pomo-accent);

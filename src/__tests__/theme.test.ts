@@ -82,20 +82,22 @@ describe('accent presets', () => {
     expect(isAccent(undefined)).toBe(false)
   })
 
-  it('keeps the default blue exactly as tuned in both themes', () => {
+  it('darkens or lightens the default blue just enough for AA text in both themes', () => {
     expect(accentTokens('blue', 'light')).toMatchObject({
-      '--primary': '#4772fa',
-      '--primary-soft': 'rgba(71, 114, 250, 0.1)',
-      '--primary-soft2': 'rgba(71, 114, 250, 0.18)',
+      '--primary': '#3e62d9',
+      '--primary-soft': 'rgba(62, 98, 217, 0.1)',
+      '--primary-soft2': 'rgba(62, 98, 217, 0.18)',
       '--on-primary': '#ffffff',
       '--accent-ring': '#dfe7ff',
+      // the app mark keeps the preset's own colour
       '--accent-mark': '#4772fa',
     })
     expect(accentTokens('blue', 'dark')).toMatchObject({
-      '--primary': '#6388fb',
-      '--primary-soft': 'rgba(99, 136, 251, 0.16)',
-      '--primary-soft2': 'rgba(99, 136, 251, 0.26)',
-      '--on-primary': '#ffffff',
+      '--primary': '#829ffc',
+      '--primary-soft': 'rgba(130, 159, 252, 0.16)',
+      '--primary-soft2': 'rgba(130, 159, 252, 0.26)',
+      // a light accent fill takes dark labels
+      '--on-primary': '#141414',
       '--accent-ring': '#2c3a66',
     })
   })
@@ -104,14 +106,11 @@ describe('accent presets', () => {
     for (const theme of ['light', 'dark'] as const)
       it(`${id} in the ${theme} theme meets AA and stays apart from the priority colours`, () => {
         const c = accentColors(id, theme)
-        // The accent on the page (rings, checkboxes, icons, large text)
-        expect(contrast(c.primary, SURFACE[theme])).toBeGreaterThanOrEqual(MIN_CONTRAST)
-        // Labels on accent fills
-        expect(contrast(c.onPrimary, c.primary)).toBeGreaterThanOrEqual(MIN_CONTRAST)
-        // Dark-theme presets other than the hand-tuned blue also reach body-text contrast on the page
-        if (theme === 'dark') expect(contrast(c.primary, SURFACE.dark)).toBeGreaterThanOrEqual(TEXT_CONTRAST - 0.01)
-        // New presets are at least as readable on white as the default blue
-        if (theme === 'light') expect(contrast(c.primary, '#ffffff')).toBeGreaterThanOrEqual(contrast('#4772fa', '#ffffff'))
+        // The accent is text (dates, links, selected tabs): AA on the page and on the greys and tints it sits on
+        for (const bg of [SURFACE[theme], ...(theme === 'light' ? ['#ededed', '#edf1ff'] : ['#3a3a3a', '#303648'])])
+          expect(contrast(c.primary, bg)).toBeGreaterThanOrEqual(TEXT_CONTRAST - 0.01)
+        // Labels on accent fills (buttons) are text too
+        expect(contrast(c.onPrimary, c.primary)).toBeGreaterThanOrEqual(TEXT_CONTRAST)
         for (const p of PRIORITY[theme]) expect(deltaE(c.primary, p)).toBeGreaterThan(25)
         // The soft tints are the accent at low alpha
         const [r, g, b] = parseHex(c.primary)
@@ -129,7 +128,7 @@ describe('accent presets', () => {
     const seen = new Set(ACCENT_IDS.map((id) => accentColors(id, 'light').primary))
     expect(seen.size).toBe(ACCENT_IDS.length)
     for (const a of ACCENT_IDS)
-      for (const b of ACCENT_IDS) if (a < b) expect(deltaE(accentColors(a, 'light').primary, accentColors(b, 'light').primary)).toBeGreaterThan(12)
+      for (const b of ACCENT_IDS) if (a < b) expect(deltaE(accentColors(a, "light").primary, accentColors(b, "light").primary), a + " " + b).toBeGreaterThan(12)
   })
 })
 

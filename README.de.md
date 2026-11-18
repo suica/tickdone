@@ -69,6 +69,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - 📲 **Als App installieren**: Füge TickDone unter Einstellungen → Über zum Startbildschirm oder Dock hinzu; nach dem ersten Besuch startet es auch offline. Gibt es eine neue Version, bietet ein Hinweis das Neuladen an.
 - 💾 **Sichern und Wiederherstellen**: Exportiere alles als JSON-Datei und importiere sie später wieder.
 - 🚀 **Schnell mit Tausenden Aufgaben**: Lange Listen und Suchergebnisse zeichnen nur die sichtbaren Zeilen, daher scrollt, wechselt und reagiert eine Liste mit 5.000 Aufgaben so schnell wie eine kurze, und Ziehen und Ablegen, die Tastatur, die Mehrfachauswahl und die Abhak-Animation funktionieren wie gewohnt. Änderungen werden im Hintergrund gespeichert.
+- ♿ **Barrierefrei**: Alles geht mit der Tastatur, mit sichtbarem Fokusrahmen und einem Link zum Überspringen zum Inhalt; Dialoge, Menüs und Blätter halten den Fokus und geben ihn beim Schließen zurück; Screenreader bekommen Landmarken, Überschriften, benannte Schaltflächen und Kontrollkästchen, und jede Meldung wird angesagt. Aufgaben lassen sich mit Alt+↑ / Alt+↓ oder über ihr Menü verschieben, als Alternative zum Ziehen. Text erfüllt den WCAG-AA-Kontrast in Hell und Dunkel, und Modi mit hohem Kontrast sowie reduzierte Bewegung werden beachtet. Eine automatische Prüfung läuft über jeden Bildschirm.
 
 ## 📸 Screenshots
 
@@ -170,7 +171,7 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [x] Listen archivieren ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Mehr Wiederholungsregeln ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Listen archivieren ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Barrierefreiheit ([#25](https://github.com/suica/tickdone/issues/25))
+- [x] Barrierefreiheit ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Schnell auch bei Tausenden von Aufgaben ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Kalender: Aufgaben ohne Datum einplanen, Agenda-Ansicht ([#28](https://github.com/suica/tickdone/issues/28))

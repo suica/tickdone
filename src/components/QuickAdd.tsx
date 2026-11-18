@@ -332,7 +332,9 @@ export function QuickAdd({ defaults = {}, placeholder, compact, autoFocus, onAdd
                         data-priority={p.v}
                         title={t(PRIORITY_NAME[p.v])}
                         aria-label={t(PRIORITY_NAME[p.v])}
-                        aria-pressed={p.v === priority}
+                        role="menuitemradio"
+                        tabIndex={-1}
+                        aria-checked={p.v === priority}
                         onClick={() => {
                           setPop(null)
                           insertToken('!' + t(PRIORITY_TOKEN[p.v]))

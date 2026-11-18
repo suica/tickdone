@@ -352,6 +352,11 @@ const KEY_STEP = 16
 /** The divider between the list and the desktop detail: drag (or arrow keys) to resize, double-click to reset. */
 function Divider({ pane, width }: { pane: RefObject<HTMLElement | null>; width?: number }) {
   const t = useT()
+  // the automatic width, for screen readers (a focusable separator says how wide it has made the panel)
+  const [auto, setAuto] = useState(MIN_DETAIL)
+  useLayoutEffect(() => {
+    if (width === undefined && pane.current) setAuto(Math.round(pane.current.getBoundingClientRect().width))
+  }, [width, pane])
   const limits = () => {
     const el = pane.current!
     const r = el.getBoundingClientRect()
@@ -421,7 +426,7 @@ function Divider({ pane, width }: { pane: RefObject<HTMLElement | null>; width?:
       role="separator"
       aria-orientation="vertical"
       aria-label={t('shell.detail.resize')}
-      aria-valuenow={width}
+      aria-valuenow={Math.round(width ?? auto)}
       aria-valuemin={MIN_DETAIL}
       tabIndex={0}
       onPointerDown={onPointerDown}
@@ -554,7 +559,7 @@ function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
               <span key={tg} className="tag-pill lg" style={c ? { background: `color-mix(in srgb, ${c} 18%, transparent)`, color: c } : undefined}>
                 {tg}
                 {!ro && (
-                  <button onClick={() => set({ tags: task.tags.filter((x) => x !== tg) })}>
+                  <button aria-label={t('misc.a11y.removeTag', { tag: '#' + tg })} title={t('misc.a11y.removeTag', { tag: '#' + tg })} onClick={() => set({ tags: task.tags.filter((x) => x !== tg) })}>
                     <Icon name="close" size={11} stroke={2.4} />
                   </button>
                 )}

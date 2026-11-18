@@ -16,8 +16,11 @@ const WHITE = '#ffffff'
 export const INK = '#141414'
 /** WCAG AA for user-interface components and large text: the floor for the accent on the page and for labels on the accent. */
 export const MIN_CONTRAST = 3
-/** WCAG AA for body text. Dark-theme accents reach it on the page, since dates and links are written in the accent. */
+/** WCAG AA for body text. Accents reach it on every surface they are written on (dates, links, selected tabs and
+ *  chips), and labels on accent fills (buttons) reach it too. */
 export const TEXT_CONTRAST = 4.5
+/** The surfaces accent text sits on, besides the page: hovered and selected rows, tabs and tinted chips. */
+const TEXT_SURFACES: Record<Resolved, string[]> = { light: ['#ededed', '#edf1ff'], dark: ['#3a3a3a', '#303648'] }
 
 interface Preset {
   /** The colour as used in the light theme. */
@@ -32,8 +35,9 @@ interface Preset {
 // the accent. Blue is the app's own colour and keeps its tuned values in both themes.
 export const PRESETS: Record<AccentId, Preset> = {
   blue: { light: '#4772fa', dark: '#6388fb', ring: { light: '#dfe7ff', dark: '#2c3a66' } },
-  indigo: { light: '#5b5bd6' },
-  violet: { light: '#8250df' },
+  // a step towards violet, so it stays apart from the blue once both are dark enough for text
+  indigo: { light: '#584ccc' },
+  violet: { light: '#9443d2' },
   pink: { light: '#c93d8a' },
   green: { light: '#21874a' },
   moss: { light: '#5f7d1e' },
@@ -111,15 +115,12 @@ export interface AccentColors {
 export function accentColors(id: AccentId, theme: Resolved): AccentColors {
   const p = PRESETS[id] ?? PRESETS[DEFAULT_ACCENT]
   const bg = SURFACE[theme]
-  let primary: string
-  if (theme === 'light') {
-    // On white the accent and a white label on the accent are the same pair: one floor covers both.
-    primary = fitContrast(p.light, bg, MIN_CONTRAST, 'black')
-  } else {
-    // A step lighter so it carries on near-black, and light enough to be read as text there.
-    primary = p.dark ?? fitContrast(mix(p.light, WHITE, 0.16), bg, TEXT_CONTRAST, 'white')
-  }
-  const onPrimary = contrast(WHITE, primary) >= MIN_CONTRAST ? WHITE : INK
+  // Light: darkened until it reads as text on the page and on the greys and tints it sits on; on white, the
+  // accent and a white label on the accent are the same pair, so buttons keep white labels.
+  // Dark: a step lighter so it carries on near-black, and light enough to be read as text on raised greys.
+  let primary = theme === 'light' ? p.light : (p.dark ?? mix(p.light, WHITE, 0.16))
+  for (const surface of [bg, ...TEXT_SURFACES[theme]]) primary = fitContrast(primary, surface, TEXT_CONTRAST, theme === 'light' ? 'black' : 'white')
+  const onPrimary = contrast(WHITE, primary) >= TEXT_CONTRAST ? WHITE : INK
   const soft = rgba(primary, theme === 'light' ? 0.1 : 0.16)
   const soft2 = rgba(primary, theme === 'light' ? 0.18 : 0.26)
   const ring = p.ring?.[theme] ?? (theme === 'light' ? mix(p.light, WHITE, 0.82) : mix(p.light, bg, 0.65))

@@ -286,8 +286,9 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
 
 function QuickBtn({ tip, onClick, children }: { tip: string; onClick: () => void; children: ReactNode }) {
   return (
-    <button className="dp-qbtn" onClick={onClick} aria-label={tip}>
-      {children}
+    <button className="dp-qbtn" onClick={onClick}>
+      {/* the glyph (a day number on Today) is decoration: the button is named by its tip */}
+      <span aria-hidden="true">{children}</span>
       <span className="dp-tip">{tip}</span>
     </button>
   )
@@ -539,7 +540,7 @@ function RepeatEditor({ value, date, weekStartsOn, onBack, onPick }: { value: Re
           <label className="dp-rep-opt">
             <input type="radio" name="dp-month-mode" checked={monthMode === 'day'} onChange={() => setMonthMode('day')} />
             <span className="dp-rep-k">{t('misc.repeat.onDay')}</span>
-            <select className="input dp-rep-sel dp-rep-mday" value={mday} onChange={(e) => (setMday(+e.target.value), setMonthMode('day'))}>
+            <select className="input dp-rep-sel dp-rep-mday" aria-label={t('misc.repeat.onDay')} value={mday} onChange={(e) => (setMday(+e.target.value), setMonthMode('day'))}>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((x) => (
                 <option key={x} value={x}>
                   {x}
@@ -551,14 +552,14 @@ function RepeatEditor({ value, date, weekStartsOn, onBack, onPick }: { value: Re
           <label className="dp-rep-opt">
             <input type="radio" name="dp-month-mode" checked={monthMode === 'nth'} onChange={() => setMonthMode('nth')} />
             <span className="dp-rep-k">{t('misc.repeat.onThe')}</span>
-            <select className="input dp-rep-sel dp-rep-nth" value={nth} onChange={(e) => (setNth(+e.target.value), setMonthMode('nth'))}>
+            <select className="input dp-rep-sel dp-rep-nth" aria-label={t('misc.repeat.onThe')} value={nth} onChange={(e) => (setNth(+e.target.value), setMonthMode('nth'))}>
               {NTH.map((x) => (
                 <option key={x} value={x}>
                   {nthName(x)}
                 </option>
               ))}
             </select>
-            <select className="input dp-rep-sel dp-rep-nthwd" value={nthWd} onChange={(e) => (setNthWd(+e.target.value), setMonthMode('nth'))}>
+            <select className="input dp-rep-sel dp-rep-nthwd" aria-label={t('misc.repeat.onThe')} value={nthWd} onChange={(e) => (setNthWd(+e.target.value), setMonthMode('nth'))}>
               {order.map((x) => (
                 <option key={x} value={x}>
                   {dayName(x, 'long')}
@@ -580,7 +581,7 @@ function RepeatEditor({ value, date, weekStartsOn, onBack, onPick }: { value: Re
                 </option>
               ))}
             </select>
-            <select className="input dp-rep-sel dp-rep-yday" value={Math.min(yday, ydays)} onChange={(e) => setYday(+e.target.value)}>
+            <select className="input dp-rep-sel dp-rep-yday" aria-label={t('misc.repeat.on')} value={Math.min(yday, ydays)} onChange={(e) => setYday(+e.target.value)}>
               {Array.from({ length: ydays }, (_, i) => i + 1).map((x) => (
                 <option key={x} value={x}>
                   {x}

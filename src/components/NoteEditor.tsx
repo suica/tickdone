@@ -183,7 +183,8 @@ export default function NoteEditor({ value, onChange, placeholder, readOnly }: N
     ],
     content: value,
     editorProps: {
-      attributes: { class: 'detail-content md note-editor', spellcheck: 'false' },
+      // a multi-line text field, named by its placeholder ("Description")
+      attributes: { class: 'detail-content md note-editor', spellcheck: 'false', role: 'textbox', 'aria-multiline': 'true', 'aria-label': placeholder ?? '' },
     },
     onUpdate: ({ editor }) => {
       const md = getMarkdown(editor)

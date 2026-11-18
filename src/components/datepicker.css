@@ -168,7 +168,7 @@
   background: var(--bg-hover);
 }
 .dp-day.out {
-  color: var(--text-4);
+  color: var(--text-3);
 }
 .dp-day.today {
   color: var(--primary);
@@ -610,4 +610,8 @@
   .dp-rep .dp-custom-preview {
     margin: 0 16px 12px;
   }
+}
+/* the keyboard sees the tip too */
+.dp-qbtn:focus-visible .dp-tip {
+  opacity: 1;
 }

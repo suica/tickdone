@@ -333,4 +333,16 @@ export default {
   'misc.keys.datePick': '选择日期',
   'misc.keys.dateClear': '清除日期',
   'misc.keys.quickAdd': '快速添加',
+  // accessibility: landmarks, the skip link, names of icon-only controls, keyboard moves
+  'misc.a11y.skipToContent': '跳到主要内容',
+  'misc.a11y.modules': '模块',
+  'misc.a11y.lists': '清单和过滤器',
+  'misc.a11y.filterIcon': '图标 {n}',
+  'misc.a11y.moveUp': '上移',
+  'misc.a11y.moveDown': '下移',
+  'misc.a11y.movedUp': '已上移',
+  'misc.a11y.movedDown': '已下移',
+  'misc.a11y.notifications': '通知',
+  'misc.a11y.tasks': '任务',
+  'misc.a11y.removeTag': '移除 {tag}',
 } satisfies Catalog<typeof en>

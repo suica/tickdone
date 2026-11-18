@@ -69,6 +69,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - 📲 **Instálalo como app**: añade TickDone a la pantalla de inicio o al dock desde Ajustes → Acerca de, y se abre sin conexión después de la primera visita. Cuando hay una versión nueva, un aviso ofrece recargar.
 - 💾 **Copia de seguridad y restauración**: exporta todo a un archivo JSON y vuelve a importarlo.
 - 🚀 **Rápido con miles de tareas**: las listas largas y los resultados de búsqueda dibujan solo las filas que se ven, así que una lista de 5.000 tareas se desplaza, cambia y responde tan rápido como una corta, y arrastrar y soltar, el teclado, la selección múltiple y la animación al completar siguen funcionando igual. Los cambios se guardan en segundo plano.
+- ♿ **Accesible**: todo funciona con el teclado, con un indicador de foco visible y un enlace para saltar al contenido; los diálogos, menús y paneles mantienen el foco dentro y lo devuelven al cerrarse; los lectores de pantalla reciben regiones, encabezados, botones y casillas con nombre, y cada aviso se anuncia. Las tareas suben y bajan con Alt+↑ / Alt+↓ o desde su menú, como alternativa a arrastrar. El texto cumple el contraste WCAG AA en claro y oscuro, y se respetan los modos de alto contraste y la reducción de movimiento. Una comprobación automática revisa cada pantalla.
 
 ## 📸 Capturas de pantalla
 
@@ -170,7 +171,7 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Más reglas de repetición ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Accesibilidad ([#25](https://github.com/suica/tickdone/issues/25))
+- [x] Accesibilidad ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Rápido incluso con miles de tareas ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Temas y colores de acento ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendario: planificar tareas sin fecha, vista de agenda ([#28](https://github.com/suica/tickdone/issues/28))

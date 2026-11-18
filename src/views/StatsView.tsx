@@ -201,7 +201,7 @@ export default function StatsView() {
           )}
         </div>
 
-        <div className="stats-scroll" key={animKey}>
+        <div className="stats-scroll" key={animKey} tabIndex={0}>
           <section className="stats-section stats-tasks">
             <h3 className="stats-h">{t('common.module.tasks')}</h3>
             <div className="stats-tiles">

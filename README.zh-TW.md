@@ -70,6 +70,7 @@ TickDone 是一款免費、開源的待辦清單與時間管理工具，直接�
 - 📲 **安裝為應用程式**：在「設定 → 關於」中把 TickDone 加到主畫面或 Dock，首次造訪後即可離線開啟。有新版本時，會顯示提示讓你重新載入。
 - 💾 **備份與還原**：把全部資料匯出成 JSON 檔，隨時再匯入。
 - 🚀 **上千筆任務也流暢**：長清單和搜尋結果只繪製畫面上的列，5,000 筆任務的清單捲動、切換和回應都和短清單一樣快，拖放、鍵盤、多選和完成動畫照常可用。修改會在背景儲存。
+- ♿ **無障礙**：所有功能都能用鍵盤操作，焦點框清楚可見，並有「跳到主要內容」連結；對話框、選單和底部面板會把焦點留在其中，關閉後把焦點交還原處；螢幕閱讀器能讀到頁面區域、標題、有名稱的按鈕和核取方塊，每則提示都會被播報。用 Alt+↑ / Alt+↓ 或任務選單即可上下移動任務，取代拖放。淺色和深色主題的文字都達到 WCAG AA 對比度，並支援高對比模式和減少動態效果。每個畫面都有自動化檢查。
 
 ## 📸 截圖
 
@@ -171,7 +172,7 @@ npm run dev        # http://localhost:5173
 - [x] 封存清單 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 更多重複規則 ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] 封存清單 ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] 無障礙 ([#25](https://github.com/suica/tickdone/issues/25))
+- [x] 無障礙 ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] 上千個任務依然流暢 ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] 主題與強調色 ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] 行事曆：安排沒有日期的任務、議程檢視 ([#28](https://github.com/suica/tickdone/issues/28))

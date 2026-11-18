@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { usePan } from '../gestures'
 import { cancelAnimations, dur, ease, play } from '../motion'
 import { usePhone } from '../viewport'
+import { useFocusTrap } from '../focus'
 
 export interface Anchor {
   x: number
@@ -57,6 +58,7 @@ function Floating({ anchor, onClose, children, className = '', width }: PopoverP
   const inside = useRef(false)
   const isTop = useLayer()
   const [pos, setPos] = useState({ left: anchor.x, top: anchor.y, origin: '0 0', ready: false })
+  useFocusTrap(ref)
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -110,6 +112,7 @@ function Floating({ anchor, onClose, children, className = '', width }: PopoverP
     <div
       ref={ref}
       className={'popover ' + className}
+      tabIndex={-1}
       // Transparent (not visibility:hidden) until placed, so an autoFocus field inside can take the focus.
       style={{ left: pos.left, top: pos.top, width, transformOrigin: pos.origin, opacity: pos.ready ? undefined : 0 }}
       onContextMenu={(e) => e.preventDefault()}
@@ -130,6 +133,7 @@ function Sheet({ onClose, children, className = '' }: PopoverProps) {
   const isTop = useLayer()
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
+  useFocusTrap(panel)
 
   const close = useCallback((then?: () => void) => {
     const done = then ?? (() => onCloseRef.current())
@@ -210,7 +214,7 @@ function Sheet({ onClose, children, className = '' }: PopoverProps) {
     <SheetClose.Provider value={close}>
       <div className="sheet-layer" onContextMenu={(e) => e.preventDefault()}>
         <div ref={mask} className="sheet-mask" onClick={() => close()} />
-        <div ref={panel} className={'popover sheet ' + className} role="dialog" aria-modal="true" {...pan}>
+        <div ref={panel} className={'popover sheet ' + className} role="dialog" aria-modal="true" tabIndex={-1} {...pan}>
           <div className="sheet-grip" aria-hidden="true">
             <span />
           </div>
@@ -248,18 +252,48 @@ export function MenuList({ items, onClose }: { items: MenuItem[]; onClose: () =>
     const r = el.getBoundingClientRect()
     setSub({ i, anchor: { x: r.right + 2, y: r.top - 4 } })
   }
+  // The keyboard: ↑ ↓ Home End move between items, Enter or Space picks one, → opens a submenu and ← closes it
+  // (Esc closes the menu, see Popover).
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const menu = e.currentTarget
+    // the menu's own items, also those in a row of buttons (not those of a submenu)
+    const own = [...menu.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])')].filter((el) => el.closest('[role="menu"]') === menu)
+    const cur = own.indexOf(document.activeElement as HTMLElement)
+    const go = (i: number) => {
+      e.preventDefault()
+      e.stopPropagation()
+      own[(i + own.length) % own.length]?.focus()
+    }
+    if (e.key === 'ArrowDown') return go(cur + 1)
+    if (e.key === 'ArrowUp') return go(cur < 0 ? -1 : cur - 1)
+    if (e.key === 'Home') return go(0)
+    if (e.key === 'End') return go(-1)
+    const item = cur >= 0 ? own[cur] : null
+    if (!item) return
+    if (e.key === 'Enter' || e.key === ' ' || (e.key === 'ArrowRight' && item.getAttribute('aria-haspopup'))) {
+      e.preventDefault()
+      e.stopPropagation()
+      item.click()
+    }
+  }
   return (
-    <div className="menu">
+    <div className="menu" role="menu" onKeyDown={onKeyDown}>
       {items.map((it, i) =>
         it.divider ? (
-          <div key={i} className="menu-divider" />
+          <div key={i} className="menu-divider" role="separator" />
         ) : it.render ? (
-          <div key={i} className="menu-custom" onMouseEnter={() => setSub(null)}>
+          <div key={i} className="menu-custom" role="group" onMouseEnter={() => setSub(null)}>
             {it.render}
           </div>
         ) : (
           <div
             key={i}
+            role={it.checked !== undefined ? 'menuitemcheckbox' : 'menuitem'}
+            aria-checked={it.checked !== undefined ? !!it.checked : undefined}
+            aria-disabled={it.disabled || undefined}
+            aria-haspopup={it.children ? 'menu' : undefined}
+            aria-expanded={it.children ? sub?.i === i : undefined}
+            tabIndex={-1}
             className={'menu-item' + (it.danger ? ' danger' : '') + (it.disabled ? ' disabled' : '')}
             onMouseEnter={(e) => {
               // phones have no hover: submenus open on tap
@@ -278,15 +312,32 @@ export function MenuList({ items, onClose }: { items: MenuItem[]; onClose: () =>
             <span className="menu-icon">{it.icon}</span>
             <span className="menu-label">{it.label}</span>
             {it.hint && <span className="menu-hint">{it.hint}</span>}
-            {it.checked && <span className="menu-check">✓</span>}
-            {it.children && <span className="menu-hint">›</span>}
+            {it.checked && (
+              <span className="menu-check" aria-hidden="true">
+                ✓
+              </span>
+            )}
+            {it.children && (
+              <span className="menu-hint" aria-hidden="true">
+                ›
+              </span>
+            )}
           </div>
         ),
       )}
       {sub && items[sub.i]?.children && (
         <Popover anchor={sub.anchor} onClose={() => setSub(null)}>
           {phone && <div className="sheet-title">{items[sub.i].label}</div>}
-          <MenuList items={items[sub.i].children!} onClose={onClose} />
+          <div
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowLeft' || phone) return
+              e.preventDefault()
+              e.stopPropagation()
+              setSub(null)
+            }}
+          >
+            <MenuList items={items[sub.i].children!} onClose={onClose} />
+          </div>
         </Popover>
       )}
     </div>

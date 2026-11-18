@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEven
 import { addDays, addMonths, addWeeks, endOfMonth, getDay, isSameMonth, parseISO, startOfMonth, startOfWeek } from 'date-fns'
 import { getData, LIST_COLORS, playDing, setData, setUI, toast, toggleCheckin, upsertHabit, useData, useUI } from '../store'
 import { fmt, todayStr } from '../dates'
+import { useFocusTrap } from '../focus'
 import { usePhone, useTablet } from '../viewport'
 import { Icon } from '../components/Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from '../components/Popover'
@@ -632,6 +633,9 @@ type FreqKind = HabitFrequency['kind']
 function HabitDialog({ habit, closing, onClose, onSaved }: { habit?: Habit; closing?: boolean; onClose: () => void; onSaved: (id?: string) => void }) {
   const t = useT()
   const isNew = !habit
+  const dlgRef = useRef<HTMLDivElement>(null)
+  // Tab stays in the dialog, and the keyboard goes back to the button that opened it
+  useFocusTrap(dlgRef)
   const [step, setStep] = useState<'gallery' | 'form'>(isNew ? 'gallery' : 'form')
   const [name, setName] = useState(habit?.name ?? '')
   const [icon, setIcon] = useState(habit?.icon ?? '✅')
@@ -695,9 +699,11 @@ function HabitDialog({ habit, closing, onClose, onSaved }: { habit?: Habit; clos
 
   return (
     <div className={'modal-mask' + (closing ? ' closing' : '')} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal habit-modal" role="dialog" aria-modal="true">
+      <div ref={dlgRef} className="modal habit-modal" role="dialog" aria-modal="true" aria-labelledby="habit-dlg-title" tabIndex={-1}>
         <div className="modal-head">
-          <span>{step === 'gallery' ? t('misc.habit.add') : isNew ? t('misc.habit.new') : t('misc.habit.edit')}</span>
+          <h2 className="modal-title" id="habit-dlg-title">
+            {step === 'gallery' ? t('misc.habit.add') : isNew ? t('misc.habit.new') : t('misc.habit.edit')}
+          </h2>
           <button className="icon-btn" title={t('common.close')} onClick={onClose}>
             <Icon name="close" size={16} />
           </button>
@@ -713,10 +719,13 @@ function HabitDialog({ habit, closing, onClose, onSaved }: { habit?: Habit; clos
               </button>
               {TEMPLATES.map((tp) => (
                 <div key={tp.id} className="habit-tpl" onClick={() => pickTemplate(tp)}>
-                  <span className="habit-icon" style={{ background: `color-mix(in srgb, ${tp.color} 18%, transparent)` }}>
+                  <span className="habit-icon" style={{ background: `color-mix(in srgb, ${tp.color} 18%, transparent)` }} aria-hidden="true">
                     {tp.icon}
                   </span>
-                  <span className="habit-tpl-name">{tplName(tp)}</span>
+                  {/* the keyboard picks a template by its name; the whole card takes clicks */}
+                  <button type="button" className="habit-tpl-name" onClick={(e) => (e.stopPropagation(), pickTemplate(tp))}>
+                    {tplName(tp)}
+                  </button>
                   <button
                     className="habit-tpl-add"
                     title={t('misc.habit.quickAdd')}

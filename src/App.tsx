@@ -52,6 +52,19 @@ function openTaskFromHash() {
 
 const openModule = (id: Module) => setUI({ module: id, selectedTaskId: undefined })
 
+/** The skip link: the keyboard goes to the content (the task list's first row, or the module itself). */
+function skipToMain(e: React.MouseEvent) {
+  e.preventDefault()
+  const row = document.querySelector<HTMLElement>('.list-pane .task-row[tabindex="0"]')
+  if (row) return row.focus()
+  // the module itself takes the focus for the moment (it is not a tab stop, and clicks don't focus it)
+  const main = document.getElementById('main')
+  if (!main) return
+  main.tabIndex = -1
+  main.focus()
+  main.addEventListener('blur', () => main.removeAttribute('tabindex'), { once: true })
+}
+
 export default function App() {
   const ui = useUI()
   const data = useData()
@@ -128,11 +141,14 @@ export default function App() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#main" onClick={skipToMain}>
+        {t('misc.a11y.skipToContent')}
+      </a>
       {!phone && (
-        <nav className="rail">
+        <nav className="rail" aria-label={t('misc.a11y.modules')}>
           <div className="rail-avatar" title="TickDone">T</div>
           {RAIL.map((r) => (
-            <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={t(r.title)} onClick={() => openModule(r.id)}>
+            <button key={r.id} className={'rail-btn' + (ui.module === r.id ? ' active' : '')} title={t(r.title)} aria-label={t(r.title)} aria-current={ui.module === r.id ? 'page' : undefined} onClick={() => openModule(r.id)}>
               <Icon name={r.icon} size={22} />
             </button>
           ))}
@@ -140,14 +156,16 @@ export default function App() {
           <a className="rail-btn" href={GITHUB_URL} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
             <Icon name="github" size={20} />
           </a>
-          <button className="rail-btn" title={t('common.settings')} onClick={() => setUI({ dialog: { kind: 'settings' } })}>
+          <button className="rail-btn" title={t('common.settings')} aria-label={t('common.settings')} onClick={() => setUI({ dialog: { kind: 'settings' } })}>
             <Icon name="settings" size={22} />
           </button>
         </nav>
       )}
 
       {/* keyed by module so switching modules fades the new one in */}
-      <div className="app-main" key={ui.module}>
+      <main className="app-main" key={ui.module} id="main" aria-label={t(RAIL.find((r) => r.id === ui.module)?.title ?? 'common.module.tasks')}>
+        {/* every module but the task list (whose list name is its heading) is named by a heading for screen readers */}
+        {ui.module !== 'tasks' && <h1 className="sr-only">{t(RAIL.find((r) => r.id === ui.module)?.title ?? 'common.module.tasks')}</h1>}
         {ui.module === 'tasks' && (
           <>
             {!phone && !ui.sidebarHidden && <Sidebar />}
@@ -162,11 +180,11 @@ export default function App() {
         {ui.module === 'habit' && <HabitView />}
         {ui.module === 'stats' && <StatsView />}
         {ui.module === 'search' && <SearchView />}
-      </div>
+      </main>
 
       {/* in selection mode the action bar takes the tab bar's place */}
       {phone && !(ui.module === 'tasks' && isBatch(getSelection(ui))) && (
-        <nav className="tabbar">
+        <nav className="tabbar" aria-label={t('misc.a11y.modules')}>
           {TABS.map((r) => (
             <button key={r.id} className={'tabbar-btn' + (ui.module === r.id ? ' active' : '')} title={t(r.title)} aria-label={t(r.title)} aria-current={ui.module === r.id ? 'page' : undefined} onClick={() => openModule(r.id)}>
               <Icon name={r.icon} size={24} />
@@ -180,12 +198,15 @@ export default function App() {
       <Dialogs />
       <ReminderCards />
       <UpdateToast />
-      {ui.toast && (
-        <div className="toast" key={ui.toast.id} role="status">
-          <span>{ui.toast.text}</span>
-          {(ui.toast.undo || ui.toast.undoFn) && <button onClick={undoWithMotion}>{t('common.undo')}</button>}
-        </div>
-      )}
+      {/* A live region that is always there, so screen readers announce each toast (drops, moves, undo) */}
+      <div className="toast-region" role="status" aria-live="polite" aria-atomic="true">
+        {ui.toast && (
+          <div className="toast" key={ui.toast.id}>
+            <span>{ui.toast.text}</span>
+            {(ui.toast.undo || ui.toast.undoFn) && <button onClick={undoWithMotion}>{t('common.undo')}</button>}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

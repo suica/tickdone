@@ -49,6 +49,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - ✅ **Aufgaben und Listen**: Heute, Morgen, Nächste 7 Tage und Eingang, dazu Erledigt, Verworfen und Papierkorb; eigene Listen, Ordner und Tags; Unteraufgaben, Notizen, Prioritäten, Fälligkeitsdatum und -uhrzeit, Erinnerungen und Wiederholungsregeln; Anheften und ein Kontextmenü für jede Aufgabe.
 - ⚡ **Smarte Schnelleingabe**: Tippe `call mom tomorrow 3pm !high #family ~Personal`, und TickDone setzt Datum, Uhrzeit, Priorität, Tag und Liste und hebt jeden erkannten Teil schon beim Tippen hervor. Chinesisch versteht sie auch.
 - 🗂️ **Listen- und Kanban-Ansicht** mit Gruppierung und Sortierung.
+- 🔎 **Gespeicherte Filter**: Kombiniere Listen, Tags, Prioritäten, Daten (überfällig, heute, diese Woche, ein eigener Zeitraum …), Stichwörter und erledigte Aufgaben zu einer eigenen intelligenten Liste, mit Name, Symbol und Farbe in der Seitenleiste.
 - 📅 **Kalender** mit Monats-, Wochen-, Tages- und Listenansicht. Zieh eine Aufgabe auf einen anderen Tag oder eine andere Uhrzeit, oder zieh die Unterkante eines Blocks, um die Dauer zu ändern.
 - 🔔 **Kalenderabos**: Abonniere jeden Kalender mit einer iCal-Adresse (.ics oder webcal://), etwa für Arbeit, Schule, Team oder Feiertage, und sieh seine Termine schreibgeschützt und in eigener Farbe im Kalender. Sie aktualisieren sich von selbst und bleiben auch offline verfügbar.
 - 🧭 **Eisenhower-Matrix**: Ordne Aufgaben nach Dringlichkeit und Wichtigkeit ein und zieh sie in einen anderen Quadranten, um ihre Priorität zu ändern.
@@ -153,7 +154,7 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [x] Tastaturnavigation in Aufgabenlisten ([#16](https://github.com/suica/tickdone/issues/16))
 - [x] Benachrichtigungen für Erinnerungen ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] Als App installieren und offline nutzen ([#18](https://github.com/suica/tickdone/issues/18))
-- [ ] Gespeicherte Filter ([#19](https://github.com/suica/tickdone/issues/19))
+- [x] Gespeicherte Filter ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Statistiken zu Aufgaben, Fokus-Timer und Gewohnheitstracker ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown in Aufgabennotizen ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Zeitleistenansicht ([#22](https://github.com/suica/tickdone/issues/22))

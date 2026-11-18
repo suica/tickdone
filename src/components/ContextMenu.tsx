@@ -3,7 +3,7 @@ import { addDays, addWeeks, startOfWeek } from 'date-fns'
 import { fmt, todayStr } from '../dates'
 import { useT } from '../i18n'
 import { startFocus } from '../pomo'
-import { deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
+import { deleteFilter, deleteList, deleteTag, deleteTask, duplicateTask, getData, setUI, toast, uid, updateList, updateTask, useData, useUI, wontDo } from '../store'
 import { copyText, taskLink } from '../taskLink'
 import { useNarrowTablet, usePhone, useTablet } from '../viewport'
 import { PRIORITY } from '../views'
@@ -166,6 +166,14 @@ export function ContextMenu() {
     items = [
       { label: tr('common.edit'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'tag', id: m.id } }) },
       { label: tr('common.delete'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteTag(m.id) },
+    ]
+  } else if (m.kind === 'filter') {
+    const f = data.filters?.find((x) => x.id === m.id)
+    if (!f) return null
+    items = [
+      { label: tr('common.edit'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'filter', id: f.id } }) },
+      { divider: true },
+      { label: tr('common.delete'), icon: <Icon name="trash" size={15} />, danger: true, onClick: () => deleteFilter(f.id) },
     ]
   } else if (m.kind === 'section') {
     const [listId, secId] = m.id.split('/')

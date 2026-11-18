@@ -58,4 +58,5 @@ export default {
   'core.pomo.focusDone.bodyTask': { other: '「{task}」のポモドーロを 1 つ完了しました。{count} 分休憩しましょう。' },
   'core.pomo.breakDone.title': '休憩終了',
   'core.pomo.breakDone.body': '次のポモドーロを始めましょう',
+  'core.toast.filterDeleted': 'フィルターを削除しました',
 } satisfies Catalog<typeof en>

@@ -20,6 +20,7 @@ const P: Record<string, string> = {
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3',
   list: 'M5 6h14M5 12h14M5 18h9',
   folder: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+  filter: 'M4 5h16l-6 7.2V18l-4 2v-7.8z',
   tag: 'M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM7.5 7.5h.01',
   plus: 'M12 5v14M5 12h14',
   more: 'M5 12h.01M12 12h.01M19 12h.01',

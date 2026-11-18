@@ -67,4 +67,5 @@ export default {
   },
   'core.pomo.breakDone.title': 'Break is over',
   'core.pomo.breakDone.body': 'Ready for the next pomodoro?',
+  'core.toast.filterDeleted': 'Filter deleted',
 } as const

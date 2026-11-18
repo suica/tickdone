@@ -50,6 +50,7 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
 - ✅ **任务与清单**：今天、明天、最近 7 天、收件箱，以及已完成、已放弃和垃圾桶；自建清单、文件夹和标签；子任务、备注、优先级、截止日期与时间、提醒和重复规则；置顶，每个任务都有右键菜单。
 - ⚡ **智能快速添加**：输入 `明天下午3点 开周会 !高 #重要`，TickDone 会设置好日期、时间、优先级和标签，输入时还会高亮识别出的部分；也支持英文，比如 `call mom tomorrow 3pm !high #family ~Personal`。
 - 🗂️ **列表和看板视图**，支持分组和排序。
+- 🔎 **过滤器**：组合清单、标签、优先级、日期（已过期、今天、本周、自定义范围……）、关键词和已完成任务，做成你自己的智能清单，并在侧栏显示名称、图标和颜色。
 - 📅 **日历**：月、周、日和列表视图。把任务拖到另一天或另一个时间，或者拖动时间块的下边缘调整时长。
 - 🔔 **订阅日历**：订阅任何提供 iCal 地址（.ics 或 webcal://）的日历，比如工作、学校、团队或节假日日历，它们的日程会以只读方式、用各自的颜色显示在日历里。会自动更新，离线也能查看。
 - 🧭 **四象限**：按紧急和重要程度给任务分类，在象限之间拖动任务即可修改优先级。
@@ -154,7 +155,7 @@ npm run dev        # http://localhost:5173
 - [x] 任务列表的键盘导航 ([#16](https://github.com/suica/tickdone/issues/16))
 - [x] 提醒通知 ([#17](https://github.com/suica/tickdone/issues/17))
 - [x] 可安装为应用并离线使用 ([#18](https://github.com/suica/tickdone/issues/18))
-- [ ] 可保存的筛选条件 ([#19](https://github.com/suica/tickdone/issues/19))
+- [x] 可保存的筛选条件 ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] 任务、番茄专注和习惯打卡的统计 ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] 任务备注支持 Markdown ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] 时间线视图 ([#22](https://github.com/suica/tickdone/issues/22))

@@ -64,4 +64,5 @@ export default {
   },
   'core.pomo.breakDone.title': 'Fim da pausa',
   'core.pomo.breakDone.body': 'Pronto para o próximo pomodoro?',
+  'core.toast.filterDeleted': 'Filtro excluído',
 } satisfies Catalog<typeof en>

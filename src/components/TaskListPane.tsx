@@ -8,6 +8,7 @@ import type { AppData, GroupBy, Priority, SortBy, Task, TaskList, ViewPrefs } fr
 import { usePhone } from '../viewport'
 import { defaultPrefs, groupTasks, sortTasks, tasksForView, viewDefaults, type Group } from '../views'
 import { Icon } from './Icon'
+import { FILTER_PREFIX, filterOf } from '../filters'
 import { maybeEnter, useExitAnimations, useLinger, withLinger } from './taskMotion'
 import { anchorOf, MenuList, Popover, type Anchor, type MenuItem } from './Popover'
 import { QuickAdd } from './QuickAdd'
@@ -34,6 +35,7 @@ function viewName(view: string, d: AppData): string {
   if (SMART_NAME[view]) return tr(SMART_NAME[view])
   if (view.startsWith('list:')) return d.lists.find((l) => 'list:' + l.id === view)?.name ?? ''
   if (view.startsWith('tag:')) return '#' + view.slice(4)
+  if (view.startsWith(FILTER_PREFIX)) return filterOf(view, d)?.name ?? ''
   return ''
 }
 
@@ -196,6 +198,12 @@ export function TaskListPane() {
     { label: t('tasks.menu.showDetails'), icon: <Icon name="list" size={15} />, checked: !!data.settings.showDetails, onClick: () => setSettings({ showDetails: !data.settings.showDetails }) },
     { divider: true },
     { label: t('tasks.menu.select'), icon: <Icon name="check" size={15} />, checked: ui.selectMode, onClick: () => (ui.selectMode ? clearSelection(false) : startSelecting()) },
+    ...(view.startsWith(FILTER_PREFIX) && filterOf(view, data)
+      ? [
+          { divider: true },
+          { label: t('tasks.menu.editFilter'), icon: <Icon name="edit" size={15} />, onClick: () => setUI({ dialog: { kind: 'filter', id: view.slice(FILTER_PREFIX.length) } }) },
+        ]
+      : []),
     ...(list
       ? [
           { divider: true },
@@ -262,7 +270,7 @@ export function TaskListPane() {
           <div className="list-content" key={view}>
             {canAdd && !phone && (
               <div className="list-add">
-                <QuickAdd defaults={viewDefaults(view)} key={view} />
+                <QuickAdd defaults={viewDefaults(view, data)} key={view} />
               </div>
             )}
             <TaskDragContext.Provider value={dnd}>
@@ -278,7 +286,7 @@ export function TaskListPane() {
           </div>
         </div>
       )}
-      {phone && canAdd && !batch && <PhoneQuickAdd defaults={kanban && list ? { listId: list.id } : viewDefaults(view)} />}
+      {phone && canAdd && !batch && <PhoneQuickAdd defaults={kanban && list ? { listId: list.id } : viewDefaults(view, data)} />}
       {phone && batch && <BatchBar />}
       {datePop && <BatchPops pop={datePop.pop} ids={datePop.ids} data={raw} onClose={() => setDatePop(null)} />}
     </main>
@@ -513,7 +521,7 @@ const EMPTY: Record<string, [MessageKey, MessageKey?]> = {
 
 function EmptyState({ view }: { view: string }) {
   const t = useT()
-  const [ka, kb] = EMPTY[view] ?? ['tasks.empty.default', 'tasks.empty.defaultHint']
+  const [ka, kb] = EMPTY[view] ?? (view.startsWith(FILTER_PREFIX) ? ['tasks.empty.filter', 'tasks.empty.filterHint'] : ['tasks.empty.default', 'tasks.empty.defaultHint'])
   const a = t(ka)
   const b = kb ? t(kb) : ''
   return (

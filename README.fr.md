@@ -57,6 +57,8 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - 🔍 **Recherche** dans les tâches, les étiquettes et les listes.
 - ↩️ **Annulation** depuis la notification après avoir terminé, supprimé ou déplacé une tâche.
 - ⌨️ **Raccourcis clavier** et 🌙 **thème sombre**.
+- ⏰ **Rappels** : à l'heure du rappel d'une tâche, TickDone affiche une carte pour la terminer, la reporter (5 min, 15 min, 1 heure, demain) ou l'ouvrir, et une notification système si vous l'autorisez. TickDone n'a pas de serveur : les rappels se déclenchent tant qu'il est ouvert dans un onglet, ou installé et en cours d'exécution ; ceux arrivés pendant qu'il était fermé s'affichent à la prochaine ouverture.
+- 📲 **Installez-le comme une application** : ajoutez TickDone à l'écran d'accueil ou au Dock depuis Paramètres → À propos ; il s'ouvre hors ligne après la première visite. Quand une nouvelle version sort, un message propose de recharger.
 - 💾 **Sauvegarde et restauration** : exportez tout dans un fichier JSON et réimportez-le.
 
 ## 📸 Captures d'écran
@@ -149,8 +151,8 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [x] Finitions de l'interface, écran par écran ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] Sélection multiple et modification groupée ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] Navigation au clavier dans les listes de tâches ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] Notifications de rappel ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] Installation comme application et utilisation hors ligne ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] Notifications de rappel ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] Installation comme application et utilisation hors ligne ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Filtres enregistrés ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Statistiques des tâches, du minuteur de concentration et du suivi des habitudes ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown dans les notes des tâches ([#21](https://github.com/suica/tickdone/issues/21))

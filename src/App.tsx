@@ -15,6 +15,8 @@ import { isBatch } from './selection'
 import { taskIdFromHash, viewOfTask } from './taskLink'
 import { usePhone } from './viewport'
 import { startFeedSync } from './feeds'
+import { startReminders } from './reminders'
+import { ReminderCards, UpdateToast } from './components/Reminders'
 import CalendarView from './views/CalendarView'
 import MatrixView from './views/MatrixView'
 import PomoView from './views/PomoView'
@@ -55,6 +57,9 @@ export default function App() {
 
   // Subscribed calendars: show the cached copies and read them again when stale.
   useEffect(() => startFeedSync(), [])
+
+  // Reminders fire while the app is open; ones missed while it was closed show as cards now.
+  useEffect(() => startReminders(), [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = data.settings.theme
@@ -167,10 +172,12 @@ export default function App() {
 
       <ContextMenu />
       <Dialogs />
+      <ReminderCards />
+      <UpdateToast />
       {ui.toast && (
         <div className="toast" key={ui.toast.id} role="status">
           <span>{ui.toast.text}</span>
-          {ui.toast.undo && <button onClick={undoToast}>{t('common.undo')}</button>}
+          {(ui.toast.undo || ui.toast.undoFn) && <button onClick={undoToast}>{t('common.undo')}</button>}
         </div>
       )}
     </div>

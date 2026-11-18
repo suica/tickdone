@@ -124,6 +124,8 @@ export function setData(fn: (d: AppData) => AppData) {
   subs.forEach((f) => f())
 }
 export const useData = () => useSyncExternalStore(subscribe, getData)
+/** Calls `f` after every data change. */
+export const subscribeData = subscribe
 
 // ---------------- UI state ----------------
 export type Module = 'tasks' | 'calendar' | 'matrix' | 'pomo' | 'habit' | 'search'
@@ -132,6 +134,8 @@ export interface Toast {
   id: string
   text: string
   undo?: AppData
+  /** Undoes something outside the app data (or alongside it), such as a snoozed reminder. */
+  undoFn?: () => void
 }
 
 export interface Menu {
@@ -220,9 +224,9 @@ export function runBatch(text: string, change: (d: AppData) => AppData): boolean
 }
 
 let toastTimer: number | undefined
-export function toast(text: string, undo?: AppData) {
+export function toast(text: string, undo?: AppData, undoFn?: () => void) {
   clearTimeout(toastTimer)
-  setUI({ toast: { id: uid(), text, undo } })
+  setUI({ toast: { id: uid(), text, undo, undoFn } })
   toastTimer = window.setTimeout(() => setUI({ toast: undefined }), 4000)
 }
 export function undoToast() {
@@ -231,6 +235,7 @@ export function undoToast() {
     const snap = t.undo
     setData(() => snap)
   }
+  t?.undoFn?.()
   setUI({ toast: undefined })
 }
 

@@ -115,6 +115,10 @@ export interface Settings {
   showWeekNumbers?: boolean
   /** A preview of each task's notes under its title in task lists. */
   showDetails?: boolean
+  /** System notifications for reminders; turned on from Settings (which asks the browser for permission). */
+  notifications?: boolean
+  /** A sound when a reminder fires while the app is open; on when unset. */
+  reminderSound?: boolean
 }
 
 /** A calendar the user subscribed to by its iCal address; its events are shown read-only. */

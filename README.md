@@ -57,6 +57,8 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - 🔍 **Search** across tasks, tags and lists.
 - ↩️ **Undo** from the toast after completing, deleting or moving a task.
 - ⌨️ **Keyboard shortcuts** and a 🌙 **dark theme**.
+- ⏰ **Reminders**: at a task's reminder time TickDone shows a card with Complete, Snooze (5 min, 15 min, 1 hour, tomorrow) and Open, plus a system notification if you allow it. TickDone has no server, so reminders fire while it is open in a tab or installed and running; ones that came due while it was closed show up when you open it again.
+- 📲 **Install it as an app**: add TickDone to your home screen or dock from Settings → About, and it opens offline after the first visit. When a new version is out, a toast offers to reload.
 - 💾 **Backup and restore**: export everything to a JSON file and import it again.
 
 ## 📸 Screenshots
@@ -149,8 +151,8 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [x] UI polish, screen by screen ([#11](https://github.com/suica/tickdone/issues/11))
 - [x] Multi-select and batch edit ([#15](https://github.com/suica/tickdone/issues/15))
 - [x] Keyboard navigation in task lists ([#16](https://github.com/suica/tickdone/issues/16))
-- [ ] Reminder notifications ([#17](https://github.com/suica/tickdone/issues/17))
-- [ ] Install as an app and work offline ([#18](https://github.com/suica/tickdone/issues/18))
+- [x] Reminder notifications ([#17](https://github.com/suica/tickdone/issues/17))
+- [x] Install as an app and work offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [ ] Saved filters ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Statistics for tasks, focus and habits ([#20](https://github.com/suica/tickdone/issues/20))
 - [ ] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))

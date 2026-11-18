@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': '已移入「{name}」',
   'tasks.dnd.outOfFolder': '已移出文件夹',
   'tasks.dnd.folder': '文件夹',
+  'tasks.swipe.date': '日期',
+  'tasks.swipe.move': '移动',
+  'tasks.swipe.complete': '完成',
+  'tasks.swipe.pinned': '已置顶',
+  'tasks.swipe.unpinned': '已取消置顶',
+  'tasks.swipe.dateChanged': '已更新日期',
 } satisfies Catalog<typeof en>

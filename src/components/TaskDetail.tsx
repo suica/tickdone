@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
 import { dueLabel, isOverdue } from '../dates'
-import { usePan } from '../gestures'
 import { useT, type MessageKey } from '../i18n'
 import { fmtFullDate, fmtMonthDay, fmtTime } from '../i18n/format'
 import { cancelAnimations, dur, ease, play } from '../motion'
@@ -47,9 +46,10 @@ function AutoTextarea({ value, onChange, className, placeholder, onKeyDown, auto
  * - float: desktop calendar/matrix/search, a panel over the right edge;
  * - overlay: calendar/matrix/search on tablets, and the task module on narrow tablets (768–1023px),
  *   a panel sliding in from the right over the list (click outside closes);
- * - page: phones, a full-screen page sliding in from the right (back button or swipe right closes).
+ * - sheet: phones, a bottom sheet over the dimmed screen. It opens at about 60% of the height; drag its
+ *   header up for full height or down to close. A tap on the dimmed area or Esc closes it.
  */
-type Mode = 'pane' | 'float' | 'overlay' | 'page'
+type Mode = 'pane' | 'float' | 'overlay' | 'sheet'
 
 export function TaskDetail({ floating }: { floating?: boolean }) {
   const ui = useUI()
@@ -58,13 +58,14 @@ export function TaskDetail({ floating }: { floating?: boolean }) {
   const tablet = useTablet()
   const narrow = useNarrowTablet()
   const task = data.tasks.find((t) => t.id === ui.selectedTaskId)
-  const mode: Mode = phone ? 'page' : floating ? (tablet ? 'overlay' : 'float') : narrow ? 'overlay' : 'pane'
+  const mode: Mode = phone ? 'sheet' : floating ? (tablet ? 'overlay' : 'float') : narrow ? 'overlay' : 'pane'
   if (mode === 'pane') return <DetailPane task={task} width={ui.detailWidth} />
   if (!task) return null
+  if (mode === 'sheet') return <DetailSheet task={task} />
   return <DetailLayer task={task} mode={mode} />
 }
 
-/** Closes the task detail. Floating panels and full-screen pages slide out first. */
+/** Closes the task detail. Floating panels slide out to the right, the phone sheet slides down. */
 export function closeDetail() {
   const id = getUI().selectedTaskId
   if (!id) return
@@ -73,9 +74,19 @@ export function closeDetail() {
   const d = dur('--dur')
   if (!el || !d) return setUI({ selectedTaskId: undefined })
   el.dataset.closing = '1'
-  const from = getComputedStyle(el).transform
-  el.style.transform = ''
-  play(el, [{ transform: from === 'none' ? 'translateX(0)' : from }, { transform: 'translateX(100%)' }], d, ease('--ease-in-out')).then((finished) => {
+  const sheet = el.dataset.detailLayer === 'sheet' ? el.querySelector<HTMLElement>('.detail-sheet') : null
+  const target = sheet ?? el
+  const from = getComputedStyle(target).transform
+  target.style.transform = ''
+  let done: Promise<boolean>
+  if (sheet) {
+    // the closing sheet no longer takes taps: the list behind is usable right away
+    el.inert = true
+    const mask = el.querySelector('.detail-sheet-mask')
+    if (mask) play(mask, [{ opacity: getComputedStyle(mask).opacity }, { opacity: 0 }], d, ease('--ease-in-out'))
+    done = play(sheet, [{ transform: from === 'none' ? 'translateY(0)' : from }, { transform: 'translateY(100%)' }], d, ease('--ease-in-out'))
+  } else done = play(el, [{ transform: from === 'none' ? 'translateX(0)' : from }, { transform: 'translateX(100%)' }], d, ease('--ease-in-out'))
+  done.then((finished) => {
     delete el.dataset.closing
     if (finished && getUI().selectedTaskId === id) setUI({ selectedTaskId: undefined })
   })
@@ -86,11 +97,9 @@ const NOT_OUTSIDE = '.popover, .sheet-layer, .modal-mask, .dlg-mask, .toast, .dr
 /** If one of these is open when the pointer goes down, the click just dismisses it. */
 const DISMISSABLE = '.popover, .sheet-layer, .modal-mask, .dlg-mask'
 
-function DetailLayer({ task, mode }: { task: Task; mode: Exclude<Mode, 'pane'> }) {
+function DetailLayer({ task, mode }: { task: Task; mode: 'float' | 'overlay' }) {
   const ref = useRef<HTMLDivElement>(null)
-  const data = useData()
   const t = useT()
-  const list = data.lists.find((l) => l.id === task.listId)
 
   // Another task picked while the panel was sliding out: keep it open.
   useLayoutEffect(() => {
@@ -104,7 +113,6 @@ function DetailLayer({ task, mode }: { task: Task; mode: Exclude<Mode, 'pane'> }
   // Floating panels close on a click outside them. A click that picks another task switches to it,
   // and a click that only dismisses an open popover, menu or dialog leaves the panel alone.
   useEffect(() => {
-    if (mode === 'page') return
     let idAtDown: string | undefined
     let skip = true
     const down = (e: PointerEvent) => {
@@ -126,48 +134,151 @@ function DetailLayer({ task, mode }: { task: Task; mode: Exclude<Mode, 'pane'> }
     }
   }, [mode])
 
-  const springBack = () => {
-    const el = ref.current
-    if (!el) return
-    const from = el.style.transform
-    el.style.transform = ''
-    play(el, [{ transform: from || 'none' }, { transform: 'translateX(0)' }], dur('--dur'), ease('--ease-out')).then(() => cancelAnimations(el))
-  }
-  // Swipe right on the full-screen page to go back.
-  const swipe = usePan({
-    axis: 'x',
-    dir: 1,
-    maxDelay: 300,
-    filter: () => !ref.current?.dataset.closing,
-    onStart: () => ref.current?.getAnimations().forEach((a) => a.finish()),
-    onMove: (d) => {
-      if (ref.current) ref.current.style.transform = `translateX(${d}px)`
-    },
-    onEnd: (d, v) => {
-      const w = ref.current?.offsetWidth ?? 1
-      if (d > w * 0.3 || v > 0.45) closeDetail()
-      else springBack()
-    },
-  })
-
-  const cls = mode === 'page' ? 'detail-page' : 'detail-float' + (mode === 'overlay' ? ' detail-overlay' : '')
+  const cls = 'detail-float' + (mode === 'overlay' ? ' detail-overlay' : '')
   return createPortal(
-    <div ref={ref} className={cls} data-detail-layer={mode} role="dialog" aria-label={t('shell.detail.label')} {...(mode === 'page' ? swipe : {})}>
-      {mode === 'page' ? (
-        <div className="detail-nav">
-          <button className="detail-back" title={t('common.back')} aria-label={t('common.back')} onClick={closeDetail}>
-            <Icon name="chevronLeft" size={24} />
-          </button>
-          <span className="detail-nav-title">{list?.name ?? t('common.list.inbox')}</span>
-        </div>
-      ) : (
-        <div className="detail-float-close">
-          <button className="icon-btn" onClick={closeDetail} title={t('common.close')}>
-            <Icon name="close" size={16} />
-          </button>
-        </div>
-      )}
+    <div ref={ref} className={cls} data-detail-layer={mode} role="dialog" aria-label={t('shell.detail.label')}>
+      <div className="detail-float-close">
+        <button className="icon-btn" onClick={closeDetail} title={t('common.close')}>
+          <Icon name="close" size={16} />
+        </button>
+      </div>
       <DetailBody task={task} key={task.id} />
+    </div>,
+    document.body,
+  )
+}
+
+/** Height of the sheet when it opens, as a share of the screen. */
+const SHEET_HALF = 0.6
+
+/** The phone detail: a bottom sheet over a dimmed screen. */
+function DetailSheet({ task }: { task: Task }) {
+  const layer = useRef<HTMLDivElement>(null)
+  const sheet = useRef<HTMLDivElement>(null)
+  const t = useT()
+
+  // Another task picked while the sheet was sliding down: keep it open.
+  useLayoutEffect(() => {
+    const el = layer.current
+    if (el?.dataset.closing) {
+      delete el.dataset.closing
+      el.inert = false
+      cancelAnimations(el.querySelector('.detail-sheet-mask'))
+      cancelAnimations(sheet.current)
+    }
+  }, [task.id])
+
+  // Focus moves into the sheet, and back to where it was once it closes.
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null
+    if (task.title) sheet.current?.focus({ preventScroll: true })
+    return () => {
+      if (prev?.isConnected) prev.focus({ preventScroll: true })
+    }
+  }, [])
+
+  // Drag the grip or the header: up to full height, down to the opening height or to close.
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = sheet.current
+    const host = layer.current
+    if (!el || !host || host.dataset.closing) return
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    if (!(e.target as Element).closest('[data-sheet-drag]')) return
+    const y0 = e.clientY
+    const pid = e.pointerId
+    const wasFull = el.classList.contains('full')
+    let started = false
+    let base = 0
+    let fullH = 0
+    let halfBase = 0
+    let pos = 0
+    const samples: { t: number; y: number }[] = []
+    const begin = () => {
+      started = true
+      cancelAnimations(el)
+      const halfH = wasFull ? 0 : el.offsetHeight
+      el.classList.add('full', 'dragging')
+      fullH = el.offsetHeight
+      halfBase = Math.max(0, fullH - (wasFull ? Math.min(fullH, Math.round(host.clientHeight * SHEET_HALF)) : halfH))
+      base = wasFull ? 0 : halfBase
+      try {
+        el.setPointerCapture(pid)
+      } catch {
+        /* pointer already gone */
+      }
+    }
+    const move = (ev: PointerEvent) => {
+      if (ev.pointerId !== pid) return
+      const dy = ev.clientY - y0
+      if (!started) {
+        if (Math.abs(dy) < 6) return
+        begin()
+      }
+      ev.preventDefault()
+      const p = base + dy
+      pos = p < 0 ? p / 3 : p
+      el.style.transform = `translateY(${pos}px)`
+      samples.push({ t: ev.timeStamp, y: ev.clientY })
+      while (samples.length > 2 && ev.timeStamp - samples[0].t > 100) samples.shift()
+    }
+    const end = (ev: PointerEvent) => {
+      if (ev.pointerId !== pid) return
+      el.removeEventListener('pointermove', move)
+      el.removeEventListener('pointerup', end)
+      el.removeEventListener('pointercancel', end)
+      if (!started) return
+      el.classList.remove('dragging')
+      // the click that ends a drag does nothing
+      const swallow = (c: MouseEvent) => {
+        c.preventDefault()
+        c.stopPropagation()
+      }
+      window.addEventListener('click', swallow, { capture: true, once: true })
+      setTimeout(() => window.removeEventListener('click', swallow, true), 400)
+      const a = samples[0]
+      const b = samples[samples.length - 1]
+      const v = ev.type === 'pointerup' && a && b && b.t > a.t ? (b.y - a.y) / (b.t - a.t) : 0
+      const projected = pos + v * 150
+      const stops = [0, halfBase, fullH]
+      const to = stops.reduce((best, s) => (Math.abs(s - projected) < Math.abs(best - projected) ? s : best), stops[0])
+      if (to === fullH) return closeDetail()
+      const d = dur('--dur')
+      play(el, [{ transform: `translateY(${pos}px)` }, { transform: `translateY(${to}px)` }], d, ease('--ease-out')).then(() => {
+        if (to !== 0) el.classList.remove('full')
+        el.style.transform = ''
+        cancelAnimations(el)
+      })
+    }
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerup', end)
+    el.addEventListener('pointercancel', end)
+  }
+
+  return createPortal(
+    <div ref={layer} className="detail-sheet-layer" data-detail-layer="sheet">
+      <div className="detail-sheet-mask" onClick={closeDetail} aria-hidden />
+      <div
+        ref={sheet}
+        className="detail-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('shell.detail.label')}
+        tabIndex={-1}
+        onPointerDown={onPointerDown}
+        onKeyDown={(e) => {
+          // Esc closes the sheet, also from a text field, unless a menu or picker is open over it
+          if (e.key !== 'Escape' || document.querySelector('.sheet-layer, .popover')) return
+          e.preventDefault()
+          e.stopPropagation()
+          ;(document.activeElement as HTMLElement | null)?.blur?.()
+          closeDetail()
+        }}
+      >
+        <div className="detail-sheet-grip" data-sheet-drag aria-hidden>
+          <span />
+        </div>
+        <DetailBody task={task} key={task.id} sheet />
+      </div>
     </div>,
     document.body,
   )
@@ -288,7 +399,7 @@ function Divider({ pane, width }: { pane: RefObject<HTMLElement | null>; width?:
   )
 }
 
-function DetailBody({ task }: { task: Task }) {
+function DetailBody({ task, sheet }: { task: Task; sheet?: boolean }) {
   const data = useData()
   const phone = usePhone()
   const t = useT()
@@ -328,6 +439,22 @@ function DetailBody({ task }: { task: Task }) {
           </button>
         </div>
       )}
+      {sheet && (
+        <div className="detail-sheet-head" data-sheet-drag>
+          <button className="detail-chip" disabled={ro} onClick={(e) => setPop({ kind: 'list', anchor: anchorOf(e.currentTarget) })}>
+            {list?.color ? <i className="dot" style={{ background: list.color }} /> : <Icon name={list ? 'list' : 'inbox'} size={15} />}
+            <span>{list?.name ?? t('common.list.inbox')}</span>
+            <Icon name="chevronDown" size={14} />
+          </button>
+          <div style={{ flex: 1 }} />
+          <button className="detail-round" title={t('common.priority')} aria-label={t('common.priority')} disabled={ro} onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
+            <Flag color={priorityColor(task.priority)} size={18} />
+          </button>
+          <button className="detail-round" title={t('common.more')} aria-label={t('common.more')} onClick={(e) => setPop({ kind: 'more', anchor: anchorOf(e.currentTarget) })}>
+            <Icon name="more" size={18} stroke={2.6} />
+          </button>
+        </div>
+      )}
       <div className="detail-top">
         <Checkbox task={task} />
         <button className="detail-date" style={{ color: dateColor }} disabled={ro} onClick={(e) => setPop({ kind: 'date', anchor: anchorOf(e.currentTarget) })}>
@@ -337,9 +464,11 @@ function DetailBody({ task }: { task: Task }) {
           {task.repeat && <Icon name="repeat" size={13} />}
         </button>
         <div style={{ flex: 1 }} />
-        <button className="icon-btn" title={t('common.priority')} disabled={ro} onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
-          <Flag color={priorityColor(task.priority)} size={17} />
-        </button>
+        {!sheet && (
+          <button className="icon-btn" title={t('common.priority')} disabled={ro} onClick={(e) => setPop({ kind: 'prio', anchor: anchorOf(e.currentTarget) })}>
+            <Flag color={priorityColor(task.priority)} size={17} />
+          </button>
+        )}
       </div>
 
       <div className="detail-scroll">
@@ -402,10 +531,12 @@ function DetailBody({ task }: { task: Task }) {
       </div>
 
       <div className="detail-foot">
-        <button className="detail-list" disabled={ro} onClick={(e) => setPop({ kind: 'list', anchor: anchorOf(e.currentTarget) })}>
-          {list?.color ? <i className="dot" style={{ background: list.color }} /> : <Icon name={list ? 'list' : 'inbox'} size={15} />}
-          <span>{list?.name ?? t('common.list.inbox')}</span>
-        </button>
+        {!sheet && (
+          <button className="detail-list" disabled={ro} onClick={(e) => setPop({ kind: 'list', anchor: anchorOf(e.currentTarget) })}>
+            {list?.color ? <i className="dot" style={{ background: list.color }} /> : <Icon name={list ? 'list' : 'inbox'} size={15} />}
+            <span>{list?.name ?? t('common.list.inbox')}</span>
+          </button>
+        )}
         <div style={{ flex: 1 }} />
         {!ro && (
           <>
@@ -417,9 +548,11 @@ function DetailBody({ task }: { task: Task }) {
             </button>
           </>
         )}
-        <button className="icon-btn" title={t('common.more')} onClick={(e) => setPop({ kind: 'more', anchor: anchorOf(e.currentTarget) })}>
-          <Icon name="more" size={18} stroke={2.6} />
-        </button>
+        {!sheet && (
+          <button className="icon-btn" title={t('common.more')} onClick={(e) => setPop({ kind: 'more', anchor: anchorOf(e.currentTarget) })}>
+            <Icon name="more" size={18} stroke={2.6} />
+          </button>
+        )}
       </div>
 
       {pop?.kind === 'date' && (

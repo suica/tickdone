@@ -101,73 +101,140 @@ body.col-resizing * {
   z-index: 1;
 }
 
-/* Phones: a full-screen page above the bottom bar, with a back button; swipe right to go back. */
-.detail-page {
+/* Phones: a bottom sheet over the dimmed screen. It opens at about 60% of the height; dragging its
+   grip or header moves it up to full height (.full) or down to close (see TaskDetail DetailSheet). */
+.detail-sheet-layer {
   position: fixed;
   inset: 0;
   z-index: 600;
+}
+.detail-sheet-mask {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  animation: detail-fade var(--dur-slow) var(--ease-out);
+  touch-action: none;
+}
+@keyframes detail-fade {
+  from {
+    opacity: 0;
+  }
+}
+.detail-sheet {
+  position: absolute;
+  left: var(--safe-l);
+  right: var(--safe-r);
+  bottom: 0;
+  height: min(60%, calc(100% - var(--safe-t) - 12px));
   display: flex;
   flex-direction: column;
-  padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+  padding-bottom: var(--safe-b);
   background: var(--bg);
-  box-shadow: var(--shadow);
-  animation: detail-in var(--dur-slow) var(--ease-out);
-  touch-action: pan-y;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.16);
+  outline: none;
+  animation: sheet-up var(--dur-slow) var(--ease-out);
 }
-.detail-nav {
+.detail-sheet.full {
+  height: calc(100% - var(--safe-t) - 12px);
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+.detail-sheet-grip {
+  flex-shrink: 0;
+  height: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  touch-action: none;
+  cursor: grab;
+}
+.detail-sheet-grip span {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+.detail-sheet-head {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 48px;
-  padding: 0 16px 0 4px;
+  gap: 10px;
+  padding: 6px 14px 4px 10px;
+  touch-action: none;
 }
-.detail-back {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: 8px;
+.detail-chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: var(--text-2);
+  gap: 6px;
+  min-width: 0;
+  max-width: 60%;
+  min-height: 40px;
+  padding: 0 8px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
   -webkit-tap-highlight-color: transparent;
 }
-.detail-back:active {
-  background: var(--bg-hover);
-}
-.detail-nav-title {
-  min-width: 0;
-  font-size: 16px;
-  font-weight: 600;
+.detail-chip span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.detail-page .detail-scroll {
+.detail-chip svg:last-child {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+.detail-chip:active:not(:disabled) {
+  background: var(--bg-hover);
+}
+.detail-round {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-round);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.detail-round:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.detail-sheet .detail-top {
+  border-bottom: none;
+}
+.detail-sheet .detail-scroll {
   touch-action: pan-y;
   padding: 14px 16px;
 }
-.detail-page .detail-top {
+.detail-sheet .detail-top {
   padding: 4px 8px 6px 16px;
 }
-.detail-page .detail-top .icon-btn,
-.detail-page .detail-foot .icon-btn {
+.detail-sheet .detail-top .icon-btn,
+.detail-sheet .detail-foot .icon-btn {
   width: 40px;
   height: 40px;
 }
-.detail-page .detail-date,
-.detail-page .detail-list,
-.detail-page .detail-addsub {
+.detail-sheet .detail-date,
+.detail-sheet .detail-list,
+.detail-sheet .detail-addsub {
   min-height: 40px;
 }
-.detail-page .detail-foot {
+.detail-sheet .detail-foot {
   padding: 2px 6px 2px 8px;
 }
-.detail-page .subtask {
+.detail-sheet .subtask {
   height: 44px;
 }
-.detail-page .detail-meta {
+.detail-sheet .detail-meta {
   padding: 0 16px 8px;
 }
 .detail-inner {
@@ -295,7 +362,7 @@ body.col-resizing * {
     opacity: 0.6;
   }
 }
-.detail-page .subtask-grip {
+.detail-sheet .subtask-grip {
   left: -16px;
   width: 16px;
 }

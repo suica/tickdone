@@ -26,8 +26,22 @@
   --text-4: #bbb;
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
   --radius: 6px;
-  /* Phone bottom module bar height and safe areas */
+  /* Phone surfaces: the grey page behind grouped cards, round header buttons, the dim behind sheets */
+  --bg-grouped: #f2f2f6;
+  --bg-card: #ffffff;
+  --bg-round: #f4f4f6;
+  --bg-bar: rgba(255, 255, 255, 0.82);
+  --scrim: rgba(0, 0, 0, 0.38);
+  --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  /* Swipe action colours on phone rows */
+  --swipe-blue: #3a8ef6;
+  --swipe-orange: #f59a23;
+  --swipe-red: #f0443e;
+  --swipe-green: #1fbf8f;
+  /* Phone bottom module bar: a floating capsule, its gap to the screen edge, and the room it takes */
   --tabbar-h: 56px;
+  --tabbar-gap: max(10px, var(--safe-b));
+  --tabbar-space: calc(var(--tabbar-h) + var(--tabbar-gap) + 8px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
@@ -69,6 +83,12 @@
   --text-4: #555;
   --p-none: #666;
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --bg-grouped: #111112;
+  --bg-card: #1e1e1e;
+  --bg-round: #2a2a2a;
+  --bg-bar: rgba(40, 40, 40, 0.82);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.35);
   color-scheme: dark;
 }
 
@@ -427,12 +447,12 @@ select {
 }
 @media (max-width: 767px) {
   .toast {
-    bottom: calc(var(--tabbar-h) + var(--safe-b) + 12px);
+    bottom: calc(var(--tabbar-space) + 4px);
     padding: 12px 16px;
   }
-  /* Stay clear of the task list's round add button (52px, 16px above the bar) */
+  /* Stay clear of the task list's round add button (52px, 14px above the bar) */
   body:has(.qa-fab) .toast {
-    bottom: calc(var(--tabbar-h) + var(--safe-b) + 16px + 52px + 12px);
+    bottom: calc(var(--tabbar-space) + 14px + 52px + 12px);
   }
   .toast button {
     margin: -12px -8px -12px 0;

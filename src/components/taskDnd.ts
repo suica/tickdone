@@ -102,6 +102,11 @@ function dropOnSide(id: string, drop: SideDrop) {
   if (getUIId() === id && (drop.patch.deleted || 'listId' in drop.patch)) setUI({ selectedTaskId: undefined })
   toast(drop.text, snap)
 }
+/** Moves a task as if it had been dropped on the sidebar entry for `view` (toast with undo). */
+export function moveTaskTo(task: Task, view: string) {
+  const drop = sideDrop(view, task)
+  if (drop) dropOnSide(task.id, drop)
+}
 const getUIId = () => document.querySelector('.task-row.selected')?.getAttribute('data-task-id')
 
 // ---------------- list rows ----------------

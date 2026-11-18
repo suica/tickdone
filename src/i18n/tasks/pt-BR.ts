@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': 'Movida para a pasta “{name}”',
   'tasks.dnd.outOfFolder': 'Removida da pasta',
   'tasks.dnd.folder': 'Pasta',
+  'tasks.swipe.date': 'Data',
+  'tasks.swipe.move': 'Mover',
+  'tasks.swipe.complete': 'Concluir',
+  'tasks.swipe.pinned': 'Fixada no topo',
+  'tasks.swipe.unpinned': 'Desafixada',
+  'tasks.swipe.dateChanged': 'Data atualizada',
 } satisfies Catalog<typeof en>

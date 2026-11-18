@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': 'Déplacée dans « {name} »',
   'tasks.dnd.outOfFolder': 'Sortie du dossier',
   'tasks.dnd.folder': 'Dossier',
+  'tasks.swipe.date': 'Date',
+  'tasks.swipe.move': 'Déplacer',
+  'tasks.swipe.complete': 'Terminer',
+  'tasks.swipe.pinned': 'Épinglée en haut',
+  'tasks.swipe.unpinned': 'Désépinglée',
+  'tasks.swipe.dateChanged': 'Date mise à jour',
 } satisfies Catalog<typeof en>

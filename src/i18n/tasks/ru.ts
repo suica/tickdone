@@ -80,4 +80,10 @@ export default {
   'tasks.dnd.intoFolder': 'Перемещено в папку «{name}»',
   'tasks.dnd.outOfFolder': 'Убрано из папки',
   'tasks.dnd.folder': 'Папка',
+  'tasks.swipe.date': 'Дата',
+  'tasks.swipe.move': 'Переместить',
+  'tasks.swipe.complete': 'Выполнить',
+  'tasks.swipe.pinned': 'Закреплено вверху',
+  'tasks.swipe.unpinned': 'Откреплено',
+  'tasks.swipe.dateChanged': 'Дата обновлена',
 } satisfies Catalog<typeof en>

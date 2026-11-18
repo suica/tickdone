@@ -1,4 +1,5 @@
 import { flushSync } from 'react-dom'
+import { t } from '../i18n'
 import { getData, setData, setUI, toast } from '../store'
 import type { AppData, Folder, TaskList } from '../types'
 import { hideLine, highlight, hitAt, pressToDrag, showLine } from './dnd'
@@ -102,24 +103,29 @@ export function startListItemDrag(e: React.PointerEvent<HTMLElement>, listId: st
         showLine(r.left + indent, y, r.width - indent - 10)
       },
       onDrop: () => {
-        const t = target as T
-        if (!t) return false
+        const tg = target as T
+        if (!tg) return false
         const d = getData()
         const l = d.lists.find((x) => x.id === listId)
         if (!l) return false
-        if (t.kind === 'into') {
-          if (l.folderId === t.folderId) return false
-          const f = d.folders.find((x) => x.id === t.folderId)
-          const count = d.lists.filter((x) => x.folderId === t.folderId).length
-          commit(side, (dd) => moveList(dd, listId, t.folderId, count), `已移入「${f?.name ?? '文件夹'}」`)
+        if (tg.kind === 'into') {
+          if (l.folderId === tg.folderId) return false
+          const f = d.folders.find((x) => x.id === tg.folderId)
+          const count = d.lists.filter((x) => x.folderId === tg.folderId).length
+          commit(side, (dd) => moveList(dd, listId, tg.folderId, count), t('tasks.dnd.intoFolder', { name: f?.name ?? t('tasks.dnd.folder') }))
           return true
         }
-        const folderId = t.folder || undefined
-        // t.index counts the container's lists without the dragged one, so its old index means "same place"
-        const box = normalizeLists(d.lists, d.folders).filter((x) => (x.folderId ?? '') === t.folder)
-        if (t.folder === origFolder && box.findIndex((x) => x.id === listId) === t.index) return false
-        const text = t.folder === origFolder ? '已调整清单顺序' : folderId ? `已移入「${d.folders.find((f) => f.id === folderId)?.name ?? '文件夹'}」` : '已移出文件夹'
-        commit(side, (dd) => moveList(dd, listId, folderId, t.index), text)
+        const folderId = tg.folder || undefined
+        // tg.index counts the container's lists without the dragged one, so its old index means "same place"
+        const box = normalizeLists(d.lists, d.folders).filter((x) => (x.folderId ?? '') === tg.folder)
+        if (tg.folder === origFolder && box.findIndex((x) => x.id === listId) === tg.index) return false
+        const text =
+          tg.folder === origFolder
+            ? t('tasks.dnd.listsReordered')
+            : folderId
+              ? t('tasks.dnd.intoFolder', { name: d.folders.find((f) => f.id === folderId)?.name ?? t('tasks.dnd.folder') })
+              : t('tasks.dnd.outOfFolder')
+        commit(side, (dd) => moveList(dd, listId, folderId, tg.index), text)
         return true
       },
       onLongPress,
@@ -159,7 +165,7 @@ export function startFolderDrag(e: React.PointerEvent<HTMLElement>, folderId: st
         const next = [...without]
         next.splice(index, 0, folderId)
         if (next.every((x, i) => x === order[i])) return false
-        commit(side, (dd) => moveFolder(dd, folderId, index), '已调整文件夹顺序')
+        commit(side, (dd) => moveFolder(dd, folderId, index), t('tasks.dnd.foldersReordered'))
         return true
       },
       onLongPress: () => setUI({ dialog: { kind: 'folder', id: folderId } }),

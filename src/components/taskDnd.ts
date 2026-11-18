@@ -2,6 +2,7 @@ import { createContext } from 'react'
 import { flushSync } from 'react-dom'
 import { addDays } from 'date-fns'
 import { fmt, todayStr } from '../dates'
+import { t, type MessageKey } from '../i18n'
 import { getData, reorderTask, setData, setUI, toast, updateList } from '../store'
 import type { AppData, GroupBy, SortBy, Task } from '../types'
 import { hideLine, highlight, hitAt, pressToDrag, showLine, type DragState } from './dnd'
@@ -24,19 +25,34 @@ export interface TaskDragApi {
 /** Provided by the task list and the kanban board; TaskRow is only draggable inside one. */
 export const TaskDragContext = createContext<TaskDragApi | null>(null)
 
-const findTask = (id: string) => getData().tasks.find((t) => t.id === id)
+/** Names of the smart lists, by view id. */
+export const SMART_NAME: Record<string, MessageKey> = {
+  today: 'common.today',
+  tomorrow: 'common.tomorrow',
+  week: 'common.list.next7Days',
+  inbox: 'common.list.inbox',
+  all: 'common.list.all',
+  completed: 'common.list.completed',
+  wontdo: 'common.list.wontDo',
+  trash: 'common.list.trash',
+}
+
+/** Short names of the priority levels. */
+export const PRIORITY_LEVEL: Record<number, MessageKey> = { 5: 'common.priority.high', 3: 'common.priority.medium', 1: 'common.priority.low', 0: 'common.priority.none' }
+
+const findTask = (id: string) => getData().tasks.find((x) => x.id === id)
 
 /** Apply a patch to a task, and the list change to its subtasks as well. */
 function patchTasks(id: string, patch: Partial<Task>, d: AppData): AppData {
   const moveList = 'listId' in patch
   const below = moveList ? new Set(descendantIds(id, d.tasks)) : new Set<string>()
   const now = Date.now()
-  const known = new Set(d.tags.map((t) => t.name))
+  const known = new Set(d.tags.map((tag) => tag.name))
   const newTags = (patch.tags ?? []).filter((x) => !known.has(x)).map((name) => ({ name }))
   return {
     ...d,
-    tasks: d.tasks.map((t) =>
-      t.id === id ? { ...t, ...patch, modifiedAt: now } : below.has(t.id) ? { ...t, listId: patch.listId!, sectionId: undefined, modifiedAt: now } : t,
+    tasks: d.tasks.map((x) =>
+      x.id === id ? { ...x, ...patch, modifiedAt: now } : below.has(x.id) ? { ...x, listId: patch.listId!, sectionId: undefined, modifiedAt: now } : x,
     ),
     tags: newTags.length ? [...d.tags, ...newTags] : d.tags,
   }
@@ -48,35 +64,36 @@ export interface SideDrop {
   text: string
 }
 
-/** What dropping `t` on a sidebar entry does, or null when it would change nothing. */
-export function sideDrop(view: string, t: Task, d: AppData = getData()): SideDrop | null {
+/** What dropping `task` on a sidebar entry does, or null when it would change nothing. */
+export function sideDrop(view: string, task: Task, d: AppData = getData()): SideDrop | null {
   const today = todayStr()
   const tomorrow = fmt(addDays(new Date(), 1))
-  const detach = (listId: string) => (t.parentId && d.tasks.find((x) => x.id === t.parentId)?.listId !== listId ? { parentId: undefined } : {})
-  if (view === 'today') return t.dueDate === today ? null : { patch: { dueDate: today }, text: '已移到「今天」' }
-  if (view === 'tomorrow') return t.dueDate === tomorrow ? null : { patch: { dueDate: tomorrow }, text: '已移到「明天」' }
-  if (view === 'week') return t.dueDate ? null : { patch: { dueDate: today }, text: '已移到「今天」' }
-  if (view === 'inbox') return t.listId === 'inbox' ? null : { patch: { listId: 'inbox', sectionId: undefined, ...detach('inbox') }, text: '已移动到「收件箱」' }
+  const detach = (listId: string) => (task.parentId && d.tasks.find((x) => x.id === task.parentId)?.listId !== listId ? { parentId: undefined } : {})
+  const movedTo = (name: string) => t('tasks.dnd.movedTo', { name })
+  if (view === 'today') return task.dueDate === today ? null : { patch: { dueDate: today }, text: movedTo(t('common.today')) }
+  if (view === 'tomorrow') return task.dueDate === tomorrow ? null : { patch: { dueDate: tomorrow }, text: movedTo(t('common.tomorrow')) }
+  if (view === 'week') return task.dueDate ? null : { patch: { dueDate: today }, text: movedTo(t('common.today')) }
+  if (view === 'inbox') return task.listId === 'inbox' ? null : { patch: { listId: 'inbox', sectionId: undefined, ...detach('inbox') }, text: movedTo(t('common.list.inbox')) }
   if (view.startsWith('list:')) {
     const l = d.lists.find((x) => x.id === view.slice(5))
-    if (!l || t.listId === l.id) return null
-    return { patch: { listId: l.id, sectionId: undefined, ...detach(l.id) }, text: `已移动到「${l.name}」` }
+    if (!l || task.listId === l.id) return null
+    return { patch: { listId: l.id, sectionId: undefined, ...detach(l.id) }, text: movedTo(l.name) }
   }
   if (view.startsWith('tag:')) {
     const tag = view.slice(4)
-    return t.tags.includes(tag) ? null : { patch: { tags: [...t.tags, tag] }, text: `已添加标签「${tag}」` }
+    return task.tags.includes(tag) ? null : { patch: { tags: [...task.tags, tag] }, text: t('tasks.dnd.tagAdded', { tag }) }
   }
-  if (view === 'completed') return t.status === 2 ? null : { patch: { status: 2, completedAt: Date.now() }, text: `已完成「${t.title || '无标题'}」` }
-  if (view === 'wontdo') return t.status === -1 ? null : { patch: { status: -1, completedAt: Date.now() }, text: '已放弃' }
-  if (view === 'trash') return t.deleted ? null : { patch: { deleted: true }, text: '已删除，可在垃圾桶恢复' }
+  if (view === 'completed') return task.status === 2 ? null : { patch: { status: 2, completedAt: Date.now() }, text: t('tasks.dnd.completed', { title: task.title || t('common.untitled') }) }
+  if (view === 'wontdo') return task.status === -1 ? null : { patch: { status: -1, completedAt: Date.now() }, text: t('tasks.dnd.wontDo') }
+  if (view === 'trash') return task.deleted ? null : { patch: { deleted: true }, text: t('tasks.dnd.deleted') }
   return null
 }
 
 /** Hit-test the sidebar: an entry that accepts the task (highlighted), an entry that does not, or nothing. */
-function sideTarget(el: HTMLElement | null, t: Task): { el: HTMLElement; drop: SideDrop | null } | null {
+function sideTarget(el: HTMLElement | null, task: Task): { el: HTMLElement; drop: SideDrop | null } | null {
   const item = el?.closest<HTMLElement>('[data-dnd-view]')
   if (!item) return null
-  return { el: item, drop: sideDrop(item.dataset.dndView!, t) }
+  return { el: item, drop: sideDrop(item.dataset.dndView!, task) }
 }
 
 function dropOnSide(id: string, drop: SideDrop) {
@@ -221,18 +238,18 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
         }
         if (target.kind !== 'slot') return false
         const { slot } = target
-        const t = findTask(task.id)
-        if (!t) return false
+        const cur = findTask(task.id)
+        if (!cur) return false
         const cross = slot.group !== origGroup
         const parentId = slot.proj.parentId
-        const oldParent = t.parentId && getData().tasks.some((x) => x.id === t.parentId) ? t.parentId : undefined
+        const oldParent = cur.parentId && getData().tasks.some((x) => x.id === cur.parentId) ? cur.parentId : undefined
         if (!cross && parentId === oldParent && slot.proj.depth === origDepth && slot.prev?.id === origPrev && slot.next?.id === origNext) return false
         const env0 = env.current
         const g = env0.groups.get(slot.group)
         const patch: Partial<Task> = {}
         if (cross && g?.patch) {
           Object.assign(patch, g.patch)
-          if ('listId' in g.patch && g.patch.listId !== t.listId) patch.sectionId = undefined
+          if ('listId' in g.patch && g.patch.listId !== cur.listId) patch.sectionId = undefined
         }
         if (parentId !== oldParent) patch.parentId = parentId
         const snap = getData()
@@ -254,17 +271,13 @@ export function startListDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
 }
 
 function listDropText(g: ListGroupInfo | undefined, groupBy: GroupBy, parentId: string | undefined, oldParent: string | undefined): string {
-  const title = (id: string) => findTask(id)?.title || '无标题'
+  const title = (id: string) => findTask(id)?.title || t('common.untitled')
   if (g?.patch) {
-    if (groupBy === 'priority') return `已设为${g.name}`
-    if (groupBy === 'date') return `已移到「${g.name}」`
-    return `已移动到「${g.name || '未分组'}」`
+    if (groupBy === 'priority' && g.patch.priority !== undefined) return t('tasks.dnd.priority', { name: t(PRIORITY_LEVEL[g.patch.priority]) })
+    return t('tasks.dnd.movedTo', { name: g.name || t('tasks.section.none') })
   }
-  if (parentId !== oldParent) {
-    if (parentId) return `已设为「${title(parentId)}」的子任务`
-    return '已取消子任务'
-  }
-  return '已调整顺序'
+  if (parentId !== oldParent) return parentId ? t('tasks.dnd.nested', { title: title(parentId) }) : t('tasks.dnd.unnested')
+  return t('tasks.dnd.reordered')
 }
 
 // ---------------- kanban cards ----------------
@@ -350,7 +363,7 @@ export function startCardDrag(e: React.PointerEvent<HTMLElement>, task: Task, ro
           if (cross) setData((d) => patchTasks(task.id, patch, d))
         })
         flip(board, before)
-        toast(cross ? `已移动到「${env0.columns.get(key) ?? '未分组'}」` : '已调整顺序', snap)
+        toast(cross ? t('tasks.dnd.movedTo', { name: env0.columns.get(key) || t('tasks.section.none') }) : t('tasks.dnd.reordered'), snap)
         return true
       },
       onLongPress: (x, y) => setUI({ menu: { x, y, kind: 'task', id: task.id } }),
@@ -400,7 +413,7 @@ export function startColumnDrag(e: React.PointerEvent<HTMLElement>, listId: stri
         const before = measure(board, 'data-flip-col')
         flushSync(() => updateList(listId, { sections: next }))
         flip(board, before, 'data-flip-col')
-        toast('已调整分组顺序', snap)
+        toast(t('tasks.dnd.sectionsReordered'), snap)
         return true
       },
     }

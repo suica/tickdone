@@ -1,5 +1,6 @@
 import { useContext, type CSSProperties, type MouseEvent } from 'react'
 import { dayDiff, dueLabel, isOverdue } from '../dates'
+import { useT } from '../i18n'
 import { setUI, updateTask, useData, useUI } from '../store'
 import type { Task } from '../types'
 import { useMedia } from '../viewport'
@@ -59,9 +60,12 @@ interface Props {
   depth?: number
   /** rows with subtasks: folded state and toggle */
   fold?: { folded: boolean; toggle: () => void }
+  /** never start a list drag from this row, even inside a task list (views that drag rows themselves) */
+  dragDisabled?: boolean
 }
 
-export function TaskRow({ task, showList, depth = 0, fold }: Props) {
+export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props) {
+  const t = useT()
   const ui = useUI()
   const data = useData()
   const drag = useContext(TaskDragContext)
@@ -74,7 +78,7 @@ export function TaskRow({ task, showList, depth = 0, fold }: Props) {
   const done = (task.status !== 0 && phase !== 'uncheck') || phase === 'check'
   const subDone = task.subtasks.filter((s) => s.done).length
   const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : task.dueDate && dayDiff(task.dueDate) <= 1 ? 'var(--primary)' : 'var(--text-3)'
-  const draggable = !!drag && !task.deleted
+  const draggable = !!drag && !task.deleted && !dragDisabled
 
   return (
     <div
@@ -83,14 +87,14 @@ export function TaskRow({ task, showList, depth = 0, fold }: Props) {
       onClick={() => setUI({ selectedTaskId: task.id })}
       onContextMenu={(e) => openTaskMenu(e, task.id)}
       data-task-id={task.id}
-      data-flip={drag?.flipRows ? task.id : undefined}
+      data-flip={drag?.flipRows && !dragDisabled ? task.id : undefined}
       data-dnd-row={draggable ? task.id : undefined}
       data-depth={depth}
     >
       {fold ? (
         <button
           className={'task-fold' + (fold.folded ? ' folded' : '')}
-          aria-label={fold.folded ? '展开子任务' : '收起子任务'}
+          aria-label={fold.folded ? t('tasks.row.showSubtasks') : t('tasks.row.hideSubtasks')}
           aria-expanded={!fold.folded}
           onClick={(e) => {
             e.stopPropagation()
@@ -110,12 +114,12 @@ export function TaskRow({ task, showList, depth = 0, fold }: Props) {
       <div className="task-main">
         <div className="task-title-wrap">
           {touch ? (
-            <span className={'task-title' + (task.title ? '' : ' empty')}>{task.title || '无标题'}</span>
+            <span className={'task-title' + (task.title ? '' : ' empty')}>{task.title || t('common.untitled')}</span>
           ) : (
             <input
               className="task-title"
               value={task.title}
-              placeholder="无标题"
+              placeholder={t('common.untitled')}
               readOnly={!!task.deleted}
               onFocus={() => setUI({ selectedTaskId: task.id })}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
@@ -126,14 +130,14 @@ export function TaskRow({ task, showList, depth = 0, fold }: Props) {
           )}
           {phase && (
             <span className="task-strike" aria-hidden>
-              <span>{task.title || '无标题'}</span>
+              <span>{task.title || t('common.untitled')}</span>
             </span>
           )}
         </div>
         <div className="task-meta">
           {task.pinned && <Icon name="pin" size={13} className="meta-ic" />}
           {task.subtasks.length > 0 && (
-            <span className="meta-ic meta-sub" title="子任务">
+            <span className="meta-ic meta-sub" title={t('tasks.row.subtasks')}>
               <Icon name="subtask" size={13} /> {subDone}/{task.subtasks.length}
             </span>
           )}
@@ -151,7 +155,7 @@ export function TaskRow({ task, showList, depth = 0, fold }: Props) {
           {showList && (
             <span className="task-list-name">
               {list?.color && <i style={{ background: list.color }} />}
-              {list?.name ?? '收件箱'}
+              {list?.name ?? t('common.list.inbox')}
             </span>
           )}
           {task.dueDate && (

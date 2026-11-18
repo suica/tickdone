@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '../i18n'
 import { useUI } from '../store'
 import type { Task } from '../types'
 import { dur, easing } from './taskMotion'
@@ -11,6 +12,7 @@ import { QuickAdd } from './QuickAdd'
  * dragged down or tapped outside to close.
  */
 export function PhoneQuickAdd({ defaults }: { defaults: Partial<Task> }) {
+  const t = useT()
   const ui = useUI()
   const [state, setState] = useState<'closed' | 'open' | 'closing'>('closed')
   const [kb, setKb] = useState(0)
@@ -73,7 +75,7 @@ export function PhoneQuickAdd({ defaults }: { defaults: Partial<Task> }) {
   return (
     <>
       {!hidden && (
-        <button className="qa-fab" aria-label="添加任务" title="添加任务" onClick={() => setState('open')}>
+        <button className="qa-fab" aria-label={t('tasks.quickAdd.addTask')} title={t('tasks.quickAdd.addTask')} onClick={() => setState('open')}>
           <svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -87,7 +89,7 @@ export function PhoneQuickAdd({ defaults }: { defaults: Partial<Task> }) {
               if (e.target === e.currentTarget) close()
             }}
           >
-            <div className="qa-sheet" ref={sheet} style={{ bottom: kb }} role="dialog" aria-label="添加任务">
+            <div className="qa-sheet" ref={sheet} style={{ bottom: kb }} role="dialog" aria-label={t('tasks.quickAdd.addTask')}>
               <div className="qa-sheet-grip" onPointerDown={grip}>
                 <span />
               </div>

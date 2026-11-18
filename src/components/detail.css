@@ -492,3 +492,158 @@ body.col-resizing * {
   overflow: auto;
   margin-top: 6px;
 }
+
+/* Notes: Markdown shown rendered; a click or focus switches to the source */
+.detail-md {
+  cursor: text;
+  overflow-wrap: anywhere;
+  border-radius: 6px;
+  outline: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.detail-md:hover {
+  background: var(--bg-hover);
+}
+.detail-md:focus-visible {
+  box-shadow: 0 0 0 2px var(--primary-soft2, var(--primary-soft));
+}
+.detail-note {
+  animation: detail-note-in var(--dur-fast) var(--ease-out);
+}
+@keyframes detail-note-in {
+  from {
+    opacity: 0.6;
+  }
+}
+.detail-md-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md p,
+.md ul,
+.md ol,
+.md pre,
+.md blockquote {
+  margin: 0 0 8px;
+}
+.md h1,
+.md h2,
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+  margin: 12px 0 6px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.md h1 {
+  font-size: 20px;
+}
+.md h2 {
+  font-size: 17px;
+}
+.md h3 {
+  font-size: 15px;
+}
+.md h4,
+.md h5,
+.md h6 {
+  font-size: 14px;
+}
+.md ul,
+.md ol {
+  padding-left: 22px;
+}
+.md li > p {
+  margin-bottom: 4px;
+}
+.md ul.md-tasks,
+.md ol.md-tasks {
+  list-style: none;
+  padding-left: 2px;
+}
+.md li.md-task {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.md li.md-task > ul,
+.md li.md-task > ol {
+  flex-basis: 100%;
+}
+.md li.md-task.checked > span {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+.md .md-check {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin: 4px 0 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.md .md-check:disabled {
+  cursor: default;
+}
+.md code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bg-input);
+}
+.md pre {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  overflow-x: auto;
+  line-height: 1.5;
+}
+.md pre code {
+  padding: 0;
+  background: none;
+  font-size: 12.5px;
+  white-space: pre;
+}
+.md blockquote {
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text-2);
+}
+.md hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+.md a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+@media (pointer: coarse) {
+  /* the box itself stays small; its tap area is 40 px */
+  .md li.md-task {
+    min-height: 40px;
+    align-items: center;
+  }
+  .md .md-check {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    position: relative;
+  }
+  .md .md-check::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
+}

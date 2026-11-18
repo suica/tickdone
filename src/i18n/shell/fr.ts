@@ -46,4 +46,6 @@ export default {
   'shell.task.copyLink': 'Copier le lien',
   'shell.toast.linkCopied': 'Lien copié',
   'shell.toast.taskNotFound': 'Cette tâche n’existe plus',
+  'shell.detail.editNotes': 'Modifier les notes',
+  'shell.detail.markdownHint': 'Markdown : **gras**, *italique*, `code`, - [ ] liste de contrôle, [lien](https://…). Échap pour terminer',
 } satisfies Catalog<typeof en>

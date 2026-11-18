@@ -1,7 +1,8 @@
-import { useContext, useLayoutEffect, useState, type CSSProperties, type MouseEvent } from 'react'
+import { useContext, useLayoutEffect, useMemo, useState, type CSSProperties, type MouseEvent } from 'react'
 import { dueLabel, isOverdue } from '../dates'
 import { useT, type MessageKey } from '../i18n'
 import { deleteTask, getData, setUI, toast, updateTask, useData, useUI } from '../store'
+import { markdownToText } from '../markdown'
 import type { Task } from '../types'
 import { useMedia, usePhone } from '../viewport'
 import { priorityColor } from '../views'
@@ -84,7 +85,8 @@ export function TaskRow({ task, showList, depth = 0, fold, dragDisabled }: Props
   const list = data.lists.find((l) => l.id === task.listId)
   const overdue = isOverdue(task) && !phase
   // "Show details": the start of the notes under the title, on one line
-  const notes = task.content.trim().replace(/\s+/g, ' ').slice(0, 200)
+  // the preview shows the notes as plain text, without their Markdown marks
+  const notes = useMemo(() => (task.content.trim() ? markdownToText(task.content).replace(/\s+/g, ' ').trim().slice(0, 200) : ''), [task.content])
   const done = (task.status !== 0 && phase !== 'uncheck') || phase === 'check'
   const subDone = task.subtasks.filter((s) => s.done).length
   // Every open date is blue; overdue ones are red.

@@ -50,6 +50,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - ⚡ **Smart quick add**: type `call mom tomorrow 3pm !high #family ~Personal` and TickDone sets the date, time, priority, tag and list, highlighting each part as you type.
 - 🗂️ **List and kanban views**, with grouping and sorting.
 - 🔎 **Saved filters**: combine lists, tags, priorities, dates (overdue, today, this week, a custom range…), keywords and completed tasks into a smart list of your own, with its name, icon and color in the sidebar.
+- 📝 **Markdown in notes**: headings, bold, italics, strikethrough, code, links, lists, quotes and checklists you can tick right in the note; click the note to edit its source.
 - 📅 **Calendar** with month, week, day and list views. Drag a task to another day or time, or drag the bottom edge of a block to change how long it takes.
 - 🔔 **Calendar subscriptions**: subscribe to any calendar that publishes an iCal (.ics or webcal://) address, such as work, school, team or holiday calendars, and see its events read-only in the calendar, in its own color. They refresh on their own and stay available offline.
 - 🧭 **Eisenhower matrix**: sort tasks by urgency and importance, and drag them between quadrants to change their priority.
@@ -156,7 +157,7 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [x] Install as an app and work offline ([#18](https://github.com/suica/tickdone/issues/18))
 - [x] Saved filters ([#19](https://github.com/suica/tickdone/issues/19))
 - [ ] Statistics for tasks, focus and habits ([#20](https://github.com/suica/tickdone/issues/20))
-- [ ] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))
+- [x] Markdown in task notes ([#21](https://github.com/suica/tickdone/issues/21))
 - [ ] Timeline view ([#22](https://github.com/suica/tickdone/issues/22))
 - [ ] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
 - [ ] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))

@@ -46,4 +46,6 @@ export default {
   'shell.task.copyLink': 'リンクをコピー',
   'shell.toast.linkCopied': 'リンクをコピーしました',
   'shell.toast.taskNotFound': 'このタスクはもう存在しません',
+  'shell.detail.editNotes': 'メモを編集',
+  'shell.detail.markdownHint': 'Markdown 対応：**太字**、*斜体*、`コード`、- [ ] チェックリスト、[リンク](https://…)。Esc で終了',
 } satisfies Catalog<typeof en>

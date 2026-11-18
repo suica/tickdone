@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { addDays, addMonths, format, getDay, isSameMonth, nextMonday, parseISO, startOfMonth } from 'date-fns'
+import { addDays, addMonths, getDay, isSameMonth, nextMonday, parseISO, startOfMonth } from 'date-fns'
 import type { RepeatRule } from '../types'
-import { fmt, repeatLabel, reminderLabel, todayStr } from '../dates'
+import { fmt, todayStr } from '../dates'
 import { useData } from '../store'
+import { useT, type MessageKey } from '../i18n'
+import { fmtMonthDay, fmtMonthYear, fmtTime } from '../i18n/format'
+import { reminderText, repeatText, dayName } from './dateLabels'
 import { Icon } from './Icon'
 import { Popover, anchorOf, type Anchor } from './Popover'
 import './datepicker.css'
+
+export { reminderText, repeatText } from './dateLabels'
 
 export interface DateValue {
   dueDate?: string
@@ -14,51 +19,9 @@ export interface DateValue {
   repeat?: RepeatRule | null
 }
 
-const WEEK_SHORT = ['日', '一', '二', '三', '四', '五', '六']
-
-/* ---------- 本地标签函数 ---------- */
-
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/**
- * 提醒文字。有时间时 reminder = 提前分钟数；
- * 全天任务时 reminder 以“到期日 00:00”为基准的提前分钟数，例如 -540 = 当天 09:00，900 = 提前 1 天 09:00。
- */
-export function reminderText(m: number | null | undefined, hasTime: boolean): string {
-  if (m == null) return '无'
-  if (hasTime) {
-    if (m === 0) return '准时'
-    if (m > 0 && m % 10080 === 0) return `提前 ${m / 10080} 周`
-    return reminderLabel(m)
-  }
-  const days = Math.max(0, Math.ceil(m / 1440))
-  const tod = days * 1440 - m
-  const hm = `${pad(Math.floor(tod / 60))}:${pad(tod % 60)}`
-  if (days === 0) return `当天(${hm})`
-  if (days % 7 === 0) return `提前 ${days / 7} 周(${hm})`
-  return `提前 ${days} 天(${hm})`
-}
-
-export function repeatText(rule: RepeatRule | null | undefined, date?: string): string {
-  if (!rule) return '无'
-  const d = date ? parseISO(date) : new Date()
-  switch (rule.kind) {
-    case 'weekly':
-      if (rule.days?.length) {
-        const days = '周' + [...rule.days].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map((x) => WEEK_SHORT[x]).join('、')
-        return rule.interval === 1 ? `每${days}` : `每 ${rule.interval} 周（${days}）`
-      }
-      return repeatLabel(rule)
-    case 'monthly':
-      return rule.interval === 1 ? `每月（${d.getDate()}日）` : `每 ${rule.interval} 个月（${d.getDate()}日）`
-    case 'yearly':
-      return rule.interval === 1 ? `每年（${format(d, 'M月d日')}）` : `每 ${rule.interval} 年（${format(d, 'M月d日')}）`
-    default:
-      return repeatLabel(rule)
-  }
-}
-
-/** 解析手输时间：9、930、0930、9:30、21：05 */
+/** Parses a typed time: 9, 930, 0930, 9:30, 21：05 (full-width colon too). */
 function parseTime(s: string): string | null {
   const t = s.trim()
   let h: number, m: number
@@ -81,11 +44,12 @@ function parseTime(s: string): string | null {
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
 
-/* ---------- 组件 ---------- */
+/* ---------- component ---------- */
 
 type Sub = { kind: 'time' | 'reminder' | 'repeat'; anchor: Anchor }
 
 export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Anchor; value: DateValue; onChange: (v: DateValue) => void; onClose: () => void }) {
+  const t = useT()
   const weekStartsOn = useData().settings.weekStartsOn
   const [draft, setDraft] = useState<DateValue>(() => ({ ...value }))
   const [mode, setMode] = useState<'date' | 'range'>('date')
@@ -98,7 +62,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
   const patch = (p: Partial<DateValue>) =>
     setDraft((d) => {
       const n = { ...d, ...p }
-      // 设置时间/提醒/重复但没有日期时，默认今天
+      // Setting a time, reminder or repeat without a date picks today
       if (!n.dueDate && (n.dueTime || n.reminder != null || n.repeat)) n.dueDate = today
       return n
     })
@@ -130,7 +94,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
     const start = addDays(month, -offset)
     return Array.from({ length: 42 }, (_, i) => addDays(start, i))
   }, [month, weekStartsOn])
-  const weekHead = Array.from({ length: 7 }, (_, i) => WEEK_SHORT[(i + weekStartsOn) % 7])
+  const weekHead = Array.from({ length: 7 }, (_, i) => (i + weekStartsOn) % 7)
 
   const hasTime = !!draft.dueTime
   const openSub = (kind: Sub['kind'], el: HTMLElement) => setSub((s) => (s?.kind === kind ? null : { kind, anchor: anchorOf(el) }))
@@ -139,7 +103,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
     setDraft((d) => {
       const n: DateValue = { ...d, dueTime: t }
       if (t && !n.dueDate) n.dueDate = today
-      // 有/无时间两种提醒口径不同：切换时重置；新设时间默认“准时”提醒
+      // Reminders mean different things with and without a time: reset when switching; a new time defaults to "on time"
       if (!!t !== !!d.dueTime) n.reminder = t ? 0 : null
       return n
     })
@@ -151,7 +115,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
     <Popover anchor={anchor} onClose={onClose} width={260} className="dp">
       <div className="dp-seg">
         <button className={mode === 'date' ? 'on' : ''} onClick={() => setMode('date')}>
-          日期
+          {t('misc.date.modeDate')}
         </button>
         <button
           className={mode === 'range' ? 'on' : ''}
@@ -160,56 +124,56 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
             setRangeFocus('start')
           }}
         >
-          时间段
+          {t('misc.date.modeRange')}
         </button>
       </div>
 
       {mode === 'date' ? (
         <div className="dp-quick">
-          <QuickBtn tip="今天" onClick={() => quick(new Date())}>
+          <QuickBtn tip={t('common.today')} onClick={() => quick(new Date())}>
             <TodayGlyph day={new Date().getDate()} />
           </QuickBtn>
-          <QuickBtn tip="明天" onClick={() => quick(addDays(new Date(), 1))}>
+          <QuickBtn tip={t('common.tomorrow')} onClick={() => quick(addDays(new Date(), 1))}>
             <Icon name="sunrise" size={20} />
           </QuickBtn>
-          <QuickBtn tip="下周一" onClick={() => quick(nextMonday(new Date()))}>
+          <QuickBtn tip={t('shell.menu.nextMonday')} onClick={() => quick(nextMonday(new Date()))}>
             <Icon name="nextWeek" size={20} />
           </QuickBtn>
-          <QuickBtn tip="下个月" onClick={() => quick(addMonths(new Date(), 1))}>
+          <QuickBtn tip={t('misc.date.inAMonth')} onClick={() => quick(addMonths(new Date(), 1))}>
             <Icon name="moon" size={20} />
           </QuickBtn>
         </div>
       ) : (
         <div className="dp-range">
           <button className={'dp-range-f' + (rangeFocus === 'start' ? ' on' : '')} onClick={() => setRangeFocus('start')}>
-            <span className="dp-range-k">开始</span>
-            {draft.dueDate ? format(parseISO(draft.dueDate), 'M月d日') : '选择日期'}
+            <span className="dp-range-k">{t('misc.date.start')}</span>
+            {draft.dueDate ? fmtMonthDay(parseISO(draft.dueDate)) : t('misc.date.pick')}
           </button>
           <span className="dp-range-sep">—</span>
           <button className={'dp-range-f' + (rangeFocus === 'end' ? ' on' : '')} onClick={() => setRangeFocus('end')}>
-            <span className="dp-range-k">结束</span>
-            {endLabel ? format(parseISO(endLabel), 'M月d日') : '选择日期'}
+            <span className="dp-range-k">{t('misc.date.end')}</span>
+            {endLabel ? fmtMonthDay(parseISO(endLabel)) : t('misc.date.pick')}
           </button>
         </div>
       )}
 
       <div className="dp-cal">
         <div className="dp-cal-head">
-          <span className="dp-cal-title">{format(month, 'yyyy年M月')}</span>
-          <button className="dp-nav" title="上个月" onClick={() => setMonth((m) => addMonths(m, -1))}>
+          <span className="dp-cal-title">{fmtMonthYear(month)}</span>
+          <button className="dp-nav" title={t('calendar.nav.prevMonth')} onClick={() => setMonth((m) => addMonths(m, -1))}>
             <Icon name="chevronLeft" size={14} />
           </button>
-          <button className="dp-nav" title="回到今天" onClick={() => setMonth(startOfMonth(new Date()))}>
+          <button className="dp-nav" title={t('misc.goToday')} onClick={() => setMonth(startOfMonth(new Date()))}>
             <span className="dp-dot" />
           </button>
-          <button className="dp-nav" title="下个月" onClick={() => setMonth((m) => addMonths(m, 1))}>
+          <button className="dp-nav" title={t('calendar.nav.nextMonth')} onClick={() => setMonth((m) => addMonths(m, 1))}>
             <Icon name="chevronRight" size={14} />
           </button>
         </div>
         <div className="dp-grid">
           {weekHead.map((w) => (
             <span key={w} className="dp-wd">
-              {w}
+              {dayName(w)}
             </span>
           ))}
           {days.map((d) => {
@@ -228,20 +192,22 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
 
       <div className="dp-rows">
         {mode === 'date' && (
-          <Row icon="clock" label="时间" value={draft.dueTime ?? '无'} active={sub?.kind === 'time'} onClick={(el) => openSub('time', el)} onClear={hasTime ? () => setTime(undefined) : undefined} />
+          <Row icon="clock" label={t('misc.date.time')} value={draft.dueTime ? fmtTime(draft.dueTime) : t('misc.date.none')} set={hasTime} active={sub?.kind === 'time'} onClick={(el) => openSub('time', el)} onClear={hasTime ? () => setTime(undefined) : undefined} />
         )}
         <Row
           icon="bell"
-          label="提醒"
+          label={t('misc.date.reminder')}
           value={reminderText(draft.reminder, hasTime)}
+          set={draft.reminder != null}
           active={sub?.kind === 'reminder'}
           onClick={(el) => openSub('reminder', el)}
           onClear={draft.reminder != null ? () => patch({ reminder: null }) : undefined}
         />
         <Row
           icon="repeat"
-          label="重复"
+          label={t('misc.date.repeat')}
           value={repeatText(draft.repeat, draft.dueDate)}
+          set={!!draft.repeat}
           active={sub?.kind === 'repeat'}
           onClick={(el) => openSub('repeat', el)}
           onClear={draft.repeat ? () => patch({ repeat: null }) : undefined}
@@ -256,7 +222,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
             onClose()
           }}
         >
-          清除
+          {t('misc.clear')}
         </button>
         <button
           className="btn btn-primary"
@@ -265,7 +231,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
             onClose()
           }}
         >
-          确定
+          {t('common.ok')}
         </button>
       </div>
 
@@ -284,23 +250,16 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
         <Popover anchor={sub.anchor} onClose={() => setSub(null)} width={226} className="dp-sub">
           <OptionList
             options={(hasTime
-              ? [
-                  ['无', null],
-                  ['准时', 0],
-                  ['提前 5 分钟', 5],
-                  ['提前 30 分钟', 30],
-                  ['提前 1 小时', 60],
-                  ['提前 1 天', 1440],
-                ]
-              : [
-                  ['无', null],
-                  ['当天(09:00)', -540],
-                  ['提前 1 天(09:00)', 900],
-                  ['提前 2 天(09:00)', 2340],
-                  ['提前 3 天(09:00)', 3780],
-                  ['提前 1 周(09:00)', 9540],
-                ]
-            ).map(([label, v]) => ({ label: label as string, checked: (draft.reminder ?? null) === v, onClick: () => patch({ reminder: v as number | null }) }))}
+              ? ([
+                  [t('core.reminder.none'), null],
+                  [t('core.reminder.onTime'), 0],
+                  [t('core.reminder.minutesBefore', { count: 5 }), 5],
+                  [t('core.reminder.minutesBefore', { count: 30 }), 30],
+                  [t('core.reminder.hoursBefore', { count: 1 }), 60],
+                  [t('core.reminder.daysBefore', { count: 1 }), 1440],
+                ] as [string, number | null][])
+              : [[t('core.reminder.none'), null] as [string, number | null], ...[-540, 900, 2340, 3780, 9540].map((v): [string, number | null] => [reminderText(v, false), v])]
+            ).map(([label, v]) => ({ label, checked: (draft.reminder ?? null) === v, onClick: () => patch({ reminder: v }) }))}
             onDone={() => setSub(null)}
           />
         </Popover>
@@ -322,7 +281,7 @@ export function DatePicker({ anchor, value, onChange, onClose }: { anchor: Ancho
   )
 }
 
-/* ---------- 子组件 ---------- */
+/* ---------- parts ---------- */
 
 function QuickBtn({ tip, onClick, children }: { tip: string; onClick: () => void; children: ReactNode }) {
   return (
@@ -344,16 +303,17 @@ function TodayGlyph({ day }: { day: number }) {
   )
 }
 
-function Row({ icon, label, value, active, onClick, onClear }: { icon: string; label: string; value: string; active?: boolean; onClick: (el: HTMLElement) => void; onClear?: () => void }) {
+function Row({ icon, label, value, set, active, onClick, onClear }: { icon: string; label: string; value: string; set: boolean; active?: boolean; onClick: (el: HTMLElement) => void; onClear?: () => void }) {
+  const t = useT()
   return (
     <div className={'dp-row' + (active ? ' active' : '')} onClick={(e) => onClick(e.currentTarget)}>
       <Icon name={icon} size={16} className="dp-row-icon" />
       <span className="dp-row-label">{label}</span>
-      <span className={'dp-row-val' + (value === '无' ? '' : ' set')}>{value}</span>
+      <span className={'dp-row-val' + (set ? ' set' : '')} title={value}>{value}</span>
       {onClear && (
         <button
           className="dp-row-x"
-          title="清除"
+          title={t('misc.clear')}
           onClick={(e) => {
             e.stopPropagation()
             onClear()
@@ -390,6 +350,7 @@ function OptionList({ options, onDone }: { options: { label: string; checked: bo
 const TIMES = Array.from({ length: 48 }, (_, i) => `${pad(Math.floor(i / 2))}:${i % 2 ? '30' : '00'}`)
 
 function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | undefined) => void }) {
+  const t = useT()
   const [text, setText] = useState(value ?? '')
   const [err, setErr] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
@@ -397,7 +358,7 @@ function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | und
   useEffect(() => {
     const list = listRef.current
     if (!list) return
-    // 定位到选中时间（或最接近的半点），无值时定位到 09:00
+    // Scroll to the selected time (or the nearest half hour); 09:00 when there is none
     const base = value ?? '09:00'
     const [h, m] = base.split(':').map(Number)
     const idx = Math.min(47, h * 2 + (m >= 30 ? 1 : 0))
@@ -407,8 +368,8 @@ function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | und
 
   const commit = () => {
     if (!text.trim()) return onPick(undefined)
-    const t = parseTime(text)
-    if (t) onPick(t)
+    const parsed = parseTime(text)
+    if (parsed) onPick(parsed)
     else setErr(true)
   }
 
@@ -417,7 +378,7 @@ function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | und
       <input
         className={'input dp-time-input' + (err ? ' err' : '')}
         autoFocus
-        placeholder="输入时间，如 9:30"
+        placeholder={t('misc.date.timePlaceholder')}
         value={text}
         onChange={(e) => {
           setText(e.target.value)
@@ -428,19 +389,19 @@ function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | und
         }}
       />
       <div className="dp-time-list" ref={listRef}>
-        {TIMES.map((t) => (
-          <div key={t} className={'dp-time-item' + (t === value ? ' sel' : '')} onClick={() => onPick(t)}>
-            {t}
-            {t === value && <span className="menu-check">✓</span>}
+        {TIMES.map((hm) => (
+          <div key={hm} className={'dp-time-item' + (hm === value ? ' sel' : '')} onClick={() => onPick(hm)}>
+            {fmtTime(hm)}
+            {hm === value && <span className="menu-check">✓</span>}
           </div>
         ))}
       </div>
       <div className="dp-sub-foot">
         <button className="btn" onClick={() => onPick(undefined)}>
-          清除
+          {t('misc.clear')}
         </button>
         <button className="btn btn-primary" onClick={commit}>
-          确定
+          {t('common.ok')}
         </button>
       </div>
     </div>
@@ -448,18 +409,19 @@ function TimePanel({ value, onPick }: { value?: string; onPick: (t: string | und
 }
 
 type Unit = 'daily' | 'weekly' | 'monthly' | 'yearly'
-const UNIT_LABEL: Record<Unit, string> = { daily: '天', weekly: '周', monthly: '月', yearly: '年' }
+const UNIT_LABEL: Record<Unit, MessageKey> = { daily: 'misc.repeat.unit.daily', weekly: 'misc.repeat.unit.weekly', monthly: 'misc.repeat.unit.monthly', yearly: 'misc.repeat.unit.yearly' }
 
 function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule | null; date: string; weekStartsOn: 0 | 1; onPick: (r: RepeatRule | null) => void }) {
+  const t = useT()
   const d = parseISO(date)
   const dow = getDay(d)
   const presets: { label: string; rule: RepeatRule | null }[] = [
-    { label: '无', rule: null },
-    { label: '每天', rule: { kind: 'daily', interval: 1 } },
-    { label: `每周（周${WEEK_SHORT[dow]}）`, rule: { kind: 'weekly', interval: 1, days: [dow] } },
-    { label: `每月（${d.getDate()}日）`, rule: { kind: 'monthly', interval: 1 } },
-    { label: `每年（${format(d, 'M月d日')}）`, rule: { kind: 'yearly', interval: 1 } },
-    { label: '每个工作日（周一至周五）', rule: { kind: 'weekdays' } },
+    { label: t('core.repeat.none'), rule: null },
+    { label: t('core.repeat.daily'), rule: { kind: 'daily', interval: 1 } },
+    { label: t('core.repeat.weeklyOn', { days: dayName(dow, 'long') }), rule: { kind: 'weekly', interval: 1, days: [dow] } },
+    { label: t('misc.repeat.monthlyOn', { day: d.getDate() }), rule: { kind: 'monthly', interval: 1 } },
+    { label: t('misc.repeat.yearlyOn', { date: fmtMonthDay(d) }), rule: { kind: 'yearly', interval: 1 } },
+    { label: t('core.repeat.weekdays'), rule: { kind: 'weekdays' } },
   ]
   const isPreset = presets.some((p) => same(p.rule, value))
   const [custom, setCustom] = useState(false)
@@ -482,7 +444,7 @@ function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule 
         })}
         <div className="menu-divider" />
         <div className={'menu-item' + (value && !isPreset ? ' dp-checked' : '')} onClick={() => setCustom(true)}>
-          <span className="menu-label">自定义</span>
+          <span className="menu-label">{t('misc.repeat.custom')}</span>
           {value && !isPreset && <span className="menu-hint">{repeatText(value, date)}</span>}
           <span className="menu-hint">›</span>
         </div>
@@ -502,15 +464,15 @@ function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule 
         <button className="dp-nav" onClick={() => setCustom(false)}>
           <Icon name="chevronLeft" size={14} />
         </button>
-        自定义重复
+        {t('misc.repeat.customTitle')}
       </div>
       <div className="dp-custom-line">
-        <span>每</span>
+        <span>{t('misc.repeat.every')}</span>
         <input className="input dp-custom-n" type="number" min={1} max={999} value={interval} onChange={(e) => setIntv(parseInt(e.target.value) || 1)} />
         <select className="input dp-custom-u" value={unit} onChange={(e) => setUnit(e.target.value as Unit)}>
           {(Object.keys(UNIT_LABEL) as Unit[]).map((u) => (
             <option key={u} value={u}>
-              {UNIT_LABEL[u]}
+              {t(UNIT_LABEL[u], { count: interval })}
             </option>
           ))}
         </select>
@@ -519,7 +481,7 @@ function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule 
         <div className="dp-custom-week">
           {order.map((i) => (
             <button key={i} className={wdays.includes(i) ? 'on' : ''} onClick={() => setWdays((w) => (w.includes(i) ? w.filter((x) => x !== i) : [...w, i]))}>
-              {WEEK_SHORT[i]}
+              {dayName(i)}
             </button>
           ))}
         </div>
@@ -527,10 +489,10 @@ function RepeatPanel({ value, date, weekStartsOn, onPick }: { value: RepeatRule 
       <div className="dp-custom-preview">{repeatText(build(), date)}</div>
       <div className="dp-sub-foot">
         <button className="btn" onClick={() => setCustom(false)}>
-          取消
+          {t('common.cancel')}
         </button>
         <button className="btn btn-primary" onClick={() => onPick(build())}>
-          确定
+          {t('common.ok')}
         </button>
       </div>
     </div>

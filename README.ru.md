@@ -61,7 +61,7 @@
 - [ ] Вёрстка для телефонов, планшетов и больших экранов ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] Перетаскивание во всём приложении ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Анимации ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] Ссылка на GitHub и раздел «О программе» в приложении ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] Ссылка на GitHub и раздел «О программе» в приложении ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] Интерфейс на 10 языках ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Шлифовка интерфейса, экран за экраном ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Множественный выбор и массовое редактирование ([#15](https://github.com/suica/tickdone/issues/15))

@@ -61,7 +61,7 @@
 - [ ] 適用手機、平板和大螢幕的版面 ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] 全面支援拖放 ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] 動畫 ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] App 內的 GitHub 連結與「關於」頁面 ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] App 內的 GitHub 連結與「關於」頁面 ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] 介面支援 10 種語言 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 逐一打磨每個畫面 ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 多選與批次編輯 ([#15](https://github.com/suica/tickdone/issues/15))

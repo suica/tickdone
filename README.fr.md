@@ -61,7 +61,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [ ] Mises en page pour téléphones, tablettes et grands écrans ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] Glisser-déposer partout ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Animations ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] Lien GitHub et section « À propos » dans l'app ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] Lien GitHub et section « À propos » dans l'app ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] Interface en 10 langues ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Finitions de l'interface, écran par écran ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Sélection multiple et modification groupée ([#15](https://github.com/suica/tickdone/issues/15))

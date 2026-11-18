@@ -61,7 +61,7 @@
 - [ ] スマートフォン・タブレット・大画面向けのレイアウト ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] あらゆる場面でドラッグ＆ドロップ ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] モーション ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] アプリ内の GitHub リンクと「このアプリについて」 ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] アプリ内の GitHub リンクと「このアプリについて」 ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] UI の 10 言語対応 ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] 画面ごとの UI のブラッシュアップ ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] 複数選択と一括編集 ([#15](https://github.com/suica/tickdone/issues/15))

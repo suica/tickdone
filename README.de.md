@@ -61,7 +61,7 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [ ] Layouts für Smartphones, Tablets und große Bildschirme ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] Drag-and-drop überall ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Animationen ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] GitHub-Link und Info-Bereich in der App ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] GitHub-Link und Info-Bereich in der App ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] Oberfläche in 10 Sprachen ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] UI-Feinschliff, Bildschirm für Bildschirm ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Mehrfachauswahl und Stapelbearbeitung ([#15](https://github.com/suica/tickdone/issues/15))

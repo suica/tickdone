@@ -61,7 +61,7 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [ ] Diseños para móviles, tabletas y pantallas grandes ([#8](https://github.com/suica/tickdone/issues/8))
 - [ ] Arrastrar y soltar en toda la app ([#9](https://github.com/suica/tickdone/issues/9))
 - [ ] Animaciones ([#3](https://github.com/suica/tickdone/issues/3))
-- [ ] Enlace a GitHub y sección Acerca de en la app ([#4](https://github.com/suica/tickdone/issues/4))
+- [x] Enlace a GitHub y sección Acerca de en la app ([#4](https://github.com/suica/tickdone/issues/4))
 - [ ] Interfaz en 10 idiomas ([#14](https://github.com/suica/tickdone/issues/14))
 - [ ] Pulido de la interfaz, pantalla por pantalla ([#11](https://github.com/suica/tickdone/issues/11))
 - [ ] Selección múltiple y edición en lote ([#15](https://github.com/suica/tickdone/issues/15))

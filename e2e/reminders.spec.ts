@@ -3,6 +3,10 @@ import { expect, test, type Page } from '@playwright/test'
 // Reminder cards at a mocked time (Playwright clock): firing, snooze, complete with undo, open, missed
 // reminders and system notifications with the permission granted.
 
+// The headless shell always reports notification permission as denied; the full Chromium build ("new
+// headless", installed with `playwright install chromium`) has the real permission model.
+test.use({ channel: 'chromium' })
+
 const KEY = 'tickdone:data:v1'
 const REMINDERS = 'tickdone:reminders:v1'
 // 2026-11-18 08:58 in Asia/Shanghai (the e2e time zone); the task is due at 09:00 with an on-time reminder

@@ -1,9 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from 'react'
 import { addDays, addMonths, addWeeks, endOfMonth, format, getDay, isSameMonth, parseISO, startOfMonth, startOfWeek } from 'date-fns'
 import { getData, LIST_COLORS, playDing, setData, setUI, toast, toggleCheckin, upsertHabit, useData, useUI } from '../store'
 import { fmt, todayStr } from '../dates'
+import { usePhone, useTablet } from '../viewport'
 import { Icon } from '../components/Icon'
 import { anchorOf, MenuList, Popover, type Anchor } from '../components/Popover'
+import { bounce, burst, dur, ease, shrink, usePresence, useSwipe } from '../components/motion'
+import { NumberRoll, SlideSwap } from '../components/Anim'
+import { habitDragStart } from './habitDrag'
 import type { Habit, HabitFrequency, HabitSection } from '../types'
 import './habit.css'
 
@@ -126,11 +130,16 @@ function freqLabel(f: HabitFrequency): string {
 export default function HabitView() {
   const data = useData()
   const ui = useUI()
+  const phone = usePhone()
+  const tablet = useTablet()
+  // Phones and tablets: the detail slides over the list (full screen on phones) instead of taking a column
+  const overlay = phone || tablet
   const weekStartsOn = data.settings.weekStartsOn
   const today = todayStr()
   const [day, setDay] = useState(today)
   const [selId, setSelId] = useState<string | undefined>()
   const [editing, setEditing] = useState<{ habit?: Habit } | null>(null)
+  const [dialog, dialogClosing] = usePresence(editing)
 
   // 外部也可通过 setUI({ dialog: { kind: 'habit', id? } }) 打开编辑弹窗
   useEffect(() => {
@@ -144,6 +153,19 @@ export default function HabitView() {
   const active = habits.filter((h) => !h.archived)
   const archived = habits.filter((h) => h.archived)
   const selected = habits.find((h) => h.id === selId)
+  const [shownId, detailClosing] = usePresence(overlay ? selId : undefined, '--dur')
+  const shown = overlay ? habits.find((h) => h.id === shownId) : undefined
+  const closeDetail = () => setSelId(undefined)
+
+  // Escape closes the sliding detail (dialogs and popovers handle their own Escape first)
+  useEffect(() => {
+    if (!overlay || !selId) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.querySelector('.modal-mask, .popover')) setSelId(undefined)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [overlay, selId])
 
   const isCollapsed = (k: string) => !!ui.collapsed['habit:' + k]
   const toggleCollapse = (k: string) => setUI((u) => ({ collapsed: { ...u.collapsed, ['habit:' + k]: !u.collapsed['habit:' + k] } }))
@@ -161,62 +183,79 @@ export default function HabitView() {
           </button>
         </div>
         <WeekStrip day={day} setDay={setDay} habits={active} weekStartsOn={weekStartsOn} />
-        <div className="habit-scroll">
-          {active.length === 0 && (
-            <div className="empty">
-              <div style={{ fontSize: 40 }}>🌱</div>
-              <div>养成一个好习惯，从今天开始</div>
-              <button className="btn btn-primary" onClick={() => setEditing({})}>
-                添加习惯
-              </button>
-            </div>
-          )}
-          {active.length > 0 && dayHabits.length === 0 && <div className="habit-none">这一天没有需要打卡的习惯</div>}
-          {SECTIONS.map((sec) => {
-            const list = dayHabits.filter((h) => (h.section ?? 'other') === sec.id)
-            if (!list.length) return null
-            const done = list.filter((h) => h.checkins[day]).length
-            return (
-              <div key={sec.id} className="habit-group">
-                <div className="habit-group-head" onClick={() => toggleCollapse(sec.id)}>
-                  <Icon name={isCollapsed(sec.id) ? 'chevronRight' : 'chevronDown'} size={14} />
-                  <span>{sec.name}</span>
-                  <span className="habit-group-count">
-                    {done}/{list.length}
-                  </span>
+        <div
+          className="habit-scroll"
+          onClick={(e) => {
+            // Tablet: tapping empty list space closes the detail panel
+            const t = e.target as HTMLElement
+            if (tablet && selId && (t === e.currentTarget || t.classList.contains('habit-list'))) closeDetail()
+          }}
+        >
+          <div className="habit-list">
+            {active.length === 0 && (
+              <div className="empty">
+                <div style={{ fontSize: 40 }}>🌱</div>
+                <div>养成一个好习惯，从今天开始</div>
+                <button className="btn btn-primary" onClick={() => setEditing({})}>
+                  添加习惯
+                </button>
+              </div>
+            )}
+            {active.length > 0 && dayHabits.length === 0 && <div className="habit-none">这一天没有需要打卡的习惯</div>}
+            {SECTIONS.map((sec) => {
+              const list = dayHabits.filter((h) => (h.section ?? 'other') === sec.id)
+              if (!list.length) return null
+              const done = list.filter((h) => h.checkins[day]).length
+              return (
+                <div key={sec.id} className="habit-group">
+                  <div className="habit-group-head" data-drop-section={sec.id} onClick={() => toggleCollapse(sec.id)}>
+                    <Icon name={isCollapsed(sec.id) ? 'chevronRight' : 'chevronDown'} size={14} />
+                    <span>{sec.name}</span>
+                    <span className="habit-group-count">
+                      {done}/{list.length}
+                    </span>
+                  </div>
+                  {!isCollapsed(sec.id) &&
+                    list.map((h) => <HabitRow key={h.id} habit={h} day={day} selected={h.id === selId} onSelect={() => setSelId(h.id)} weekStartsOn={weekStartsOn} />)}
                 </div>
-                {!isCollapsed(sec.id) &&
-                  list.map((h) => <HabitRow key={h.id} habit={h} day={day} selected={h.id === selId} onSelect={() => setSelId(h.id)} weekStartsOn={weekStartsOn} />)}
+              )
+            })}
+            {archived.length > 0 && (
+              <div className="habit-group archived">
+                <div className="habit-group-head" onClick={() => toggleCollapse('archivedOpen')}>
+                  <Icon name={isCollapsed('archivedOpen') ? 'chevronDown' : 'chevronRight'} size={14} />
+                  <span>已归档</span>
+                  <span className="habit-group-count">{archived.length}</span>
+                </div>
+                {/* 已归档默认折叠 */}
+                {isCollapsed('archivedOpen') &&
+                  archived.map((h) => <HabitRow key={h.id} habit={h} day={day} selected={h.id === selId} onSelect={() => setSelId(h.id)} weekStartsOn={weekStartsOn} archived />)}
               </div>
-            )
-          })}
-          {archived.length > 0 && (
-            <div className="habit-group archived">
-              <div className="habit-group-head" onClick={() => toggleCollapse('archivedOpen')}>
-                <Icon name={isCollapsed('archivedOpen') ? 'chevronDown' : 'chevronRight'} size={14} />
-                <span>已归档</span>
-                <span className="habit-group-count">{archived.length}</span>
-              </div>
-              {/* 已归档默认折叠 */}
-              {isCollapsed('archivedOpen') &&
-                archived.map((h) => <HabitRow key={h.id} habit={h} day={day} selected={h.id === selId} onSelect={() => setSelId(h.id)} weekStartsOn={weekStartsOn} archived />)}
+            )}
+          </div>
+        </div>
+      </div>
+      {!overlay && (
+        <div className="habit-detail">
+          {selected ? (
+            <HabitDetail key={selected.id} habit={selected} weekStartsOn={weekStartsOn} onEdit={() => setEditing({ habit: selected })} onClose={closeDetail} />
+          ) : (
+            <div className="empty habit-detail-empty">
+              <Icon name="habit" size={48} stroke={1.2} />
+              <div>点击习惯查看打卡记录与统计</div>
             </div>
           )}
         </div>
-      </div>
-      <div className="habit-detail">
-        {selected ? (
-          <HabitDetail key={selected.id} habit={selected} weekStartsOn={weekStartsOn} onEdit={() => setEditing({ habit: selected })} onClose={() => setSelId(undefined)} />
-        ) : (
-          <div className="empty habit-detail-empty">
-            <Icon name="habit" size={48} stroke={1.2} />
-            <div>点击习惯查看打卡记录与统计</div>
-          </div>
-        )}
-      </div>
-      {editing && (
+      )}
+      {overlay && shown && (
+        <DetailOverlay phone={phone} closing={detailClosing} onClose={closeDetail}>
+          <HabitDetail key={shown.id} habit={shown} weekStartsOn={weekStartsOn} phone={phone} onEdit={() => setEditing({ habit: shown })} onClose={closeDetail} />
+        </DetailOverlay>
+      )}
+      {dialog && (
         <HabitDialog
-          habit={editing.habit}
+          habit={dialog.habit}
+          closing={dialogClosing}
           onClose={() => setEditing(null)}
           onSaved={(id) => {
             if (id) setSelId(id)
@@ -227,41 +266,114 @@ export default function HabitView() {
   )
 }
 
+/**
+ * The detail as a panel over the list: slides in from the right (full screen on phones). On phones a
+ * rightward swipe outside the calendar drags it away and closes it.
+ */
+function DetailOverlay({ phone, closing, onClose, children }: { phone: boolean; closing: boolean; onClose: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const sw = useRef<{ id: number; x: number; y: number; t: number; on: boolean } | null>(null)
+  const back = (el: HTMLElement, dx: number) => {
+    el.style.transform = ''
+    el.animate([{ transform: `translateX(${dx}px)` }, { transform: 'none' }], { duration: dur('--dur'), easing: ease('--ease-out') })
+  }
+  return (
+    <div
+      ref={ref}
+      className={'habit-detail overlay' + (closing ? ' closing' : '')}
+      role="dialog"
+      aria-label="习惯详情"
+      onPointerDown={(e) => {
+        if (!phone || e.pointerType === 'mouse' || (e.target as HTMLElement).closest('.habit-card')) return
+        sw.current = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp, on: false }
+      }}
+      onPointerMove={(e) => {
+        const s = sw.current
+        const el = ref.current
+        if (!s || !el || e.pointerId !== s.id) return
+        const dx = e.clientX - s.x
+        const dy = e.clientY - s.y
+        if (!s.on) {
+          if (Math.abs(dy) > 10 && Math.abs(dy) >= Math.abs(dx)) sw.current = null
+          else if (dx > 10 && dx > Math.abs(dy) * 1.2) s.on = true
+          if (!s.on) return
+        }
+        el.style.transform = `translateX(${Math.max(0, dx)}px)`
+      }}
+      onPointerUp={(e) => {
+        const s = sw.current
+        const el = ref.current
+        sw.current = null
+        if (!s?.on || !el || e.pointerId !== s.id) return
+        const dx = Math.max(0, e.clientX - s.x)
+        const v = dx / Math.max(1, e.timeStamp - s.t)
+        if (dx > 90 || (dx > 30 && v > 0.5)) {
+          el.style.transform = 'translateX(100%)'
+          el.animate([{ transform: `translateX(${dx}px)` }, { transform: 'translateX(100%)' }], { duration: dur('--dur'), easing: ease('--ease-out') })
+          onClose()
+        } else back(el, dx)
+      }}
+      onPointerCancel={() => {
+        const s = sw.current
+        sw.current = null
+        const el = ref.current
+        if (s?.on && el) back(el, parseFloat(el.style.transform.replace(/[^\d.-]/g, '')) || 0)
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 // ---------------- 周日期条 ----------------
 function WeekStrip({ day, setDay, habits, weekStartsOn }: { day: string; setDay: (d: string) => void; habits: Habit[]; weekStartsOn: 0 | 1 }) {
   const today = todayStr()
   const [anchor, setAnchor] = useState(() => startOfWeek(parseISO(day), { weekStartsOn }))
-  useEffect(() => setAnchor(startOfWeek(parseISO(day), { weekStartsOn })), [day, weekStartsOn])
-  const thisWeek = startOfWeek(new Date(), { weekStartsOn })
-  const days = Array.from({ length: 7 }, (_, i) => addDays(anchor, i))
+  // Follow the selected day (e.g. 回到今天) without an effect
+  const key = day + '|' + weekStartsOn
+  const [seen, setSeen] = useState(key)
+  if (seen !== key) {
+    setSeen(key)
+    setAnchor(startOfWeek(parseISO(day), { weekStartsOn }))
+  }
+  const thisWeek = startOfWeek(parseISO(today), { weekStartsOn })
+  const canNext = anchor < thisWeek
+  const go = (n: number) => {
+    if (n > 0 && !canNext) return
+    setAnchor((a) => addWeeks(a, n))
+  }
+  const swipe = useSwipe(go)
+  const week = (start: Date) => (
+    <div className="habit-week-days">
+      {Array.from({ length: 7 }, (_, i) => addDays(start, i)).map((d) => {
+        const k = fmt(d)
+        const sch = habits.filter((h) => scheduled(h, d))
+        const ratio = sch.length ? sch.filter((h) => h.checkins[k]).length / sch.length : 0
+        const future = k > today
+        const r = 15
+        const c = 2 * Math.PI * r
+        return (
+          <button key={k} className={'habit-day' + (k === day ? ' active' : '') + (k === today ? ' today' : '') + (future ? ' future' : '')} disabled={future} onClick={() => setDay(k)}>
+            <span className="habit-day-wd">{k === today ? '今天' : '周' + WEEK_SHORT[getDay(d)]}</span>
+            <span className="habit-day-ring">
+              <svg width="36" height="36" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r={r} className="ring-bg" />
+                <circle cx="18" cy="18" r={r} className="ring-fg" strokeDasharray={`${c * ratio} ${c}`} opacity={ratio > 0 ? 1 : 0} transform="rotate(-90 18 18)" />
+              </svg>
+              <span className="habit-day-num">{ratio === 1 ? <Icon name="check" size={14} stroke={2.4} /> : format(d, 'd')}</span>
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  )
   return (
-    <div className="habit-week">
-      <button className="icon-btn" title="上一周" onClick={() => setAnchor((a) => addWeeks(a, -1))}>
+    <div className="habit-week" {...swipe}>
+      <button className="icon-btn habit-week-nav" title="上一周" onClick={() => go(-1)}>
         <Icon name="chevronLeft" size={16} />
       </button>
-      <div className="habit-week-days">
-        {days.map((d) => {
-          const k = fmt(d)
-          const sch = habits.filter((h) => scheduled(h, d))
-          const ratio = sch.length ? sch.filter((h) => h.checkins[k]).length / sch.length : 0
-          const future = k > today
-          const r = 15
-          const c = 2 * Math.PI * r
-          return (
-            <button key={k} className={'habit-day' + (k === day ? ' active' : '') + (k === today ? ' today' : '') + (future ? ' future' : '')} disabled={future} onClick={() => setDay(k)}>
-              <span className="habit-day-wd">{k === today ? '今天' : '周' + WEEK_SHORT[getDay(d)]}</span>
-              <span className="habit-day-ring">
-                <svg width="36" height="36" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r={r} className="ring-bg" />
-                  {ratio > 0 && <circle cx="18" cy="18" r={r} className="ring-fg" strokeDasharray={`${c * ratio} ${c}`} transform="rotate(-90 18 18)" />}
-                </svg>
-                <span className="habit-day-num">{ratio === 1 ? <Icon name="check" size={14} stroke={2.4} /> : format(d, 'd')}</span>
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      <button className="icon-btn" title="下一周" disabled={anchor >= thisWeek} style={{ opacity: anchor >= thisWeek ? 0.3 : 1 }} onClick={() => setAnchor((a) => addWeeks(a, 1))}>
+      <SlideSwap order={anchor.getTime()} className="habit-week-swap" render={(o) => week(new Date(o))} />
+      <button className="icon-btn habit-week-nav" title="下一周" disabled={!canNext} style={{ opacity: canNext ? 1 : 0.3 }} onClick={() => go(1)}>
         <Icon name="chevronRight" size={16} />
       </button>
       {day !== today && (
@@ -284,24 +396,58 @@ function doCheckin(h: Habit, day: string) {
   }
 }
 
+/** Check-in button art: ring, a fill disc that scales in, and a tick drawn with its stroke. */
+function CheckGlyph() {
+  return (
+    <svg className="hc-svg" viewBox="0 0 30 30" aria-hidden="true">
+      <circle className="hc-ring" cx="15" cy="15" r="14" />
+      <circle className="hc-fill" cx="15" cy="15" r="15" />
+      <path className="hc-tick" d="M10.33 15.33l3 3L19.67 12" pathLength={1} />
+    </svg>
+  )
+}
+
 function HabitRow({ habit: h, day, selected, onSelect, weekStartsOn, archived }: { habit: Habit; day: string; selected: boolean; onSelect: () => void; weekStartsOn: 0 | 1; archived?: boolean }) {
   const done = !!h.checkins[day]
-  const [pop, setPop] = useState(false)
   const streak = currentStreak(h)
   const total = totalDays(h)
   const f = freqOf(h)
-  let sub: string
-  if (f.kind === 'weekly') sub = `本周 ${weekCount(h, parseISO(day), weekStartsOn)}/${f.times} 天 · 总共 ${total} 天`
-  else sub = streak > 0 ? `连续 ${streak} 天 · 总共 ${total} 天` : `总共 ${total} 天`
-  if (h.goalDays) sub += ` · 目标 ${h.goalDays} 天`
+  let sub: ReactNode
+  if (archived) sub = <>已归档 · 总共 {total} 天</>
+  else {
+    if (f.kind === 'weekly')
+      sub = (
+        <>
+          本周 <NumberRoll value={weekCount(h, parseISO(day), weekStartsOn)} />/{f.times} 天 · 总共 <NumberRoll value={total} /> 天
+        </>
+      )
+    else
+      sub =
+        streak > 0 ? (
+          <>
+            连续 <NumberRoll value={streak} /> 天 · 总共 <NumberRoll value={total} /> 天
+          </>
+        ) : (
+          <>
+            总共 <NumberRoll value={total} /> 天
+          </>
+        )
+    if (h.goalDays)
+      sub = (
+        <>
+          {sub} · 目标 {h.goalDays} 天
+        </>
+      )
+  }
+  const drag = archived ? {} : { 'data-drag-id': h.id, 'data-section': h.section ?? 'other', onPointerDown: (e: RPointerEvent<HTMLDivElement>) => habitDragStart(e, h.id) }
   return (
-    <div className={'habit-row' + (selected ? ' selected' : '') + (done ? ' done' : '')} onClick={onSelect}>
+    <div className={'habit-row' + (selected ? ' selected' : '') + (done ? ' done' : '')} onClick={onSelect} {...drag}>
       <span className="habit-icon" style={{ background: `color-mix(in srgb, ${h.color} 18%, transparent)` }}>
         {h.icon}
       </span>
       <div className="habit-row-text">
         <div className="habit-row-name">{h.name}</div>
-        <div className="habit-row-sub">{archived ? '已归档 · ' + `总共 ${total} 天` : sub}</div>
+        <div className="habit-row-sub">{sub}</div>
       </div>
       {archived ? (
         <button
@@ -316,19 +462,22 @@ function HabitRow({ habit: h, day, selected, onSelect, weekStartsOn, archived }:
         </button>
       ) : (
         <button
-          className={'habit-check' + (done ? ' checked' : '') + (pop ? ' pop' : '')}
+          className={'habit-check' + (done ? ' checked' : '')}
           style={{ ['--hc' as string]: h.color }}
           title={done ? '取消打卡' : '打卡'}
+          aria-pressed={done}
           onClick={(e) => {
             e.stopPropagation()
-            if (!done) {
-              setPop(true)
-              setTimeout(() => setPop(false), 450)
+            const btn = e.currentTarget
+            if (done) shrink(btn)
+            else {
+              bounce(btn)
+              burst(btn, h.color, { count: 8, from: 12, to: 28, size: 5 })
             }
             doCheckin(h, day)
           }}
         >
-          {done ? <Icon name="check" size={16} stroke={2.6} /> : null}
+          <CheckGlyph />
         </button>
       )}
     </div>
@@ -336,21 +485,24 @@ function HabitRow({ habit: h, day, selected, onSelect, weekStartsOn, archived }:
 }
 
 // ---------------- 右栏详情 ----------------
-function HabitDetail({ habit: h, weekStartsOn, onEdit, onClose }: { habit: Habit; weekStartsOn: 0 | 1; onEdit: () => void; onClose: () => void }) {
-  const [month, setMonth] = useState(() => startOfMonth(new Date()))
-  const [menu, setMenu] = useState<Anchor | null>(null)
+function HabitDetail({ habit: h, weekStartsOn, phone, onEdit, onClose }: { habit: Habit; weekStartsOn: 0 | 1; phone?: boolean; onEdit: () => void; onClose: () => void }) {
   const today = todayStr()
+  const thisMonth = startOfMonth(parseISO(today))
+  const [month, setMonth] = useState(thisMonth)
+  const [menu, setMenu] = useState<Anchor | null>(null)
   const stats = monthStats(h, month)
   const streak = currentStreak(h)
   const longest = longestStreak(h)
   const total = totalDays(h)
+  const swipe = useSwipe((dir) => setMonth((m) => addMonths(m, dir)))
 
-  const gridStart = startOfWeek(month, { weekStartsOn })
-  const cells: Date[] = []
-  for (let d = gridStart; cells.length < 42; d = addDays(d, 1)) cells.push(d)
-  while (cells.length > 35 && !isSameMonth(cells[cells.length - 7], month)) cells.splice(cells.length - 7, 7)
+  const cellsOf = (m: Date) => {
+    const cells: Date[] = []
+    for (let d = startOfWeek(m, { weekStartsOn }); cells.length < 42; d = addDays(d, 1)) cells.push(d)
+    while (cells.length > 35 && !isSameMonth(cells[cells.length - 7], m)) cells.splice(cells.length - 7, 7)
+    return cells
+  }
   const weekHead = Array.from({ length: 7 }, (_, i) => WEEK_SHORT[(i + weekStartsOn) % 7])
-  const thisMonth = startOfMonth(new Date())
 
   const del = () => {
     const snap = getData()
@@ -359,9 +511,44 @@ function HabitDetail({ habit: h, weekStartsOn, onEdit, onClose }: { habit: Habit
     onClose()
   }
 
+  const grid = (m: Date) => (
+    <div className="habit-cal">
+      {cellsOf(m).map((d) => {
+        const k = fmt(d)
+        const on = !!h.checkins[k]
+        const out = !isSameMonth(d, m)
+        const future = k > today
+        return (
+          <button
+            key={k}
+            className={'habit-cal-day' + (on ? ' on' : '') + (out ? ' out' : '') + (future ? ' future' : '') + (k === today ? ' today' : '') + (!scheduled(h, d) ? ' off' : '')}
+            disabled={future}
+            title={future ? '' : on ? '点击取消打卡' : '点击补打卡'}
+            onClick={(e) => {
+              const el = e.currentTarget
+              if (on) shrink(el)
+              else {
+                bounce(el, 0.7)
+                burst(el, h.color, { count: 6, from: 10, to: 22, size: 4 })
+              }
+              doCheckin(h, k)
+            }}
+          >
+            {format(d, 'd')}
+          </button>
+        )
+      })}
+    </div>
+  )
+
   return (
     <div className="habit-detail-inner" style={{ ['--hc' as string]: h.color }}>
       <div className="habit-detail-head">
+        {phone && (
+          <button className="icon-btn habit-detail-back" title="返回" onClick={onClose}>
+            <Icon name="chevronLeft" size={20} />
+          </button>
+        )}
         <span className="habit-icon lg" style={{ background: `color-mix(in srgb, ${h.color} 18%, transparent)` }}>
           {h.icon}
         </span>
@@ -376,13 +563,15 @@ function HabitDetail({ habit: h, weekStartsOn, onEdit, onClose }: { habit: Habit
         <button className="icon-btn" title="更多" onClick={(e) => setMenu(anchorOf(e.currentTarget))}>
           <Icon name="more" />
         </button>
-        <button className="icon-btn" title="关闭" onClick={onClose}>
-          <Icon name="close" size={16} />
-        </button>
+        {!phone && (
+          <button className="icon-btn" title="关闭" onClick={onClose}>
+            <Icon name="close" size={16} />
+          </button>
+        )}
       </div>
       {h.encouragement && <div className="habit-encourage">“{h.encouragement}”</div>}
 
-      <div className="habit-card">
+      <div className="habit-card" {...swipe}>
         <div className="habit-cal-head">
           <span>{format(month, 'yyyy年M月')}</span>
           <div style={{ display: 'flex', gap: 2 }}>
@@ -399,30 +588,14 @@ function HabitDetail({ habit: h, weekStartsOn, onEdit, onClose }: { habit: Habit
             </button>
           </div>
         </div>
-        <div className="habit-cal">
+        <div className="habit-cal-wds">
           {weekHead.map((w) => (
             <div key={w} className="habit-cal-wd">
               {w}
             </div>
           ))}
-          {cells.map((d) => {
-            const k = fmt(d)
-            const on = !!h.checkins[k]
-            const out = !isSameMonth(d, month)
-            const future = k > today
-            return (
-              <button
-                key={k}
-                className={'habit-cal-day' + (on ? ' on' : '') + (out ? ' out' : '') + (future ? ' future' : '') + (k === today ? ' today' : '') + (!scheduled(h, d) ? ' off' : '')}
-                disabled={future}
-                title={future ? '' : on ? '点击取消打卡' : '点击补打卡'}
-                onClick={() => doCheckin(h, k)}
-              >
-                {format(d, 'd')}
-              </button>
-            )
-          })}
         </div>
+        <SlideSwap order={month.getTime()} render={(o) => grid(new Date(o))} />
       </div>
 
       <div className="habit-stats">
@@ -435,7 +608,7 @@ function HabitDetail({ habit: h, weekStartsOn, onEdit, onClose }: { habit: Habit
       </div>
       {h.goalDays ? (
         <div className="habit-goal-bar">
-          <div style={{ width: `${Math.min(100, (total / h.goalDays) * 100)}%` }} />
+          <div style={{ transform: `scaleX(${Math.min(1, total / h.goalDays)})` }} />
         </div>
       ) : null}
 
@@ -470,7 +643,7 @@ function Stat({ label, value, unit }: { label: string; value: number; unit: stri
   return (
     <div className="habit-stat">
       <div className="habit-stat-val">
-        {value}
+        <NumberRoll value={value} />
         <small>{unit}</small>
       </div>
       <div className="habit-stat-label">{label}</div>
@@ -481,7 +654,7 @@ function Stat({ label, value, unit }: { label: string; value: number; unit: stri
 // ---------------- 新建/编辑弹窗 ----------------
 type FreqKind = HabitFrequency['kind']
 
-function HabitDialog({ habit, onClose, onSaved }: { habit?: Habit; onClose: () => void; onSaved: (id?: string) => void }) {
+function HabitDialog({ habit, closing, onClose, onSaved }: { habit?: Habit; closing?: boolean; onClose: () => void; onSaved: (id?: string) => void }) {
   const isNew = !habit
   const [step, setStep] = useState<'gallery' | 'form'>(isNew ? 'gallery' : 'form')
   const [name, setName] = useState(habit?.name ?? '')
@@ -544,8 +717,8 @@ function HabitDialog({ habit, onClose, onSaved }: { habit?: Habit; onClose: () =
   }
 
   return (
-    <div className="modal-mask" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal habit-modal">
+    <div className={'modal-mask' + (closing ? ' closing' : '')} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal habit-modal" role="dialog" aria-modal="true">
         <div className="modal-head">
           <span>{step === 'gallery' ? '添加习惯' : isNew ? '新建习惯' : '编辑习惯'}</span>
           <button className="icon-btn" onClick={onClose}>

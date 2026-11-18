@@ -1,0 +1,96 @@
+/* Shared motion pieces (see motion.ts / Anim.tsx). Only transform and opacity are animated. */
+
+/* Particle burst layer, positioned at the source element's center */
+.fx-burst {
+  position: fixed;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1200;
+}
+.fx-burst i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+
+/* Slide between pages */
+.slide-swap {
+  position: relative;
+  overflow: hidden;
+}
+.slide-pane.slide-out {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  pointer-events: none;
+}
+.slide-in.from-right {
+  animation: slide-in-right var(--dur-slow) var(--ease-out);
+}
+.slide-in.from-left {
+  animation: slide-in-left var(--dur-slow) var(--ease-out);
+}
+.slide-out.to-left {
+  animation: slide-out-left var(--dur-slow) var(--ease-out) forwards;
+}
+.slide-out.to-right {
+  animation: slide-out-right var(--dur-slow) var(--ease-out) forwards;
+}
+@keyframes slide-in-right {
+  from {
+    transform: translateX(45%);
+    opacity: 0;
+  }
+}
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-45%);
+    opacity: 0;
+  }
+}
+@keyframes slide-out-left {
+  to {
+    transform: translateX(-45%);
+    opacity: 0;
+  }
+}
+@keyframes slide-out-right {
+  to {
+    transform: translateX(45%);
+    opacity: 0;
+  }
+}
+
+/* Number roll */
+.num-roll {
+  display: inline-block;
+}
+.num-roll.roll-up {
+  animation: num-roll-up var(--dur-slow) var(--ease-spring);
+}
+.num-roll.roll-down {
+  animation: num-roll-down var(--dur-slow) var(--ease-out);
+}
+@keyframes num-roll-up {
+  0% {
+    transform: translateY(70%) scale(0.8);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(-18%) scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes num-roll-down {
+  from {
+    transform: translateY(-70%) scale(0.9);
+    opacity: 0;
+  }
+}

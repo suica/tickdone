@@ -96,12 +96,16 @@
 }
 
 .pomo-ring {
+  --ring: 300px;
   position: relative;
-  width: 300px;
-  height: 300px;
+  width: var(--ring);
+  height: var(--ring);
 }
 .pomo-ring svg {
   display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 .pomo-ring-bg,
 .pomo-ring-fg {
@@ -114,7 +118,21 @@
 .pomo-ring-fg {
   stroke: var(--pomo-accent);
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.3s linear;
+}
+/* While running the offset is written every frame; otherwise changes (like rewinding to empty) are eased */
+.pomo-ring:not(.running) .pomo-ring-fg {
+  transition: stroke-dashoffset var(--dur-slow) var(--ease-out);
+}
+/* Glow behind the ring, only shown by the finish animation */
+.pomo-ring-glow {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 8px color-mix(in srgb, var(--pomo-accent) 16%, transparent),
+    0 0 48px 16px color-mix(in srgb, var(--pomo-accent) 42%, transparent);
+  opacity: 0;
+  pointer-events: none;
 }
 .pomo-ring-text {
   position: absolute;
@@ -150,7 +168,62 @@
   font-size: 15px;
   border: 1px solid var(--pomo-accent);
   color: var(--pomo-accent);
-  transition: filter 0.15s, background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    filter 0.15s,
+    background 0.15s,
+    transform var(--dur-fast) var(--ease-out);
+}
+.pomo-btn:active {
+  transform: scale(0.96);
+}
+.pomo-btn-label {
+  display: inline-block;
+  animation: pomo-label-in var(--dur) var(--ease-out);
+}
+@keyframes pomo-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+/* The second button grows out from behind the primary one */
+.pomo-btn-2 {
+  animation: pomo-btn-in var(--dur-slow) var(--ease-out);
+}
+@keyframes pomo-btn-in {
+  from {
+    opacity: 0;
+    transform: translateX(-48px) scale(0.85);
+  }
+}
+/* Play triangle <-> pause bars */
+.pomo-pp {
+  position: relative;
+  width: 12px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.pomo-pp i {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transition: clip-path var(--dur) var(--ease-out);
+}
+.pomo-pp i:first-child {
+  clip-path: polygon(8% 0, 54% 25%, 54% 75%, 8% 100%);
+}
+.pomo-pp i:last-child {
+  clip-path: polygon(54% 25%, 100% 50%, 100% 50%, 54% 75%);
+}
+.pomo-pp.playing i:first-child {
+  clip-path: polygon(10% 0, 38% 0, 38% 100%, 10% 100%);
+}
+.pomo-pp.playing i:last-child {
+  clip-path: polygon(62% 0, 90% 0, 90% 100%, 62% 100%);
 }
 .pomo-btn:hover {
   background: var(--primary-soft);
@@ -411,5 +484,110 @@
 @media (max-width: 900px) {
   .pomo-side {
     width: 280px;
+  }
+}
+
+@media (hover: none) {
+  .pomo-rec-del {
+    opacity: 1;
+    color: var(--text-4);
+  }
+}
+
+/* Phones: the timer fills the first screen, centered; overview and records follow below */
+@media (max-width: 767px) {
+  .pomo-view {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .pomo-main {
+    flex: none;
+    min-height: 100%;
+    overflow: visible;
+  }
+  .pomo-head {
+    height: 48px;
+    padding: 0 16px;
+  }
+  .pomo-center {
+    min-height: 0;
+    padding: 4px 16px 28px;
+  }
+  .pomo-tabs {
+    margin-bottom: 22px;
+  }
+  .pomo-tab {
+    height: 36px;
+    min-width: 96px;
+    font-size: 14px;
+  }
+  .pomo-task {
+    max-width: 100%;
+    height: 40px;
+    margin-bottom: 14px;
+  }
+  .pomo-ring {
+    --ring: min(70vw, 300px);
+  }
+  .pomo-clock {
+    font-size: clamp(40px, 14.5vw, 56px);
+  }
+  .pomo-actions {
+    margin-top: 32px;
+  }
+  .pomo-btn {
+    min-width: 120px;
+    height: 44px;
+    border-radius: 22px;
+    font-size: 16px;
+  }
+  .pomo-side {
+    flex: none;
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    overflow: visible;
+  }
+  .pomo-side-title {
+    padding: 18px 16px 10px;
+  }
+  .pomo-stats {
+    padding: 0 16px 6px;
+  }
+  .pomo-records {
+    flex: none;
+    overflow: visible;
+    padding: 0 16px 24px;
+  }
+  .pomo-rec {
+    align-items: center;
+  }
+  .pomo-rec::before {
+    top: 32px;
+  }
+  .pomo-rec-del {
+    width: 40px;
+    height: 40px;
+  }
+  .pomo-picker {
+    max-height: 70vh;
+  }
+  .pomo-picker-item {
+    min-height: 44px;
+  }
+}
+
+/* Large screens: a bigger timer and a wider overview column */
+@media (min-width: 1920px) {
+  .pomo-ring {
+    --ring: 360px;
+  }
+  .pomo-clock {
+    font-size: 66px;
+  }
+  .pomo-side {
+    width: 380px;
   }
 }

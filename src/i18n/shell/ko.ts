@@ -36,6 +36,7 @@ export default {
   'shell.menu.moveTo': '이동',
   'shell.menu.listView': '목록 보기',
   'shell.menu.kanbanView': '칸반 보기',
+  'shell.menu.timelineView': '타임라인 보기',
   'shell.menu.moveToFolder': '폴더로 이동',
   'shell.menu.noFolder': '없음',
   'shell.menu.deleteSection': '섹션 삭제',

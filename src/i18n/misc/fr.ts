@@ -67,6 +67,7 @@ export default {
   'misc.list.view': 'Vue',
   'misc.list.viewList': 'Liste',
   'misc.list.viewKanban': 'Kanban',
+  'misc.list.viewTimeline': 'Chronologie',
   'misc.list.folder': 'Dossier',
   'misc.folder.new': 'Nouveau dossier',
   'misc.folder.rename': 'Renommer le dossier',

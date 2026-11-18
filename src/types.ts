@@ -52,6 +52,8 @@ export interface Task {
   dueDate?: string // yyyy-MM-dd
   dueTime?: string // HH:mm
   duration?: number // minutes; how long a timed task is in the calendar (shown as 30 minutes when unset)
+  /** Days the task starts before its due date (its bar on the timeline); unset = a single day. Kept when the due date moves. */
+  spanDays?: number
   reminder?: number | null // minutes before; 0 = on time
   repeat?: RepeatRule | null
   status: TaskStatus
@@ -76,7 +78,7 @@ export interface TaskList {
   color?: string
   folderId?: string
   sections: Section[]
-  view: 'list' | 'kanban'
+  view: 'list' | 'kanban' | 'timeline'
   order: number
   /** Archived lists leave the sidebar's lists and open read-only; their tasks stay out of smart lists, the calendar and the matrix. */
   archived?: boolean

@@ -57,6 +57,8 @@ export default function App() {
   const data = useData()
   const phone = usePhone()
   const t = useT()
+  const openList = ui.view.startsWith('list:') ? data.lists.find((l) => 'list:' + l.id === ui.view) : undefined
+  const timelineOpen = !phone && openList?.view === 'timeline' && !openList.archived
 
   // Subscribed calendars: show the cached copies and read them again when stale.
   useEffect(() => startFeedSync(), [])
@@ -150,7 +152,8 @@ export default function App() {
           <>
             {!phone && !ui.sidebarHidden && <Sidebar />}
             <TaskListPane />
-            <TaskDetail />
+            {/* the timeline needs the width: its task detail floats over it instead of taking a column */}
+            <TaskDetail floating={timelineOpen} />
           </>
         )}
         {ui.module === 'calendar' && <CalendarView />}

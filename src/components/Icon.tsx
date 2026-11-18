@@ -48,6 +48,7 @@ const P: Record<string, string> = {
   sidebar: 'M4 5h16v14H4zM9 5v14',
   sort: 'M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4',
   kanban: 'M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v13h-4z',
+  timeline: 'M4 6h9M8 12h10M6 18h7M4 3v18',
   play: 'M7 4l13 8-13 8z',
   pause: 'M7 4h3v16H7zM14 4h3v16h-3z',
   stop: 'M6 6h12v12H6z',

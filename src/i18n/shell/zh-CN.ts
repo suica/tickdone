@@ -36,6 +36,7 @@ export default {
   'shell.menu.moveTo': '移动到',
   'shell.menu.listView': '列表视图',
   'shell.menu.kanbanView': '看板视图',
+  'shell.menu.timelineView': '时间线视图',
   'shell.menu.moveToFolder': '移动到文件夹',
   'shell.menu.noFolder': '无',
   'shell.menu.deleteSection': '删除分组',

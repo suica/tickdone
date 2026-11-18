@@ -67,6 +67,7 @@ export default {
   'misc.list.view': 'Вид',
   'misc.list.viewList': 'Список',
   'misc.list.viewKanban': 'Канбан',
+  'misc.list.viewTimeline': 'Таймлайн',
   'misc.list.folder': 'Папка',
   'misc.folder.new': 'Новая папка',
   'misc.folder.rename': 'Переименовать папку',

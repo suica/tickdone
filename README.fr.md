@@ -64,6 +64,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - 🔍 **Recherche** dans les tâches, les étiquettes et les listes.
 - ↩️ **Annulation** depuis la notification après avoir terminé, supprimé ou déplacé une tâche.
 - ⌨️ **Raccourcis clavier**.
+- ☑️ **Sélection multiple et modification groupée** : sélectionnez des tâches avec Ctrl/⌘+clic, Maj+clic ou Ctrl/⌘+A, puis changez leur date, priorité, liste ou étiquettes, terminez-les, supprimez-les ou déplacez-les toutes ensemble ; une seule annulation rétablit tout le lot. Sur téléphone, un appui long lance la sélection.
 - 🎨 **Thèmes et couleurs d’accent** : clair, sombre ou comme le système, et huit couleurs d’accent pour les boutons, les cases, la sélection et les contours de focus. Les changements s’appliquent tout de suite, avec un aperçu dans les Réglages, et l’écran de démarrage et l’icône de l’onglet suivent.
 - ⏰ **Rappels** : à l'heure du rappel d'une tâche, TickDone affiche une carte pour la terminer, la reporter (5 min, 15 min, 1 heure, demain) ou l'ouvrir, et une notification système si vous l'autorisez. TickDone n'a pas de serveur : les rappels se déclenchent tant qu'il est ouvert dans un onglet, ou installé et en cours d'exécution ; ceux arrivés pendant qu'il était fermé s'affichent à la prochaine ouverture.
 - 📲 **Installez-le comme une application** : ajoutez TickDone à l'écran d'accueil ou au Dock depuis Paramètres → À propos ; il s'ouvre hors ligne après la première visite. Quand une nouvelle version sort, un message propose de recharger.
@@ -93,6 +94,12 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
     <td><img src="docs/screenshots/fr/desktop-focus.png" alt="Concentration"></td>
     <td><img src="docs/screenshots/fr/desktop-habits.png" alt="Habitudes"></td>
   </tr>
+  <tr>
+    <th colspan="2">Statistiques</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/fr/desktop-stats.png" alt="Statistiques"></td>
+  </tr>
 </table>
 
 <table>
@@ -102,6 +109,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
     <td><img src="docs/screenshots/fr/phone-matrix.png" alt="sur mobile : Matrice"></td>
     <td><img src="docs/screenshots/fr/phone-focus.png" alt="sur mobile : Concentration"></td>
     <td><img src="docs/screenshots/fr/phone-habits.png" alt="sur mobile : Habitudes"></td>
+    <td><img src="docs/screenshots/fr/phone-stats.png" alt="sur mobile : Statistiques"></td>
   </tr>
 </table>
 

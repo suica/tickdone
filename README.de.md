@@ -64,6 +64,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
 - 🔍 **Suche** in Aufgaben, Tags und Listen.
 - ↩️ **Rückgängig** über die Meldung, nachdem du eine Aufgabe erledigt, gelöscht oder verschoben hast.
 - ⌨️ **Tastenkürzel**.
+- ☑️ **Mehrfachauswahl und Sammelbearbeitung**: Aufgaben mit Strg/⌘-Klick, Umschalt-Klick oder Strg/⌘+A auswählen und dann Datum, Priorität, Liste oder Tags gemeinsam ändern, alle erledigen, löschen oder zusammen ziehen; ein einziges Rückgängig macht alles rückgängig. Auf dem Handy startet langes Drücken die Auswahl.
 - 🎨 **Designs und Akzentfarben**: hell, dunkel oder wie das System, dazu acht Akzentfarben für Schaltflächen, Kontrollkästchen, Auswahl und Fokusrahmen. Änderungen wirken sofort, mit Live-Vorschau in den Einstellungen, und Startbildschirm und Tab-Symbol ziehen mit.
 - ⏰ **Erinnerungen**: Zur Erinnerungszeit einer Aufgabe zeigt TickDone eine Karte zum Erledigen, Verschieben (5 Min., 15 Min., 1 Std., morgen) oder Öffnen und, wenn du es erlaubst, eine Systembenachrichtigung. TickDone hat keinen Server: Erinnerungen kommen, solange es in einem Tab geöffnet oder installiert ist und läuft; was fällig wurde, während es geschlossen war, erscheint beim nächsten Öffnen.
 - 📲 **Als App installieren**: Füge TickDone unter Einstellungen → Über zum Startbildschirm oder Dock hinzu; nach dem ersten Besuch startet es auch offline. Gibt es eine neue Version, bietet ein Hinweis das Neuladen an.
@@ -93,6 +94,12 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
     <td><img src="docs/screenshots/de/desktop-focus.png" alt="Fokus"></td>
     <td><img src="docs/screenshots/de/desktop-habits.png" alt="Gewohnheiten"></td>
   </tr>
+  <tr>
+    <th colspan="2">Statistik</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/de/desktop-stats.png" alt="Statistik"></td>
+  </tr>
 </table>
 
 <table>
@@ -102,6 +109,7 @@ TickDone ist eine kostenlose Open-Source-Aufgabenliste mit Zeitmanagement, die i
     <td><img src="docs/screenshots/de/phone-matrix.png" alt="auf dem Handy: Matrix"></td>
     <td><img src="docs/screenshots/de/phone-focus.png" alt="auf dem Handy: Fokus"></td>
     <td><img src="docs/screenshots/de/phone-habits.png" alt="auf dem Handy: Gewohnheiten"></td>
+    <td><img src="docs/screenshots/de/phone-stats.png" alt="auf dem Handy: Statistik"></td>
   </tr>
 </table>
 

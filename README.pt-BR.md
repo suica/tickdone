@@ -64,6 +64,7 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
 - 🔍 **Busca** em tarefas, etiquetas e listas.
 - ↩️ **Desfazer** pelo aviso depois de concluir, excluir ou mover uma tarefa.
 - ⌨️ **Atalhos de teclado**.
+- ☑️ **Seleção múltipla e edição em lote**: selecione tarefas com Ctrl/⌘+clique, Shift+clique ou Ctrl/⌘+A e mude data, prioridade, lista ou etiquetas, conclua, exclua ou arraste todas de uma vez; um único desfazer reverte o lote inteiro. No celular, toque e segure para começar a selecionar.
 - 🎨 **Temas e cores de destaque**: claro, escuro ou seguir o sistema, e oito cores de destaque para botões, caixas de seleção, seleção e anéis de foco. As mudanças valem na hora, com prévia nas Configurações, e a tela de abertura e o ícone da aba acompanham.
 - ⏰ **Lembretes**: na hora do lembrete de uma tarefa, o TickDone mostra um cartão para concluir, adiar (5 min, 15 min, 1 hora, amanhã) ou abrir a tarefa, e uma notificação do sistema se você permitir. O TickDone não tem servidor, então os lembretes tocam enquanto ele está aberto em uma aba ou instalado e em execução; os que venceram com ele fechado aparecem quando você o abre de novo.
 - 📲 **Instale como app**: adicione o TickDone à tela inicial ou ao Dock em Configurações → Sobre, e ele abre off-line depois da primeira visita. Quando sai uma versão nova, um aviso oferece recarregar.
@@ -93,6 +94,12 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
     <td><img src="docs/screenshots/pt-BR/desktop-focus.png" alt="Foco"></td>
     <td><img src="docs/screenshots/pt-BR/desktop-habits.png" alt="Hábitos"></td>
   </tr>
+  <tr>
+    <th colspan="2">Estatísticas</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/pt-BR/desktop-stats.png" alt="Estatísticas"></td>
+  </tr>
 </table>
 
 <table>
@@ -102,6 +109,7 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
     <td><img src="docs/screenshots/pt-BR/phone-matrix.png" alt="no celular: Matriz"></td>
     <td><img src="docs/screenshots/pt-BR/phone-focus.png" alt="no celular: Foco"></td>
     <td><img src="docs/screenshots/pt-BR/phone-habits.png" alt="no celular: Hábitos"></td>
+    <td><img src="docs/screenshots/pt-BR/phone-stats.png" alt="no celular: Estatísticas"></td>
   </tr>
 </table>
 

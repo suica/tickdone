@@ -65,6 +65,7 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
 - 🔍 **搜索**任务、标签和清单。
 - ↩️ **撤销**：完成、删除或移动任务后，可以在提示条中撤销。
 - ⌨️ **键盘快捷键**。
+- ☑️ **多选与批量修改**：Ctrl/⌘ 点击、Shift 点击或 Ctrl/⌘+A 选中任务，一次改日期、优先级、清单或标签，批量完成、删除或一起拖动；一次撤销就能全部恢复。手机上长按进入多选。
 - 🎨 **主题与强调色**：浅色、深色或跟随系统，另有八种强调色，用于按钮、复选框、选中状态和焦点框。修改即时生效，设置里可实时预览，启动画面和标签页图标也会跟着变。
 - ⏰ **提醒**：到了任务的提醒时间，TickDone 会弹出提醒卡片，可以完成、稍后提醒（5 分钟、15 分钟、1 小时、明天）或打开任务；允许通知后还会弹出系统通知。TickDone 没有服务器，所以提醒只在它于标签页中打开、或已安装并正在运行时触发；关闭期间到时的提醒，会在下次打开时显示。
 - 📲 **安装为应用**：在「设置 → 关于」中把 TickDone 添加到主屏幕或程序坞，首次访问后即可离线打开。有新版本时，会弹出提示让你重新加载。
@@ -94,6 +95,12 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
     <td><img src="docs/screenshots/zh-CN/desktop-focus.png" alt="番茄专注"></td>
     <td><img src="docs/screenshots/zh-CN/desktop-habits.png" alt="习惯打卡"></td>
   </tr>
+  <tr>
+    <th colspan="2">统计</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/zh-CN/desktop-stats.png" alt="统计"></td>
+  </tr>
 </table>
 
 <table>
@@ -103,6 +110,7 @@ TickDone 是一款免费、开源的待办清单和时间管理工具，直接�
     <td><img src="docs/screenshots/zh-CN/phone-matrix.png" alt="手机上的四象限"></td>
     <td><img src="docs/screenshots/zh-CN/phone-focus.png" alt="手机上的番茄专注"></td>
     <td><img src="docs/screenshots/zh-CN/phone-habits.png" alt="手机上的习惯打卡"></td>
+    <td><img src="docs/screenshots/zh-CN/phone-stats.png" alt="手机上的统计"></td>
   </tr>
 </table>
 

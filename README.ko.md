@@ -64,6 +64,7 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 - 🔍 **검색**: 할 일, 태그, 목록을 한 번에 찾습니다.
 - ↩️ **실행 취소**: 할 일을 완료하거나 삭제하거나 옮긴 뒤 알림에서 되돌릴 수 있습니다.
 - ⌨️ **키보드 단축키**.
+- ☑️ **다중 선택과 일괄 편집**: Ctrl/⌘ 클릭, Shift 클릭 또는 Ctrl/⌘+A로 할 일을 선택해 날짜, 우선순위, 목록, 태그를 한 번에 바꾸고, 한꺼번에 완료·삭제하거나 함께 끌어 옮길 수 있습니다. 실행 취소 한 번으로 전체가 되돌아갑니다. 휴대폰에서는 길게 눌러 선택을 시작합니다.
 - 🎨 **테마와 강조 색상**: 라이트, 다크 또는 시스템 설정 따르기, 그리고 버튼·체크박스·선택·포커스 링에 쓰이는 8가지 강조 색상. 바꾸면 바로 적용되고 설정에서 미리 볼 수 있으며, 시작 화면과 탭 아이콘도 함께 바뀝니다.
 - ⏰ **알림**: 할 일의 알림 시간이 되면 완료, 다시 알림(5분, 15분, 1시간, 내일), 열기를 고를 수 있는 카드를 보여 주고, 허용하면 시스템 알림도 띄웁니다. TickDone에는 서버가 없어 알림은 탭에서 열려 있거나 설치되어 실행 중일 때만 울리며, 닫혀 있는 동안 시간이 된 알림은 다음에 열 때 표시됩니다.
 - 📲 **앱으로 설치**: 설정 → 정보에서 TickDone을 홈 화면이나 Dock에 추가할 수 있고, 한 번 방문하면 오프라인에서도 열립니다. 새 버전이 나오면 새로고침을 안내합니다.
@@ -93,6 +94,12 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
     <td><img src="docs/screenshots/ko/desktop-focus.png" alt="집중"></td>
     <td><img src="docs/screenshots/ko/desktop-habits.png" alt="습관"></td>
   </tr>
+  <tr>
+    <th colspan="2">통계</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/ko/desktop-stats.png" alt="통계"></td>
+  </tr>
 </table>
 
 <table>
@@ -102,6 +109,7 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
     <td><img src="docs/screenshots/ko/phone-matrix.png" alt="휴대폰의 매트릭스"></td>
     <td><img src="docs/screenshots/ko/phone-focus.png" alt="휴대폰의 집중"></td>
     <td><img src="docs/screenshots/ko/phone-habits.png" alt="휴대폰의 습관"></td>
+    <td><img src="docs/screenshots/ko/phone-stats.png" alt="휴대폰의 통계"></td>
   </tr>
 </table>
 

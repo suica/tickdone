@@ -75,10 +75,10 @@
 }
 
 :root[data-theme='dark'] {
-  --primary: #829ffc;
-  --primary-soft: rgba(130, 159, 252, 0.16);
-  --primary-soft2: rgba(130, 159, 252, 0.26);
-  --on-primary: #141414;
+  --primary: #6388fb;
+  --primary-soft: rgba(99, 136, 251, 0.16);
+  --primary-soft2: rgba(99, 136, 251, 0.26);
+  --on-primary: #ffffff;
   --accent-ring: #2c3a66;
   /* Reds a step lighter than in light mode so text in them stays readable on near-black */
   --danger: #f68080;

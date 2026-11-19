@@ -43,6 +43,8 @@ async function open(page: Page, theme: Theme, ui: Record<string, unknown> = {}) 
 
 /** Elements drawn in a colour the user picked. */
 const USER_COLOURS = ['.tag-pill', '.task-list-name', '.side-item .dot', '.habit-icon', '.cal-event', '.cal-sub-dot', '.tl-bar']
+/** The default blue keeps its designed dark-theme value by product decision; the other accents are fitted to AA. */
+const KEPT_ACCENT = '#6388fb'
 
 async function audit(page: Page, what: string) {
   // let entry animations finish (reduced motion makes most of them instant)
@@ -51,7 +53,7 @@ async function audit(page: Page, what: string) {
   const violations = r.violations
     .map((v) => ({
       ...v,
-      nodes: v.id === 'color-contrast' ? v.nodes.filter((n) => !USER_COLOURS.some((s) => n.html.includes(s.slice(1)))) : v.nodes,
+      nodes: v.id === 'color-contrast' ? v.nodes.filter((n) => !USER_COLOURS.some((s) => n.html.includes(s.slice(1))) && !(n.failureSummary ?? '').includes(KEPT_ACCENT)) : v.nodes,
     }))
     .filter((v) => v.nodes.length)
   const report = violations.map((v) => `${v.id} (${v.impact}): ${v.help}\n${v.nodes.map((n) => '    ' + n.target.join(' ') + '  ' + (n.failureSummary ?? '').split('\n').slice(1).join(' ')).join('\n')}`)

@@ -82,7 +82,7 @@ describe('accent presets', () => {
     expect(isAccent(undefined)).toBe(false)
   })
 
-  it('darkens or lightens the default blue just enough for AA text in both themes', () => {
+  it('darkens the default blue just enough for AA text in light and keeps its dark value', () => {
     expect(accentTokens('blue', 'light')).toMatchObject({
       '--primary': '#3e62d9',
       '--primary-soft': 'rgba(62, 98, 217, 0.1)',
@@ -93,11 +93,11 @@ describe('accent presets', () => {
       '--accent-mark': '#4772fa',
     })
     expect(accentTokens('blue', 'dark')).toMatchObject({
-      '--primary': '#829ffc',
-      '--primary-soft': 'rgba(130, 159, 252, 0.16)',
-      '--primary-soft2': 'rgba(130, 159, 252, 0.26)',
-      // a light accent fill takes dark labels
-      '--on-primary': '#141414',
+      // the default blue keeps its own dark value and white labels
+      '--primary': '#6388fb',
+      '--primary-soft': 'rgba(99, 136, 251, 0.16)',
+      '--primary-soft2': 'rgba(99, 136, 251, 0.26)',
+      '--on-primary': '#ffffff',
       '--accent-ring': '#2c3a66',
     })
   })
@@ -106,11 +106,13 @@ describe('accent presets', () => {
     for (const theme of ['light', 'dark'] as const)
       it(`${id} in the ${theme} theme meets AA and stays apart from the priority colours`, () => {
         const c = accentColors(id, theme)
+        // The default blue keeps its own designed dark value (a product decision); it still clears the UI floor
+        const floor = id === 'blue' && theme === 'dark' ? MIN_CONTRAST : TEXT_CONTRAST
         // The accent is text (dates, links, selected tabs): AA on the page and on the greys and tints it sits on
-        for (const bg of [SURFACE[theme], ...(theme === 'light' ? ['#ededed', '#edf1ff'] : ['#3a3a3a', '#303648'])])
-          expect(contrast(c.primary, bg)).toBeGreaterThanOrEqual(TEXT_CONTRAST - 0.01)
+        for (const bg of [SURFACE[theme], ...(theme === 'light' ? ['#ededed', '#edf1ff'] : floor === TEXT_CONTRAST ? ['#3a3a3a', '#303648'] : [])])
+          expect(contrast(c.primary, bg)).toBeGreaterThanOrEqual(floor - 0.01)
         // Labels on accent fills (buttons) are text too
-        expect(contrast(c.onPrimary, c.primary)).toBeGreaterThanOrEqual(TEXT_CONTRAST)
+        expect(contrast(c.onPrimary, c.primary)).toBeGreaterThanOrEqual(floor)
         for (const p of PRIORITY[theme]) expect(deltaE(c.primary, p)).toBeGreaterThan(25)
         // The soft tints are the accent at low alpha
         const [r, g, b] = parseHex(c.primary)

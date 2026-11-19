@@ -118,9 +118,12 @@ export function accentColors(id: AccentId, theme: Resolved): AccentColors {
   // Light: darkened until it reads as text on the page and on the greys and tints it sits on; on white, the
   // accent and a white label on the accent are the same pair, so buttons keep white labels.
   // Dark: a step lighter so it carries on near-black, and light enough to be read as text on raised greys.
+  // A preset with its own dark value (the default blue) keeps it as designed, with white labels.
+  const tuned = theme === 'dark' && p.dark !== undefined
   let primary = theme === 'light' ? p.light : (p.dark ?? mix(p.light, WHITE, 0.16))
-  for (const surface of [bg, ...TEXT_SURFACES[theme]]) primary = fitContrast(primary, surface, TEXT_CONTRAST, theme === 'light' ? 'black' : 'white')
-  const onPrimary = contrast(WHITE, primary) >= TEXT_CONTRAST ? WHITE : INK
+  if (!tuned)
+    for (const surface of [bg, ...TEXT_SURFACES[theme]]) primary = fitContrast(primary, surface, TEXT_CONTRAST, theme === 'light' ? 'black' : 'white')
+  const onPrimary = tuned || contrast(WHITE, primary) >= TEXT_CONTRAST ? WHITE : INK
   const soft = rgba(primary, theme === 'light' ? 0.1 : 0.16)
   const soft2 = rgba(primary, theme === 'light' ? 0.18 : 0.26)
   const ring = p.ring?.[theme] ?? (theme === 'light' ? mix(p.light, WHITE, 0.82) : mix(p.light, bg, 0.65))

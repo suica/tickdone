@@ -169,8 +169,6 @@ Cada elemento enlaza a su issue. Los elementos marcados ya están disponibles en
 - [x] Vista de línea de tiempo ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Más reglas de repetición ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Más reglas de repetición ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] Archivar listas ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] Accesibilidad ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Rápido incluso con miles de tareas ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Temas y colores de acento ([#27](https://github.com/suica/tickdone/issues/27))

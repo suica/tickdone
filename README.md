@@ -169,8 +169,6 @@ Each item links to its issue. Ticked items are live at [tickdone.pages.dev](http
 - [x] Timeline view ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] More repeat rules ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] Archive lists ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] Accessibility ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Fast with thousands of tasks ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Themes and accent colors ([#27](https://github.com/suica/tickdone/issues/27))

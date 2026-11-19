@@ -169,8 +169,6 @@ npm run dev        # http://localhost:5173
 - [x] Вид временной шкалы ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Больше правил повторения ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Архивация списков ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Больше правил повторения ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] Архивация списков ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] Доступность ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Быстрая работа даже с тысячами задач ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Темы и акцентные цвета ([#27](https://github.com/suica/tickdone/issues/27))

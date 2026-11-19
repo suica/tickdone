@@ -169,8 +169,6 @@ Jeder Punkt verlinkt auf sein Issue. Abgehakte Punkte sind auf [tickdone.pages.d
 - [x] Zeitleistenansicht ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Mehr Wiederholungsregeln ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Listen archivieren ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Mehr Wiederholungsregeln ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] Listen archivieren ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] Barrierefreiheit ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Schnell auch bei Tausenden von Aufgaben ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Designs und Akzentfarben ([#27](https://github.com/suica/tickdone/issues/27))

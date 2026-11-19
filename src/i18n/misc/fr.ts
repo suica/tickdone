@@ -333,4 +333,16 @@ export default {
   'misc.keys.datePick': 'Choisir une date',
   'misc.keys.dateClear': 'Effacer la date',
   'misc.keys.quickAdd': 'Ajout rapide',
+  // accessibility: landmarks, the skip link, names of icon-only controls, keyboard moves
+  'misc.a11y.skipToContent': 'Aller au contenu',
+  'misc.a11y.modules': 'Modules',
+  'misc.a11y.lists': 'Listes et filtres',
+  'misc.a11y.filterIcon': 'Icône {n}',
+  'misc.a11y.moveUp': 'Monter',
+  'misc.a11y.moveDown': 'Descendre',
+  'misc.a11y.movedUp': 'Montée',
+  'misc.a11y.movedDown': 'Descendue',
+  'misc.a11y.notifications': 'Notifications',
+  'misc.a11y.tasks': 'Tâches',
+  'misc.a11y.removeTag': 'Retirer {tag}',
 } satisfies Catalog<typeof en>

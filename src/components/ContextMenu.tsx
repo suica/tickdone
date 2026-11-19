@@ -10,6 +10,7 @@ import { activeLists, inArchivedList, PRIORITY } from '../views'
 import { Flag, Icon } from './Icon'
 import { MenuList, Popover, type MenuItem } from './Popover'
 import { editSubtaskSoon, PRIORITY_NAME } from './TaskDetail'
+import { moveTaskBy } from './batchActions'
 import './ctxmenu.css'
 
 export function ContextMenu() {
@@ -138,6 +139,13 @@ export function ContextMenu() {
             },
           })),
         },
+        // keyboard and screen-reader alternatives to dragging the row
+        ...(ui.module === 'tasks'
+          ? [
+              { label: tr('misc.a11y.moveUp'), icon: <Icon name="chevronDown" size={15} style={{ transform: 'rotate(180deg)' }} />, onClick: () => void moveTaskBy(t.id, -1) },
+              { label: tr('misc.a11y.moveDown'), icon: <Icon name="chevronDown" size={15} />, onClick: () => void moveTaskBy(t.id, 1) },
+            ]
+          : []),
         { label: tr('shell.task.startFocus'), icon: <Icon name="pomo" size={15} />, onClick: () => { startFocus(t.id); setUI({ module: 'pomo' }) } },
         { label: tr('shell.task.duplicate'), icon: <Icon name="copy" size={15} />, onClick: () => duplicateTask(t.id) },
         {

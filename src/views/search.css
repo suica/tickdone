@@ -104,7 +104,7 @@
 }
 .search-empty-sub {
   font-size: 12px;
-  color: var(--text-4);
+  color: var(--text-3);
 }
 .search-chips {
   display: flex;

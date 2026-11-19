@@ -298,7 +298,7 @@ body.habit-dragging * {
   fill: transparent;
   stroke: color-mix(in srgb, var(--hc) 55%, transparent);
   stroke-width: 2;
-  transition: fill 0.2s;
+  transition: fill var(--dur);
 }
 .habit-check:hover .hc-ring {
   fill: color-mix(in srgb, var(--hc) 14%, transparent);
@@ -512,6 +512,14 @@ body.habit-dragging * {
   border-style: dashed;
 }
 .habit-tpl-name {
+  /* a button reset to read as the card's label */
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   font-size: 13px;
   flex: 1;
   min-width: 0;

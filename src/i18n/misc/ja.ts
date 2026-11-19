@@ -333,4 +333,16 @@ export default {
   'misc.keys.datePick': '日付を選ぶ',
   'misc.keys.dateClear': '日付をクリア',
   'misc.keys.quickAdd': 'クイック追加',
+  // accessibility: landmarks, the skip link, names of icon-only controls, keyboard moves
+  'misc.a11y.skipToContent': 'メインコンテンツへ移動',
+  'misc.a11y.modules': 'モジュール',
+  'misc.a11y.lists': 'リストとフィルター',
+  'misc.a11y.filterIcon': 'アイコン {n}',
+  'misc.a11y.moveUp': '上へ移動',
+  'misc.a11y.moveDown': '下へ移動',
+  'misc.a11y.movedUp': '上へ移動しました',
+  'misc.a11y.movedDown': '下へ移動しました',
+  'misc.a11y.notifications': '通知',
+  'misc.a11y.tasks': 'タスク',
+  'misc.a11y.removeTag': '{tag} を外す',
 } satisfies Catalog<typeof en>

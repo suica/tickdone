@@ -144,7 +144,7 @@
   color: #fff;
   outline: 2px solid transparent;
   outline-offset: 2px;
-  transition: transform 0.1s;
+  transition: transform var(--dur-fast);
 }
 .dlg-color:hover {
   transform: scale(1.1);

@@ -113,7 +113,7 @@ export function BarChart({ bars, ticks, fmtTick, label, height = 168 }: { bars: 
             ) : null,
           )}
           {bars.map((b, i) => (
-            <rect key={i} className="stats-hit" x={padL + step * i} y={padT} width={step} height={plotH + padB} aria-label={`${b.tipTitle}: ${b.tip}`} {...item(i)} />
+            <rect key={i} className="stats-hit" x={padL + step * i} y={padT} width={step} height={plotH + padB} role="img" aria-label={`${b.tipTitle}: ${b.tip}`} {...item(i)} />
           ))}
         </svg>
       )}
@@ -167,6 +167,7 @@ export function Donut({ slices, total, label }: { slices: Slice[]; total: string
                 stroke={s.color}
                 strokeDasharray={`${Math.max(0.5, len - gap)} ${C}`}
                 strokeDashoffset={-starts[i]}
+                role="img"
                 aria-label={`${s.label}: ${s.text}`}
                 {...item(i)}
               />

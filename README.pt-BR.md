@@ -69,6 +69,7 @@ O TickDone é uma lista de tarefas e um gerenciador de tempo gratuito e de códi
 - 📲 **Instale como app**: adicione o TickDone à tela inicial ou ao Dock em Configurações → Sobre, e ele abre off-line depois da primeira visita. Quando sai uma versão nova, um aviso oferece recarregar.
 - 💾 **Backup e restauração**: exporte tudo para um arquivo JSON e importe de volta quando quiser.
 - 🚀 **Rápido com milhares de tarefas**: listas longas e resultados de busca desenham só as linhas na tela, então uma lista de 5.000 tarefas rola, troca e responde tão rápido quanto uma curta, com arrastar e soltar, teclado, seleção múltipla e a animação de conclusão funcionando como antes. As alterações são salvas em segundo plano.
+- ♿ **Acessível**: tudo funciona pelo teclado, com indicador de foco visível e um link para pular para o conteúdo; diálogos, menus e painéis mantêm o foco dentro e o devolvem ao fechar; leitores de tela recebem regiões, títulos, botões e caixas de seleção com nome, e cada aviso é anunciado. As tarefas sobem e descem com Alt+↑ / Alt+↓ ou pelo menu, como alternativa a arrastar. O texto atende ao contraste WCAG AA no claro e no escuro, e os modos de alto contraste e a redução de movimento são respeitados. Uma verificação automática roda em cada tela.
 
 ## 📸 Capturas de tela
 
@@ -170,7 +171,7 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [x] Arquivar listas ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Mais regras de repetição ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Arquivar listas ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Acessibilidade ([#25](https://github.com/suica/tickdone/issues/25))
+- [x] Acessibilidade ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Rápido mesmo com milhares de tarefas ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Temas e cores de destaque ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendário: planejar tarefas sem data, visualização de agenda ([#28](https://github.com/suica/tickdone/issues/28))

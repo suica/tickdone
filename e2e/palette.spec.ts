@@ -53,7 +53,9 @@ for (const theme of ['light', 'dark'] as const) {
         ['none', 'Priority: None', '--p-none'],
       ]) {
         const cb = row(page, title).locator('.checkbox')
-        await expect(cb).toHaveAttribute('aria-label', label)
+        // a checkbox named by its task, with the priority as its description (and tooltip)
+        await expect(cb).toHaveAttribute('aria-label', title)
+        await expect(cb).toHaveAttribute('aria-description', label)
         await expect(cb).toHaveAttribute('title', label)
         const style = await cb.evaluate((el) => ({ bg: getComputedStyle(el).backgroundColor, border: getComputedStyle(el).borderTopColor }))
         expect(style.bg).toBe('rgba(0, 0, 0, 0)')

@@ -610,7 +610,7 @@ export default function CalendarView() {
               <button
                 className={'btn cal-tool cal-unsched-btn' + (showUnsched ? ' on' : '')}
                 title={t('calendar.unsched.toggle')}
-                aria-label={t('calendar.unsched.toggle')}
+                aria-label={unschedCount > 0 ? `${t('calendar.unsched.toggle')} ${unschedCount}` : t('calendar.unsched.toggle')}
                 aria-pressed={showUnsched}
                 onClick={() => toggleUnsched(!showUnsched)}
               >

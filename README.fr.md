@@ -69,6 +69,7 @@ TickDone est une liste de tâches et un outil de gestion du temps, gratuit et op
 - 📲 **Installez-le comme une application** : ajoutez TickDone à l'écran d'accueil ou au Dock depuis Paramètres → À propos ; il s'ouvre hors ligne après la première visite. Quand une nouvelle version sort, un message propose de recharger.
 - 💾 **Sauvegarde et restauration** : exportez tout dans un fichier JSON et réimportez-le.
 - 🚀 **Rapide avec des milliers de tâches** : les longues listes et les résultats de recherche n'affichent que les lignes visibles, si bien qu'une liste de 5 000 tâches défile, change et réagit aussi vite qu'une courte, avec le glisser-déposer, le clavier, la sélection multiple et l'animation de fin qui marchent comme avant. Les modifications sont enregistrées en arrière-plan.
+- ♿ **Accessible** : tout se fait au clavier, avec un indicateur de focus visible et un lien d'accès direct au contenu ; les boîtes de dialogue, menus et panneaux gardent le focus et le rendent à la fermeture ; les lecteurs d'écran disposent de régions, de titres, de boutons et de cases nommés, et chaque notification est annoncée. Les tâches montent et descendent avec Alt+↑ / Alt+↓ ou depuis leur menu, en alternative au glisser-déposer. Le texte respecte le contraste WCAG AA en clair comme en sombre, et les modes à contraste élevé et la réduction des animations sont pris en compte. Une vérification automatique passe sur chaque écran.
 
 ## 📸 Captures d'écran
 
@@ -170,7 +171,7 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [x] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] Plus de règles de répétition ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
+- [x] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] Calendrier : planifier les tâches sans date, vue agenda ([#28](https://github.com/suica/tickdone/issues/28))

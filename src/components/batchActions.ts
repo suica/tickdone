@@ -2,7 +2,8 @@ import { addDays, nextMonday } from 'date-fns'
 import { completeMany, deleteMany, patchMany, reopenMany, tagMany, tagState, wontDoMany } from '../batch'
 import { fmt } from '../dates'
 import { t } from '../i18n'
-import { clearSelection, dingAfterPaint, getData, getSelection, getUI, runBatch, setSelection } from '../store'
+import { clearSelection, dingAfterPaint, getData, getSelection, getUI, reorderTask, runBatch, setSelection, setUI, toast } from '../store'
+import { defaultPrefs } from '../views'
 import { after, clickSelect, enterMode, inOrder, selectedIds, type ClickMods } from '../selection'
 import type { Priority, Task } from '../types'
 import { PRIORITY_LEVEL } from './taskDnd'
@@ -139,5 +140,33 @@ export function escapeSelection(): boolean {
   const u = getUI()
   if (!u.selectMode && u.selectedIds.length < 2) return false
   clearSelection(!u.selectMode)
+  return true
+}
+
+/**
+ * Moves a task one place up (-1) or down (+1) among the tasks next to it (same parent, same group): the keyboard
+ * alternative to dragging it (Alt+↑ / Alt+↓, or Move up / Move down in its menu). Switches the list to custom
+ * order, like a drag does, and can be undone from the toast. Returns whether it moved.
+ */
+export function moveTaskBy(id: string, dir: -1 | 1): boolean {
+  const d = getData()
+  const task = d.tasks.find((x) => x.id === id)
+  const row = rowEl(id)
+  if (!task || !row) return false
+  // rows outside the rendered window of a long list count as in the same group (it is only checked to keep
+  // tasks from hopping between groups, and the rows next to the focused one are always rendered)
+  const group = row.closest('[data-group]')
+  const siblings = visibleOrder()
+    .map((x) => d.tasks.find((y) => y.id === x))
+    .filter((x): x is Task => !!x && (x.parentId ?? '') === (task.parentId ?? '') && x.status === task.status && (rowEl(x.id)?.closest('[data-group]') ?? group) === group)
+  const i = siblings.findIndex((x) => x.id === id)
+  const other = siblings[i + dir]
+  if (i < 0 || !other) return false
+  const snap = getData()
+  const u = getUI()
+  const prefs = u.prefs[u.view] ?? defaultPrefs(u.view)
+  if (prefs.sortBy !== 'custom') setUI({ prefs: { ...u.prefs, [u.view]: { ...prefs, sortBy: 'custom' } } })
+  reorderTask(id, other.id, dir > 0)
+  toast(t(dir < 0 ? 'misc.a11y.movedUp' : 'misc.a11y.movedDown'), snap)
   return true
 }

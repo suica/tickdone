@@ -125,6 +125,7 @@
   border-top-color: var(--primary);
   flex-shrink: 0;
   animation: feed-spin 0.8s linear infinite;
+  /* a loading spinner keeps turning slowly with reduced motion: it is the only sign of progress */
 }
 @keyframes feed-spin {
   to {

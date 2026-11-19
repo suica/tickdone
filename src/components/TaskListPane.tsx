@@ -20,7 +20,7 @@ import { TaskRow } from './TaskRow'
 import { Timeline } from './Timeline'
 import './timeline.css'
 import { BatchBar, BatchPops, type BatchPop } from './BatchPanel'
-import { batchIds, completeSelected, deleteSelected, quickDate, rowEl, setListOrder, setPriority, startSelecting, visibleOrder } from './batchActions'
+import { batchIds, completeSelected, deleteSelected, moveTaskBy, quickDate, rowEl, setListOrder, setPriority, startSelecting, visibleOrder } from './batchActions'
 import { usePinnedRows, useListWindow } from './listWindow'
 import './tasks.css'
 
@@ -210,7 +210,9 @@ export function TaskListPane() {
                     data-view={v}
                     title={t(VIEW_NAMES[v])}
                     aria-label={t(VIEW_NAMES[v])}
-                    aria-pressed={(list.view ?? 'list') === v}
+                    role="menuitemradio"
+                    tabIndex={-1}
+                    aria-checked={(list.view ?? 'list') === v}
                     onClick={() => updateList(list.id, { view: v })}
                   >
                     <Icon name={v} size={17} />
@@ -259,7 +261,7 @@ export function TaskListPane() {
   ]
 
   return (
-    <main className="list-pane">
+    <section className="list-pane" aria-labelledby="list-title">
       <header className="list-head">
         {phone ? (
           <button className="icon-btn list-head-btn" title={t('tasks.header.openSidebar')} aria-label={t('tasks.header.openSidebar')} onClick={() => setUI({ drawerOpen: true })}>
@@ -270,7 +272,7 @@ export function TaskListPane() {
             <Icon name="sidebar" size={18} />
           </button>
         )}
-        <h1>{title}</h1>
+        <h1 id="list-title">{title}</h1>
         <div style={{ flex: 1 }} />
         {isTrash && open.length > 0 && (
           <button
@@ -356,7 +358,7 @@ export function TaskListPane() {
       {phone && canAdd && !batch && <PhoneQuickAdd defaults={(kanban || timelineList) && list ? { listId: list.id } : viewDefaults(view, data)} />}
       {phone && batch && <BatchBar />}
       {datePop && <BatchPops pop={datePop.pop} ids={datePop.ids} data={raw} onClose={() => setDatePop(null)} />}
-    </main>
+    </section>
   )
 }
 
@@ -396,6 +398,15 @@ function listKeys(e: KeyboardEvent, openDate: (ids: string[], anchor: Anchor) =>
 
   // an archived list is read-only: only moving around works there
   if (u.view.startsWith('list:') && getData().lists.some((l) => l.archived && 'list:' + l.id === u.view)) return
+
+  // Alt+↑ / Alt+↓ move the task under the cursor among its neighbours: dragging, from the keyboard
+  if (e.altKey && !mod && !e.shiftKey && (key === 'ArrowUp' || key === 'ArrowDown')) {
+    const c = u.selectedTaskId
+    if (!c) return
+    e.preventDefault()
+    if (moveTaskBy(c, key === 'ArrowUp' ? -1 : 1)) requestAnimationFrame(() => focusRow(c))
+    return
+  }
 
   const ids = batchIds()
   if (!ids.length) return

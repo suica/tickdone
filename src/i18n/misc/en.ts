@@ -347,4 +347,16 @@ export default {
   'misc.keys.datePick': 'Pick a date',
   'misc.keys.dateClear': 'Clear the date',
   'misc.keys.quickAdd': 'Quick add',
+  // accessibility: landmarks, the skip link, names of icon-only controls, keyboard moves
+  'misc.a11y.skipToContent': 'Skip to content',
+  'misc.a11y.modules': 'Modules',
+  'misc.a11y.lists': 'Lists and filters',
+  'misc.a11y.filterIcon': 'Icon {n}',
+  'misc.a11y.moveUp': 'Move up',
+  'misc.a11y.moveDown': 'Move down',
+  'misc.a11y.movedUp': 'Moved up',
+  'misc.a11y.movedDown': 'Moved down',
+  'misc.a11y.notifications': 'Notifications',
+  'misc.a11y.tasks': 'Tasks',
+  'misc.a11y.removeTag': 'Remove {tag}',
 } as const

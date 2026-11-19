@@ -318,7 +318,7 @@ export function TimeGrid({ days, byDay, evByDay, onEvent, hourH, labelW, add, fr
           )
         })}
       </div>
-      <div className="cal-time-body" ref={bodyRef}>
+      <div className="cal-time-body" ref={bodyRef} tabIndex={0}>
         <div className="cal-time-inner" style={{ gridTemplateColumns: cols, height: 24 * hourH }}>
           <div className="cal-hours">
             {Array.from({ length: 24 }, (_, h) => (

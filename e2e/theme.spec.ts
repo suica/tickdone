@@ -1,4 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
+import { accentColors, parseHex } from '../src/theme'
+
+// The accent colours as the app derives them (darkened or lightened for AA text, see src/theme.ts)
+const BLUE = { light: accentColors('blue', 'light').primary, dark: accentColors('blue', 'dark').primary }
+const VIOLET = { light: accentColors('violet', 'light').primary, dark: accentColors('violet', 'dark').primary }
+const rgb = (hex: string) => `rgb(${parseHex(hex).join(', ')})`
 
 // Theme (light, dark, follow the system) and accent colour: applied at once, kept after a reload, and
 // already in place on the launch screen. Runs in English.
@@ -44,12 +50,12 @@ test('a new user follows the system theme, and it changes with the system', asyn
   await open(page, null)
   expect(await themeAttr(page)).toBe('dark')
   expect(await page.locator('meta[name="theme-color"]').getAttribute('content')).toBe('#1c1c1c')
-  expect(await rootVar(page, '--primary')).toBe('#6388fb')
+  expect(await rootVar(page, '--primary')).toBe(BLUE.dark)
 
   await page.emulateMedia({ colorScheme: 'light' })
   await expect.poll(() => themeAttr(page)).toBe('light')
   expect(await page.locator('meta[name="theme-color"]').getAttribute('content')).toBe('#ffffff')
-  expect(await rootVar(page, '--primary')).toBe('#4772fa')
+  expect(await rootVar(page, '--primary')).toBe(BLUE.light)
 
   await openSettings(page)
   await expect(page.getByRole('radio', { name: 'Follow system' })).toHaveAttribute('aria-checked', 'true')
@@ -73,33 +79,33 @@ test('switching the theme and the accent applies at once and survives a reload',
   // Accent: violet
   await page.getByRole('radio', { name: 'Violet' }).click()
   await expect(page.getByRole('radio', { name: 'Violet' })).toHaveAttribute('aria-checked', 'true')
-  expect(await rootVar(page, '--primary')).toBe('#8250df')
-  expect(await rootVar(page, '--primary-soft')).toBe('rgba(130, 80, 223, 0.1)')
+  expect(await rootVar(page, '--primary')).toBe(VIOLET.light)
+  expect(await rootVar(page, '--primary-soft')).toBe(accentColors('violet', 'light').soft)
   expect(await page.evaluate(() => document.documentElement.dataset.accent)).toBe('violet')
   // The selected theme card is outlined in the new accent
   // (the border colour transitions, so wait for it to settle)
   await expect
     .poll(() => page.locator('.dlg-theme.on .dlg-theme-preview').evaluate((el) => getComputedStyle(el).borderTopColor))
-    .toBe('rgb(130, 80, 223)')
+    .toBe(rgb(VIOLET.light))
   // The tab icon follows the accent
   expect(await page.locator('link[rel="icon"]').getAttribute('href')).toMatch(/^data:image\/svg\+xml,/)
 
   // Theme: dark. The dark-theme accent is the lighter derived step.
   await page.getByRole('radio', { name: 'Dark' }).click()
   expect(await themeAttr(page)).toBe('dark')
-  expect(await rootVar(page, '--primary')).toBe('#966ce4')
+  expect(await rootVar(page, '--primary')).toBe(VIOLET.dark)
   expect(await page.locator('meta[name="theme-color"]').getAttribute('content')).toBe('#1c1c1c')
   await expect.poll(() => saved(page)).toMatchObject({ theme: 'dark', accent: 'violet' })
 
   await page.reload()
   await expect(page.locator('#launch')).toHaveCount(0, { timeout: 5000 })
   expect(await themeAttr(page)).toBe('dark')
-  expect(await rootVar(page, '--primary')).toBe('#966ce4')
+  expect(await rootVar(page, '--primary')).toBe(VIOLET.dark)
 
   // Back to blue: the tuned dark blue and the static icon return
   await openSettings(page)
   await page.getByRole('radio', { name: 'Blue' }).click()
-  expect(await rootVar(page, '--primary')).toBe('#6388fb')
+  expect(await rootVar(page, '--primary')).toBe(BLUE.dark)
   expect(await page.locator('link[rel="icon"]').getAttribute('href')).toBe('/favicon.svg')
 })
 
@@ -130,11 +136,11 @@ test('pointing at a swatch previews it on the theme cards without saving it', as
   await open(page, 'light')
   await openSettings(page)
   const pic = page.locator('.dlg-theme[data-theme-mode="light"] .dlg-theme-pic .pv-btn')
-  expect(await pic.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(71, 114, 250)')
+  expect(await pic.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(rgb(BLUE.light))
   await page.getByRole('radio', { name: 'Pink' }).hover()
-  await expect.poll(() => pic.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(201, 61, 138)')
+  await expect.poll(() => pic.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(rgb(accentColors('pink', 'light').primary))
   await expect(page.locator('.dlg-accent-row .dlg-row-desc')).toHaveText('Pink')
-  expect(await rootVar(page, '--primary')).toBe('#4772fa')
+  expect(await rootVar(page, '--primary')).toBe(BLUE.light)
   await page.mouse.move(5, 5)
-  await expect.poll(() => pic.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(71, 114, 250)')
+  await expect.poll(() => pic.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(rgb(BLUE.light))
 })

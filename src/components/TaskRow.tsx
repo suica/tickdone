@@ -13,6 +13,7 @@ import { useRowSwipe, type SwipeSide } from './rowSwipe'
 import { justLanded, toggleWithMotion, useLingerOf } from './taskMotion'
 import { moveTaskTo, TaskDragContext } from './taskDnd'
 import { clickRow } from './batchActions'
+import { menuPoint } from '../menuPoint'
 
 const PRIORITY_LEVEL: Record<Task['priority'], MessageKey> = { 0: 'common.priority.none', 1: 'common.priority.low', 3: 'common.priority.medium', 5: 'common.priority.high' }
 
@@ -56,7 +57,9 @@ export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void
       style={tinted || landing ? ({ '--cb': color } as CSSProperties) : undefined}
       role="checkbox"
       title={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
-      aria-label={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
+      // named by the task it completes; its priority is the description
+      aria-label={task.title || t('common.untitled')}
+      aria-description={t('tasks.row.priority', { level: t(PRIORITY_LEVEL[task.priority]) })}
       aria-checked={phase ? phase === 'check' : task.status === 2}
       data-no-drag
       onClick={(e) => {
@@ -77,7 +80,8 @@ export function Checkbox({ task, onToggle }: { task: Task; onToggle?: () => void
 export function openTaskMenu(e: MouseEvent, id: string) {
   e.preventDefault()
   e.stopPropagation()
-  setUI({ menu: { x: e.clientX, y: e.clientY, kind: 'task', id }, selectedTaskId: id })
+  const p = menuPoint(e)
+  setUI({ menu: { x: p.x, y: p.y, kind: 'task', id }, selectedTaskId: id })
 }
 
 interface Props {
@@ -130,7 +134,7 @@ export const TaskRow = memo(function TaskRow({ task, showList, depth = 0, fold, 
   const done = (task.status !== 0 && phase !== 'uncheck') || phase === 'check'
   const subDone = task.subtasks.filter((s) => s.done).length
   // Every open date is blue; overdue ones are red.
-  const dateColor = done ? 'var(--text-4)' : overdue ? 'var(--overdue)' : 'var(--primary)'
+  const dateColor = done ? 'var(--text-3)' : overdue ? 'var(--overdue)' : 'var(--primary)'
   const locked = isLocked(task, { lists })
   const draggable = !!drag && !locked && !dragDisabled
 

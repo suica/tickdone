@@ -1,8 +1,9 @@
-import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { LIST_COLORS, addFilter, addList, deleteFilter, deleteList, deleteTag, renameTag, updateFilter, setData, setUI, toast, uid, updateList, useData, useUI, getData, migrateData } from '../store'
 import type { AppData, FilterDate, Priority, SavedFilter, Settings, TaskList } from '../types'
 import { FILTER_DATES, FILTER_ICONS, FILTER_PREFIX, filterClock, filterMatcher, conditionCount } from '../filters'
 import { PRIORITY } from '../views'
+import { useFocusTrap } from '../focus'
 import { isPhone, useMedia, usePhone } from '../viewport'
 import { ACCENT_IDS, accentColors, DEFAULT_ACCENT, isAccent, resolveTheme, type AccentId, type Resolved, type ThemeMode } from '../theme'
 import { SYSTEM_DARK } from '../look'
@@ -57,7 +58,10 @@ function Modal({
   onSubmit,
   className = '',
   width,
+  label,
 }: {
+  /** The dialog's name for screen readers when it has no title bar */
+  label?: string
   title?: ReactNode
   children: ReactNode
   foot?: ReactNode
@@ -66,6 +70,7 @@ function Modal({
   width?: number
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  const titleId = useId()
   const submitRef = useRef(onSubmit)
   submitRef.current = onSubmit
   const closing = useContext(ClosingContext)
@@ -76,6 +81,8 @@ function Modal({
     el?.focus()
     if (el instanceof HTMLInputElement) el.select()
   }, [])
+  // Tab stays in the dialog; when it closes the keyboard goes back to what opened it
+  useFocusTrap(ref)
   useEffect(() => {
     if (closing) return
     const onKey = (e: KeyboardEvent) => {
@@ -97,6 +104,9 @@ function Modal({
         style={width ? ({ '--dlg-w': width + 'px' } as CSSProperties) : undefined}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={title !== undefined ? titleId : undefined}
+        aria-label={title === undefined ? label : undefined}
+        tabIndex={-1}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && submitRef.current) {
             const t = e.target as HTMLElement
@@ -108,7 +118,9 @@ function Modal({
       >
         {title !== undefined && (
           <div className="modal-head">
-            <span>{title}</span>
+            <h2 className="modal-title" id={titleId}>
+              {title}
+            </h2>
             <button className="icon-btn" onClick={close} title={t('common.close')}>
               <Icon name="close" size={16} />
             </button>
@@ -231,7 +243,7 @@ function ListDialog({ id }: { id?: string }) {
           </div>
         </Field>
         <Field label={t('misc.list.folder')}>
-          <select className="input dlg-select" value={folderId} onChange={(e) => setFolderId(e.target.value)}>
+          <select className="input dlg-select" aria-label={t('misc.list.folder')} value={folderId} onChange={(e) => setFolderId(e.target.value)}>
             <option value="">{t('shell.menu.noFolder')}</option>
             {[...data.folders]
               .sort((a, b) => a.order - b.order)
@@ -488,8 +500,8 @@ function FilterDialog({ id }: { id?: string }) {
         <div className="dlg-filter-look">
           <Field label={t('tasks.filter.icon')}>
             <div className="dlg-icons" role="group" aria-label={t('tasks.filter.icon')}>
-              {FILTER_ICONS.map((ic) => (
-                <button type="button" key={ic} data-icon={ic} className={'dlg-icon-btn' + ((f.icon || 'filter') === ic ? ' on' : '')} aria-pressed={(f.icon || 'filter') === ic} onClick={() => set({ icon: ic === 'filter' ? undefined : ic })}>
+              {FILTER_ICONS.map((ic, i) => (
+                <button type="button" key={ic} data-icon={ic} aria-label={t('misc.a11y.filterIcon', { n: i + 1 })} className={'dlg-icon-btn' + ((f.icon || 'filter') === ic ? ' on' : '')} aria-pressed={(f.icon || 'filter') === ic} onClick={() => set({ icon: ic === 'filter' ? undefined : ic })}>
                   <Icon name={ic} size={17} />
                 </button>
               ))}
@@ -697,7 +709,7 @@ function ShortcutsDialog() {
   const t = useT()
   return (
     <Modal title={t('misc.keys.title')} width={480}>
-      <div className="modal-body dlg-scroll">
+      <div className="modal-body dlg-scroll" tabIndex={0}>
         <ShortcutList />
       </div>
     </Modal>
@@ -733,13 +745,13 @@ function SettingsDialog() {
     </button>
   )
   return (
-    <Modal className="dlg-settings" width={720}>
+    <Modal className="dlg-settings" width={720} label={t('common.settings')}>
       <div className="dlg-set-wrap">
         {!phone && (
           <aside className="dlg-set-nav">
             <div className="dlg-set-title">{t('common.settings')}</div>
             {TABS.map((x) => (
-              <button key={x.id} className={'dlg-set-tab' + (tab === x.id ? ' on' : '')} onClick={() => setPicked(x.id)}>
+              <button key={x.id} className={'dlg-set-tab' + (tab === x.id ? ' on' : '')} aria-current={tab === x.id ? 'page' : undefined} onClick={() => setPicked(x.id)}>
                 <Icon name={x.icon} size={16} />
                 {t(x.label)}
               </button>
@@ -796,14 +808,27 @@ function SettingsDialog() {
   )
 }
 
+/** The label (and description) of a settings row, for the control in it to point at. */
+const RowIds = createContext<{ label: string; desc?: string } | null>(null)
+
 function Row({ label, desc, children }: { label: string; desc?: string; children: ReactNode }) {
+  const id = useId()
+  const ids = { label: id + '-l', desc: desc ? id + '-d' : undefined }
   return (
     <div className="dlg-row">
       <div>
-        <div className="dlg-row-label">{label}</div>
-        {desc && <div className="dlg-row-desc">{desc}</div>}
+        <div className="dlg-row-label" id={ids.label}>
+          {label}
+        </div>
+        {desc && (
+          <div className="dlg-row-desc" id={ids.desc}>
+            {desc}
+          </div>
+        )}
       </div>
-      <div className="dlg-row-ctl">{children}</div>
+      <div className="dlg-row-ctl">
+        <RowIds.Provider value={ids}>{children}</RowIds.Provider>
+      </div>
     </div>
   )
 }
@@ -812,7 +837,7 @@ function Seg<T extends string | number>({ value, options, onChange }: { value: T
   return (
     <div className="dlg-seg small">
       {options.map(([v, l]) => (
-        <button type="button" key={String(v)} className={value === v ? 'on' : ''} onClick={() => onChange(v)}>
+        <button type="button" key={String(v)} className={value === v ? 'on' : ''} aria-pressed={value === v} onClick={() => onChange(v)}>
           {l}
         </button>
       ))}
@@ -821,7 +846,18 @@ function Seg<T extends string | number>({ value, options, onChange }: { value: T
 }
 
 function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return <button type="button" role="switch" aria-checked={checked} className={'dlg-switch' + (checked ? ' on' : '')} onClick={() => onChange(!checked)} />
+  const ids = useContext(RowIds)
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-labelledby={ids?.label}
+      aria-describedby={ids?.desc}
+      className={'dlg-switch' + (checked ? ' on' : '')}
+      onClick={() => onChange(!checked)}
+    />
+  )
 }
 
 const ACCENT_NAME: Record<AccentId, MessageKey> = {

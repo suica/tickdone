@@ -69,6 +69,7 @@ TickDone은 브라우저에서 실행되는 무료 오픈 소스 할 일 목록�
 - 📲 **앱으로 설치**: 설정 → 정보에서 TickDone을 홈 화면이나 Dock에 추가할 수 있고, 한 번 방문하면 오프라인에서도 열립니다. 새 버전이 나오면 새로고침을 안내합니다.
 - 💾 **백업과 복원**: 모든 데이터를 JSON 파일로 내보내고 다시 가져올 수 있습니다.
 - 🚀 **수천 개의 작업도 빠르게**: 긴 목록과 검색 결과는 화면에 보이는 행만 그리므로, 작업 5,000개짜리 목록도 짧은 목록처럼 빠르게 스크롤하고 전환하고 반응합니다. 드래그 앤 드롭, 키보드, 다중 선택, 완료 애니메이션도 그대로 작동합니다. 변경 사항은 백그라운드에서 저장됩니다.
+- ♿ **접근성**: 모든 기능을 키보드로 쓸 수 있고, 포커스 표시가 잘 보이며 본문으로 건너뛰는 링크가 있습니다. 대화상자, 메뉴, 시트는 포커스를 안에 두고 닫히면 원래 자리로 돌려줍니다. 화면 낭독기는 랜드마크, 제목, 이름 있는 버튼과 체크박스를 읽고, 모든 알림을 읽어 줍니다. 작업은 Alt+↑ / Alt+↓ 나 메뉴로 위아래로 옮길 수 있어 끌어 놓기를 대신합니다. 글자는 라이트와 다크 테마 모두 WCAG AA 대비를 지키고, 고대비 모드와 동작 줄이기 설정도 따릅니다. 모든 화면을 자동으로 검사합니다.
 
 ## 📸 스크린샷
 
@@ -170,7 +171,7 @@ npm run dev        # http://localhost:5173
 - [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
 - [ ] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] 접근성 ([#25](https://github.com/suica/tickdone/issues/25))
+- [x] 접근성 ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] 작업이 수천 개여도 빠르게 ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] 테마와 강조 색상 ([#27](https://github.com/suica/tickdone/issues/27))
 - [x] 캘린더: 날짜 없는 작업 계획, 일정 목록 보기 ([#28](https://github.com/suica/tickdone/issues/28))

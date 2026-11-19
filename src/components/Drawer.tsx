@@ -5,6 +5,7 @@ import { GITHUB_URL } from '../links'
 import { setUI, useUI } from '../store'
 import { Icon } from './Icon'
 import { Sidebar } from './Sidebar'
+import { useFocusTrap } from '../focus'
 
 /**
  * Phone sidebar: a left drawer holding <Sidebar/>, with search, settings and GitHub at the top.
@@ -20,6 +21,8 @@ export function Drawer() {
   const panel = useRef<HTMLDivElement>(null)
   const width = useRef(1)
   const close = () => setUI({ drawerOpen: false })
+  // Tab stays in the open drawer; closing it gives the keyboard back to the menu button
+  useFocusTrap(panel, { active: open, focusIn: false })
 
   useEffect(() => {
     if (!open) return

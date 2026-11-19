@@ -333,4 +333,16 @@ export default {
   'misc.keys.datePick': 'Выбрать дату',
   'misc.keys.dateClear': 'Убрать дату',
   'misc.keys.quickAdd': 'Быстрое добавление',
+  // accessibility: landmarks, the skip link, names of icon-only controls, keyboard moves
+  'misc.a11y.skipToContent': 'Перейти к содержимому',
+  'misc.a11y.modules': 'Разделы',
+  'misc.a11y.lists': 'Списки и фильтры',
+  'misc.a11y.filterIcon': 'Значок {n}',
+  'misc.a11y.moveUp': 'Переместить вверх',
+  'misc.a11y.moveDown': 'Переместить вниз',
+  'misc.a11y.movedUp': 'Перемещено вверх',
+  'misc.a11y.movedDown': 'Перемещено вниз',
+  'misc.a11y.notifications': 'Уведомления',
+  'misc.a11y.tasks': 'Задачи',
+  'misc.a11y.removeTag': 'Убрать {tag}',
 } satisfies Catalog<typeof en>

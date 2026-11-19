@@ -22,6 +22,10 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { browserName: 'chromium', viewport: { width: 1440, height: 860 } } },
     { name: 'large', testMatch: /layout\.spec\.ts/, use: { browserName: 'chromium', viewport: { width: 2560, height: 1440 } } },
+    { name: 'large-1920', testMatch: /layout\.spec\.ts/, use: { browserName: 'chromium', viewport: { width: 1920, height: 1080 } } },
+    // touch tablets, portrait and landscape
+    { name: 'tablet', testMatch: /layout\.spec\.ts/, use: { browserName: 'chromium', viewport: { width: 768, height: 1024 }, hasTouch: true, isMobile: true } },
+    { name: 'tablet-1024', testMatch: /layout\.spec\.ts/, use: { browserName: 'chromium', viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true } },
     { name: 'phone', testMatch: /layout\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium' } },
     { name: 'phone-390', testMatch: /layout\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', viewport: { width: 390, height: 844 } } },
     { name: 'phone-360', testMatch: /layout\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', viewport: { width: 360, height: 740 } } },

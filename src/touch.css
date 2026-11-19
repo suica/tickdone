@@ -1,0 +1,115 @@
+/*
+ * Touch screens: every control can be hit in a 40 x 40 px area (e2e/layout.spec.ts checks it).
+ * Mouse layouts are untouched. Small marks (checkboxes, switches, swatches, the × on a tag) keep
+ * their size and get a larger invisible hit area; buttons and fields get a minimum box size,
+ * while their icons and text stay as they are.
+ * Loaded after every other style sheet (src/main.tsx), so these rules win over the base sizes.
+ */
+@media (pointer: coarse) {
+  /* ---- buttons, fields and menu rows: at least 40 px ---- */
+  .icon-btn,
+  .side-add,
+  .btn.cal-tool,
+  .dp-nav,
+  .dp-qbtn,
+  .qa-tool,
+  .qa-more,
+  .matrix-more,
+  .matrix-page-more {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .btn,
+  .menu-item,
+  .pomo-tab,
+  .pomo-task,
+  .stats-seg button,
+  .dlg-seg button,
+  .dp-seg button,
+  .dlg-set-tab,
+  .detail-addsub,
+  .detail-date,
+  .detail-list,
+  .quick-add-input,
+  .cal-unsched-filter,
+  .dlg-select,
+  .input,
+  select {
+    min-height: 40px;
+  }
+  .side-add {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ---- small marks: the same look, a 40 px hit area around them ---- */
+  .checkbox.cb::before,
+  .tag-pill button::before,
+  .dlg-switch::before,
+  .dlg-accent::after,
+  .habit-check::before {
+    content: '';
+    position: absolute;
+    /* grows the area to 40 px, centred on the mark; never shrinks it */
+    top: min(0px, calc((100% - 40px) / 2));
+    bottom: min(0px, calc((100% - 40px) / 2));
+    left: min(0px, calc((100% - 40px) / 2));
+    right: min(0px, calc((100% - 40px) / 2));
+  }
+  .tag-pill button {
+    position: relative;
+  }
+  /* the area stays on top of the title next to the box */
+  .checkbox.cb {
+    z-index: 1;
+  }
+  /* room for the checkbox hit area at the left edge of a quadrant, which scrolls (and clips) */
+  .matrix-body {
+    padding-left: 12px;
+  }
+  /* the calendar toolbar keeps fitting next to the Unscheduled panel with its taller buttons */
+  .cal-tools {
+    gap: 4px;
+  }
+  /* 30 px swatches 10 px apart: their 40 px areas touch but do not overlap */
+  .dlg-accents {
+    gap: 10px;
+  }
+  /* the divider between the list and the task detail is 8 px wide; it can be grabbed 40 px wide.
+     It sits below the controls next to it, so where their areas meet the control wins. */
+  .detail-divider {
+    z-index: 0;
+  }
+  .detail-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -16px;
+    right: -16px;
+  }
+  .list-head-btn,
+  .qa-more {
+    position: relative;
+    z-index: 1;
+  }
+  /* the floating detail's close button sits left of the (now 40 px) priority button */
+  .detail-float-close {
+    right: 60px;
+  }
+
+  /* ---- grids of days: 40 px cells ---- */
+  .dp-cal-head {
+    height: 44px;
+  }
+  .popover.dp {
+    min-width: 316px;
+  }
+  .dp-day {
+    height: 40px;
+  }
+  .habit-cal-day {
+    width: 40px;
+    height: 40px;
+  }
+}

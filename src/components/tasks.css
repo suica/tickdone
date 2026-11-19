@@ -1165,7 +1165,7 @@ body.dnd-active * {
   .task-row > .checkbox.cb::before {
     content: '';
     position: absolute;
-    inset: -14px -10px;
+    inset: -14px -12px;
   }
   .task-fold {
     height: 48px;

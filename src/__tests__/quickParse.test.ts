@@ -183,6 +183,146 @@ describe('quickParse, other languages', () => {
   })
 })
 
+// Fixtures in the other UI languages are what their users type.
+describe('quickParse, dates and times in every language', () => {
+  it.each([
+    // Japanese
+    ['会議 月曜日', '会議', '2026-11-23'],
+    ['会議 金曜', '会議', '2026-11-20'],
+    ['レポート 来週の月曜日', 'レポート', '2026-11-23'],
+    ['レポート 来週金曜日', 'レポート', '2026-11-27'],
+    ['計画 来週', '計画', '2026-11-23'],
+    ['更新 来月', '更新', '2026-12-18'],
+    ['家賃 3月15日', '家賃', '2027-03-15'],
+    ['確認 3日後', '確認', '2026-11-21'],
+    ['確認 2週間後', '確認', '2026-12-02'],
+    ['健診 3か月後', '健診', '2027-02-18'],
+    // Korean
+    ['회의 월요일', '회의', '2026-11-23'],
+    ['보고서 다음 주 월요일', '보고서', '2026-11-23'],
+    ['계획 다음 주', '계획', '2026-11-23'],
+    ['갱신 다음 달', '갱신', '2026-12-18'],
+    ['월세 3월 15일', '월세', '2027-03-15'],
+    ['검토 3일 후', '검토', '2026-11-21'],
+    ['검토 2주 뒤', '검토', '2026-12-02'],
+    // Spanish
+    ['Informe el lunes', 'Informe', '2026-11-23'],
+    ['Gimnasio viernes', 'Gimnasio', '2026-11-20'],
+    ['Informe el próximo lunes', 'Informe', '2026-11-23'],
+    ['Informe el viernes que viene', 'Informe', '2026-11-27'],
+    ['Plan la próxima semana', 'Plan', '2026-11-23'],
+    ['Plan la semana que viene', 'Plan', '2026-11-23'],
+    ['Renovar el mes que viene', 'Renovar', '2026-12-18'],
+    ['Alquiler 15 de marzo', 'Alquiler', '2027-03-15'],
+    ['Regalos el 25 de diciembre', 'Regalos', '2026-12-25'],
+    ['Revisar en 3 días', 'Revisar', '2026-11-21'],
+    ['Revisar en 2 semanas', 'Revisar', '2026-12-02'],
+    // French
+    ['Rapport lundi', 'Rapport', '2026-11-23'],
+    ['Rapport lundi prochain', 'Rapport', '2026-11-23'],
+    ['Rapport vendredi prochain', 'Rapport', '2026-11-27'],
+    ['Plan la semaine prochaine', 'Plan', '2026-11-23'],
+    ['Renouveler le mois prochain', 'Renouveler', '2026-12-18'],
+    ['Loyer 15 mars', 'Loyer', '2027-03-15'],
+    ['Fête le 1er mai', 'Fête', '2027-05-01'],
+    ['Revoir dans 3 jours', 'Revoir', '2026-11-21'],
+    ['Revoir dans 2 semaines', 'Revoir', '2026-12-02'],
+    // German
+    ['Bericht Montag', 'Bericht', '2026-11-23'],
+    ['Bericht am Freitag', 'Bericht', '2026-11-20'],
+    ['Bericht nächsten Montag', 'Bericht', '2026-11-23'],
+    ['Plan nächste Woche', 'Plan', '2026-11-23'],
+    ['Verlängern nächsten Monat', 'Verlängern', '2026-12-18'],
+    ['Miete 15. März', 'Miete', '2027-03-15'],
+    ['Geschenke am 24. Dezember', 'Geschenke', '2026-12-24'],
+    ['Prüfen in 3 Tagen', 'Prüfen', '2026-11-21'],
+    ['Prüfen in 2 Wochen', 'Prüfen', '2026-12-02'],
+    // Brazilian Portuguese
+    ['Relatório segunda-feira', 'Relatório', '2026-11-23'],
+    ['Relatório na sexta', 'Relatório', '2026-11-20'],
+    ['Relatório na próxima segunda', 'Relatório', '2026-11-23'],
+    ['Relatório sexta que vem', 'Relatório', '2026-11-27'],
+    ['Plano semana que vem', 'Plano', '2026-11-23'],
+    ['Plano na próxima semana', 'Plano', '2026-11-23'],
+    ['Aluguel 15 de março', 'Aluguel', '2027-03-15'],
+    ['Revisar em 3 dias', 'Revisar', '2026-11-21'],
+    ['Revisar em 2 semanas', 'Revisar', '2026-12-02'],
+    // Russian
+    ['Отчёт в понедельник', 'Отчёт', '2026-11-23'],
+    ['Отчёт в пятницу', 'Отчёт', '2026-11-20'],
+    ['Отчёт четверг', 'Отчёт', '2026-11-19'],
+    ['Отчёт в следующий понедельник', 'Отчёт', '2026-11-23'],
+    ['Отчёт в следующую пятницу', 'Отчёт', '2026-11-27'],
+    ['План на следующей неделе', 'План', '2026-11-23'],
+    ['Продлить в следующем месяце', 'Продлить', '2026-12-18'],
+    ['Аренда 15 марта', 'Аренда', '2027-03-15'],
+    ['Проверить через 3 дня', 'Проверить', '2026-11-21'],
+    ['Проверить через 2 недели', 'Проверить', '2026-12-02'],
+  ])('%s → %s, %s', (text, title, date) => {
+    expect(quickParse(text)).toMatchObject({ title, dueDate: date })
+  })
+
+  it.each([
+    ['Réunion demain 15h', 'Réunion', '2026-11-19', '15:00'],
+    ['Réunion demain à 15h', 'Réunion', '2026-11-19', '15:00'],
+    ['Réunion demain à 9h30', 'Réunion', '2026-11-19', '09:30'],
+    ['Réunion demain à 15:00', 'Réunion', '2026-11-19', '15:00'],
+    ['Reunião amanhã às 15h', 'Reunião', '2026-11-19', '15:00'],
+    ['Reunião amanhã às 3 da tarde', 'Reunião', '2026-11-19', '15:00'],
+    ['Reunião amanhã às 15:00', 'Reunião', '2026-11-19', '15:00'],
+    ['Meeting morgen um 15 Uhr', 'Meeting', '2026-11-19', '15:00'],
+    ['Meeting morgen 9:30 Uhr', 'Meeting', '2026-11-19', '09:30'],
+    ['Meeting morgen um 3 Uhr nachmittags', 'Meeting', '2026-11-19', '15:00'],
+    ['Meeting morgen um 15:30', 'Meeting', '2026-11-19', '15:30'],
+    ['Reunión mañana a las 3 de la tarde', 'Reunión', '2026-11-19', '15:00'],
+    ['Reunión mañana a las 9 de la mañana', 'Reunión', '2026-11-19', '09:00'],
+    ['Reunión mañana a las 15:00', 'Reunión', '2026-11-19', '15:00'],
+    ['Reunión el lunes a las 10 de la noche', 'Reunión', '2026-11-23', '22:00'],
+    ['Встреча завтра в 15:00', 'Встреча', '2026-11-19', '15:00'],
+    ['Встреча завтра в 15 часов', 'Встреча', '2026-11-19', '15:00'],
+    ['Встреча завтра в 3 часа дня', 'Встреча', '2026-11-19', '15:00'],
+    ['Встреча завтра в 9 утра', 'Встреча', '2026-11-19', '09:00'],
+    ['会議 来週の月曜日 15:00', '会議', '2026-11-23', '15:00'],
+    ['회의 다음 주 월요일 오후 3시', '회의', '2026-11-23', '15:00'],
+  ])('%s → %s, %s %s', (text, title, date, time) => {
+    expect(quickParse(text)).toMatchObject({ title, dueDate: date, dueTime: time })
+  })
+
+  it('a full phrase in each language: date, time and priority, all highlighted', () => {
+    const cases: [string, string[]][] = [
+      ['Bericht nächsten Montag um 15 Uhr !hoch', ['nächsten Montag', 'um 15 Uhr', '!hoch']],
+      ['Rapport lundi prochain à 15h !haute', ['lundi prochain', 'à 15h', '!haute']],
+      ['Informe el próximo lunes a las 3 de la tarde !alta', ['el próximo lunes', 'a las 3 de la tarde', '!alta']],
+      ['Relatório na próxima segunda às 15h !alta', ['na próxima segunda', 'às 15h', '!alta']],
+      ['Отчёт в следующий понедельник в 15 часов !высокий', ['в следующий понедельник', 'в 15 часов', '!высокий']],
+      ['レポート 来週の月曜日 午後3時 !高', ['来週の月曜日', '午後3時', '!高']],
+      ['보고서 다음 주 월요일 오후 3시 !높음', ['다음 주 월요일', '오후 3시', '!높음']],
+    ]
+    for (const [text, parts] of cases) {
+      const p = quickParse(text)
+      expect(p, text).toMatchObject({ dueDate: '2026-11-23', dueTime: '15:00', priority: 5 })
+      expect(p.spans.map((s) => text.slice(s.start, s.end)), text).toEqual(parts)
+      expect(p.title.split(' ').length, text).toBe(1)
+    }
+  })
+
+  it('3日後 is three days from now, not the 3rd of the month', () => {
+    expect(quickParse('3日後 確認')).toMatchObject({ title: '確認', dueDate: '2026-11-21' })
+  })
+
+  it('a short hour with h alone is a duration, not a time', () => {
+    expect(quickParse('Training 2h')).toMatchObject({ title: 'Training 2h', dueTime: undefined })
+    expect(quickParse('fix the 3 hour bug').dueTime).toBeUndefined()
+  })
+
+  it('words that only look like dates stay in the title', () => {
+    expect(quickParse('Segunda versão do relatório')).toMatchObject({ title: 'Segunda versão do relatório', dueDate: undefined })
+    expect(quickParse('Настроить среда разработки')).toMatchObject({ title: 'Настроить среда разработки', dueDate: undefined })
+    expect(quickParse('Montagsrunde vorbereiten').dueDate).toBeUndefined()
+    expect(quickParse('Отчёт в 3 этапа').dueTime).toBeUndefined()
+  })
+})
+
 describe('quick-add words in every language', () => {
   const levels = [['high', 5], ['medium', 3], ['low', 1], ['none', 0]] as const
   for (const { code } of LOCALES) {

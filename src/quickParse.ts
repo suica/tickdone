@@ -4,8 +4,7 @@ import { firstOccurrence, withDays } from './repeat'
 import type { Priority, RepeatRule } from './types'
 
 // Quick-add parser: picks dates, times, repeat rules, priorities, #tags and ~lists out of a task title.
-// It understands Chinese and English in full; for the other UI languages it knows today / tomorrow /
-// the day after tomorrow, times like 15:00 and the priority words in `tasks.quickAdd.token.*`.
+// It understands dates, times and priorities in every UI language; repeat rules in Chinese and English.
 // The CJK and other non-English words in this file are the words users type, so they stay as they are.
 
 export interface Span {
@@ -83,6 +82,58 @@ const DAY_WORDS_RE = new RegExp(`(?<![${WORD}])(${alternation(Object.keys(DAY_WO
 const PRIORITY_RE = new RegExp(`(?:^|(?<=\\s))!(${alternation(Object.keys(PRIORITY_WORDS))})(?=\\s|$)`, 'iu')
 
 const EN_WD = '(mon|tue|wed|thu|fri|sat|sun)(?:day|sday|nesday|rsday|urday)?s?'
+
+// ---- words of the other UI languages (Japanese, Korean, Spanish, French, German, Portuguese, Russian) ----
+// These are the words users type, so they stay in their own language.
+
+/** Not after / not before a letter or digit (`\b` only knows ASCII). */
+const B = '(?<![\\p{L}\\p{N}])'
+const E = '(?![\\p{L}\\p{N}])'
+const ure = (source: string) => new RegExp(source, 'iu')
+const alt = (words: Record<string, number>) => alternation(Object.keys(words))
+
+const WD_ES: Record<string, number> = { domingo: 0, lunes: 1, martes: 2, miércoles: 3, miercoles: 3, jueves: 4, viernes: 5, sábado: 6, sabado: 6 }
+const WD_FR: Record<string, number> = { dimanche: 0, lundi: 1, mardi: 2, mercredi: 3, jeudi: 4, vendredi: 5, samedi: 6 }
+const WD_DE: Record<string, number> = { sonntag: 0, montag: 1, dienstag: 2, mittwoch: 3, donnerstag: 4, freitag: 5, samstag: 6, sonnabend: 6 }
+/** Portuguese weekdays that are never anything else */
+const WD_PT: Record<string, number> = {
+  domingo: 0, 'segunda-feira': 1, 'terça-feira': 2, 'terca-feira': 2, 'quarta-feira': 3, 'quinta-feira': 4, 'sexta-feira': 5, sábado: 6, sabado: 6,
+}
+/** Short Portuguese weekdays: also ordinary words ("segunda" is "second"), so only after na / no / próxima, or before "que vem" */
+const WD_PT_SHORT: Record<string, number> = { segunda: 1, terça: 2, terca: 2, quarta: 3, quinta: 4, sexta: 5 }
+/** Russian weekdays, nominative and accusative ("в среду") */
+const WD_RU: Record<string, number> = {
+  воскресенье: 0, понедельник: 1, вторник: 2, среда: 3, среду: 3, четверг: 4, пятница: 5, пятницу: 5, суббота: 6, субботу: 6,
+}
+/** Russian weekdays that may stand alone ("среда" is also "environment") */
+const WD_RU_ALONE: Record<string, number> = { воскресенье: 0, понедельник: 1, вторник: 2, четверг: 4, пятница: 5, суббота: 6 }
+const WD_JA: Record<string, number> = {
+  日曜日: 0, 月曜日: 1, 火曜日: 2, 水曜日: 3, 木曜日: 4, 金曜日: 5, 土曜日: 6, 日曜: 0, 月曜: 1, 火曜: 2, 水曜: 3, 木曜: 4, 金曜: 5, 土曜: 6,
+}
+const WD_KO: Record<string, number> = { 일요일: 0, 월요일: 1, 화요일: 2, 수요일: 3, 목요일: 4, 금요일: 5, 토요일: 6 }
+const WD_ALL: Record<string, number> = { ...WD_ES, ...WD_FR, ...WD_DE, ...WD_PT, ...WD_PT_SHORT, ...WD_RU, ...WD_JA, ...WD_KO }
+const WD_LATIN = { ...WD_ES, ...WD_FR, ...WD_DE, ...WD_PT }
+const WD_PT_ANY = { ...WD_PT, ...WD_PT_SHORT }
+
+const monthsOf = (names: string[][]) => Object.fromEntries(names.flatMap((forms, i) => forms.map((f) => [f, i + 1])))
+const MONTH_ES_PT = monthsOf([
+  ['enero', 'janeiro'], ['febrero', 'fevereiro'], ['marzo', 'março', 'marco'], ['abril'], ['mayo', 'maio'], ['junio', 'junho'],
+  ['julio', 'julho'], ['agosto'], ['septiembre', 'setiembre', 'setembro'], ['octubre', 'outubro'], ['noviembre', 'novembro'], ['diciembre', 'dezembro'],
+])
+const MONTH_FR_DE = monthsOf([
+  ['janvier', 'januar', 'jänner'], ['février', 'fevrier', 'februar'], ['mars', 'märz', 'maerz'], ['avril', 'april'], ['mai'], ['juin', 'juni'],
+  ['juillet', 'juli'], ['août', 'aout', 'august'], ['septembre', 'september'], ['octobre', 'oktober'], ['novembre', 'november'], ['décembre', 'decembre', 'dezember'],
+])
+/** Russian months in the genitive, as in "15 марта" */
+const MONTH_RU = monthsOf([['января'], ['февраля'], ['марта'], ['апреля'], ['мая'], ['июня'], ['июля'], ['августа'], ['сентября'], ['октября'], ['ноября'], ['декабря']])
+
+/** Day, week or month, from a unit word of any language ("días", "Wochen", "месяца", "일", "週間"…). */
+function unitOf(word: string): 'day' | 'week' | 'month' {
+  const w = word.toLowerCase()
+  if (/^(d[ií]a|jour|tag|д|일|日)/u.test(w)) return 'day'
+  if (/^(semana|semaine|woche|недел|주|週)/u.test(w)) return 'week'
+  return 'month'
+}
 const EN_NTH: Record<string, number> = { first: 1, '1st': 1, second: 2, '2nd': 2, third: 3, '3rd': 3, fourth: 4, '4th': 4, last: -1 }
 const EN_UNIT: Record<string, Exclude<RepeatRule['kind'], 'weekdays'>> = { day: 'daily', week: 'weekly', month: 'monthly', year: 'yearly' }
 const CN_UNIT: Record<string, Exclude<RepeatRule['kind'], 'weekdays'>> = { 天: 'daily', 日: 'daily', 周: 'weekly', 週: 'weekly', 星期: 'weekly', 礼拜: 'weekly', 禮拜: 'weekly', 月: 'monthly', 年: 'yearly' }
@@ -184,6 +235,120 @@ export function quickParse(text: string, listNames: string[] = []): Parsed {
     const n = m[1] ? 2 : m[2] ? +m[2] : 1
     if (n < 1) return false
     return setRepeat({ kind: EN_UNIT[m[3].toLowerCase()], interval: n } as RepeatRule)
+  })
+
+  // ---- the other UI languages ----
+  // Times first, so "de la mañana" is a time of day and not "tomorrow", and "в 15:00" loses its "в".
+  const setTime = (h: number, min: number, part?: 'am' | 'pm' | 'night') => {
+    if (dueTime || h > 23 || min > 59) return false
+    if (part === 'pm' && h < 12) h += 12
+    if ((part === 'am' || part === 'night') && h === 12) h = 0
+    dueTime = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+  }
+  const partOf = (w?: string): 'am' | 'pm' | 'night' | undefined => {
+    if (!w) return undefined
+    const x = w.toLowerCase()
+    if (/^(mañana|manana|manhã|manha|morgens|vormittags|утра)$/u.test(x)) return 'am'
+    if (/^(ночи|nachts)$/u.test(x)) return 'night'
+    return 'pm'
+  }
+  // Spanish: a las 3 de la tarde, a las 15:00, 9 de la mañana
+  take(ure(`${B}a\\s+las?\\s+(\\d{1,2})(?:[:.h](\\d{2}))?(?:\\s*h)?(?:\\s+(?:de|por)\\s+la\\s+(mañana|manana|tarde|noche))?${E}`), 'date', (m) =>
+    setTime(+m[1], m[2] ? +m[2] : 0, partOf(m[3])),
+  )
+  take(ure(`${B}(\\d{1,2})(?::(\\d{2}))?\\s+de\\s+la\\s+(mañana|manana|tarde|noche)${E}`), 'date', (m) => setTime(+m[1], m[2] ? +m[2] : 0, partOf(m[3])))
+  // Portuguese: às 3 da tarde, às 15h da tarde
+  take(ure(`${B}(?:às?\\s+)?(\\d{1,2})(?:h(\\d{2})?|:(\\d{2}))?\\s+da\\s+(manhã|manha|tarde|noite)${E}`), 'date', (m) =>
+    setTime(+m[1], m[2] ? +m[2] : m[3] ? +m[3] : 0, partOf(m[4])),
+  )
+  // French and Portuguese: 15h, 15h30, à 15h, às 15h ("2h" alone is a duration, so a short hour needs à / às or minutes)
+  take(ure(`${B}(?:(à|às)\\s+)?(\\d{1,2})\\s?h(?:\\s?(\\d{2}))?${E}`), 'date', (m) => {
+    if (!m[1] && !m[3] && m[2].length < 2) return false
+    return setTime(+m[2], m[3] ? +m[3] : 0)
+  })
+  // German: 15 Uhr, um 15:30 Uhr, um 3 Uhr nachmittags
+  take(ure(`${B}(?:um\\s+)?(\\d{1,2})(?:[:.](\\d{2}))?\\s*Uhr(?:\\s+(morgens|vormittags|nachmittags|abends|nachts))?${E}`), 'date', (m) =>
+    setTime(+m[1], m[2] ? +m[2] : 0, partOf(m[3])),
+  )
+  // Russian: в 15:00, в 15 часов, в 3 часа дня, в 9 утра
+  take(ure(`${B}(?:во?\\s+)?(\\d{1,2})\\s*(?:час(?:а|ов)?|ч\\.?)(?:\\s+(утра|дня|вечера|ночи))?${E}`), 'date', (m) => setTime(+m[1], 0, partOf(m[2])))
+  take(ure(`${B}во?\\s+(\\d{1,2})\\s+(утра|дня|вечера|ночи)${E}`), 'date', (m) => setTime(+m[1], 0, partOf(m[2])))
+  // à 15:00, às 15:00, um 15:30, в 15:00: the word before the time goes with it
+  take(ure(`${B}(?:à|às|um|во?)\\s+(\\d{1,2}):(\\d{2})${E}`), 'date', (m) => setTime(+m[1], +m[2]))
+
+  const dateOnce = (fn: () => Date | false | undefined) => {
+    if (dueDate) return false
+    const d = fn()
+    if (!d) return false
+    setDue(d)
+  }
+  const relative = (n: number, unit: string) => {
+    const u = unitOf(unit)
+    return u === 'day' ? addDays(now, n) : u === 'week' ? addDays(now, 7 * n) : addMonths(now, n)
+  }
+  const wdOf = (m: RegExpExecArray) => WD_ALL[m.slice(1).find(Boolean)!.toLowerCase()]
+  // next Monday: el próximo lunes, lundi prochain, nächsten Montag, na próxima segunda, в следующий понедельник, 来週の月曜日, 다음 주 월요일
+  for (const source of [
+    `${B}(?:el\\s+)?(?:próximo|proximo)\\s+(${alt(WD_ES)})${E}`,
+    `${B}(?:el\\s+)?(${alt(WD_ES)})\\s+(?:que\\s+viene|próximo|proximo)${E}`,
+    `${B}(?:le\\s+)?(${alt(WD_FR)})\\s+prochain${E}`,
+    `${B}(?:le\\s+)?prochain\\s+(${alt(WD_FR)})${E}`,
+    `${B}(?:am\\s+)?(?:nächsten|nächster|naechsten|kommenden)\\s+(${alt(WD_DE)})${E}`,
+    `${B}(?:n[ao]\\s+)?(?:próxim[ao]|proxim[ao])\\s+(${alt(WD_PT_ANY)})${E}`,
+    `${B}(?:n[ao]\\s+)?(${alt(WD_PT_ANY)})\\s+que\\s+vem${E}`,
+    `${B}(?:во?\\s+)?следующ(?:ий|ую|ее|ая)\\s+(${alt(WD_RU)})${E}`,
+    `来週の?(${alt(WD_JA)})`,
+    `다음\\s*주\\s*(${alt(WD_KO)})`,
+  ])
+    take(ure(source), 'date', (m) => dateOnce(() => nextWeek(wdOf(m))))
+  // next week (its Monday), next month
+  take(
+    ure(
+      `${B}(?:(?:la|na)\\s+)?(?:próxima|proxima)\\s+semana${E}|${B}(?:(?:la|na)\\s+)?semana\\s+que\\s+(?:viene|vem)${E}|${B}(?:la\\s+)?semaine\\s+prochaine${E}|${B}la\\s+prochaine\\s+semaine${E}|${B}(?:nächste|naechste|kommende)\\s+woche${E}|${B}(?:на\\s+)?следующей\\s+неделе${E}|${B}следующую\\s+неделю${E}|来週|다음\\s*주`,
+    ),
+    'date',
+    () => dateOnce(() => nextWeek(1)),
+  )
+  take(
+    ure(
+      `${B}(?:el\\s+)?(?:próximo|proximo)\\s+mes${E}|${B}(?:el\\s+)?mes\\s+que\\s+viene${E}|${B}(?:no\\s+)?(?:próximo|proximo)\\s+m[eê]s${E}|${B}(?:no\\s+)?m[eê]s\\s+que\\s+vem${E}|${B}(?:le\\s+)?mois\\s+prochain${E}|${B}(?:im\\s+)?(?:nächsten|naechsten|kommenden)\\s+monat${E}|${B}(?:в\\s+)?следующем\\s+месяце${E}|来月|다음\\s*달`,
+    ),
+    'date',
+    () => dateOnce(() => addMonths(now, 1)),
+  )
+  // a weekday: el lunes, lundi, am Montag, na segunda, segunda-feira, в среду, понедельник, 月曜日, 월요일
+  for (const source of [
+    `${B}(?:(?:el|le|am|n[ao])\\s+)?(${alt(WD_LATIN)})${E}`,
+    `${B}(?:n[ao]|nesta|esta)\\s+(${alt(WD_PT_SHORT)})${E}`,
+    `${B}во?\\s+(${alt(WD_RU)})${E}`,
+    `${B}(${alt(WD_RU_ALONE)})${E}`,
+    `(?:今週の?)?(${alt(WD_JA)})`,
+    `(?:이번\\s*주\\s*)?(${alt(WD_KO)})`,
+  ])
+    take(ure(source), 'date', (m) => dateOnce(() => upcoming(wdOf(m))))
+  // in 3 days: en 3 días, em 3 dias, dans 3 jours, in 3 Tagen, через 3 дня, 3일 후, 3日後
+  for (const source of [
+    `${B}(?:en|em|daqui\\s+a|dans|in|через)\\s+(\\d+)\\s+(d[ií]as?|semanas?|mes(?:es)?|m[eê]s|meses|jours?|semaines?|mois|tag(?:en)?|wochen?|monat(?:en)?|д(?:ень|ня|ней)|недел[юиь]|месяц(?:а|ев)?)${E}`,
+    `(\\d+)\\s*(일|주|개월|달)\\s*(?:후|뒤)`,
+    `(\\d+)\\s*(日|週間|か月|ヶ月|カ月|ヵ月|ケ月)\\s*[後后]`,
+  ])
+    take(ure(source), 'date', (m) => dateOnce(() => relative(+m[1], m[2])))
+  // month dates: 15 de marzo, 15 de março, 15 mars, le 1er mai, 15. März, 15 марта, 3월 15일
+  take(ure(`${B}(?:(?:el|o|dia)\\s+)?(\\d{1,2})\\s+de\\s+(${alternation(Object.keys(MONTH_ES_PT))})(?:\\s+de\\s+(\\d{4}))?${E}`), 'date', (m) => {
+    if (dueDate) return false
+    return monthDay(MONTH_ES_PT[m[2].toLowerCase()], +m[1], m[3] ? +m[3] : undefined)
+  })
+  take(ure(`${B}(?:(?:le|am)\\s+)?(\\d{1,2})(?:er|\\.)?\\s*(${alternation(Object.keys(MONTH_FR_DE))})(?:\\s+(\\d{4}))?${E}`), 'date', (m) => {
+    if (dueDate) return false
+    return monthDay(MONTH_FR_DE[m[2].toLowerCase()], +m[1], m[3] ? +m[3] : undefined)
+  })
+  take(ure(`${B}(\\d{1,2})\\s+(${alternation(Object.keys(MONTH_RU))})(?:\\s+(\\d{4})(?:\\s*(?:года|г\\.?))?)?${E}`), 'date', (m) => {
+    if (dueDate) return false
+    return monthDay(MONTH_RU[m[2].toLowerCase()], +m[1], m[3] ? +m[3] : undefined)
+  })
+  take(/(?:(\d{4})년\s*)?(\d{1,2})월\s*(\d{1,2})일/, 'date', (m) => {
+    if (dueDate) return false
+    return monthDay(+m[2], +m[3], m[1] ? +m[1] : undefined)
   })
 
   // ---- dates: Chinese ----

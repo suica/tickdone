@@ -40,6 +40,7 @@ const SCREENS = [
   { name: 'matrix', ui: { module: 'matrix' } },
   { name: 'focus', ui: { module: 'pomo' } },
   { name: 'habits', ui: { module: 'habit' }, prepare: checkInHabits },
+  { name: 'stats', ui: { module: 'stats' }, prepare: fillStats },
 ]
 // Screens shown in the banner's browser and phone frames.
 const HERO = { desktop: 'tasks', phone: 'calendar' }
@@ -168,6 +169,45 @@ async function checkInHabits(page, phone) {
   const n = Math.min(2, await checks.count())
   for (let i = 0; i < n; i++) await checks.nth(i).click()
   if (!phone && n) await page.locator('.habit-row-name').first().click()
+}
+
+/** Gives the statistics a week of history: completed copies of the demo tasks and focus sessions over the past days. */
+async function fillStats(page) {
+  // The demo data is written on its first change: check in a habit, which the statistics show too.
+  await page.evaluate(() => {
+    const ui = JSON.parse(localStorage.getItem('tickdone:ui:v1'))
+    localStorage.setItem('tickdone:ui:v1', JSON.stringify({ ...ui, module: 'habit' }))
+  })
+  await page.reload({ waitUntil: 'networkidle' })
+  await page.locator('.habit-check').first().click()
+  await page.waitForFunction(() => localStorage.getItem('tickdone:data:v1'))
+  await page.evaluate(() => {
+    const key = 'tickdone:data:v1'
+    const d = JSON.parse(localStorage.getItem(key))
+    const day = 86400000
+    const start = new Date()
+    start.setHours(0, 0, 0, 0)
+    const dow = (start.getDay() + 6) % 7 // days since Monday
+    const open = d.tasks.filter((t) => t.status === 0 && !t.parentId)
+    const perDay = [3, 5, 2, 4, 6, 3, 4]
+    let n = 0
+    for (let i = 0; i <= dow; i++) {
+      const base = start.getTime() - (dow - i) * day
+      for (let k = 0; k < perDay[i]; k++) {
+        const src = open[n++ % open.length]
+        d.tasks.push({ ...src, id: `promo-${i}-${k}`, status: 2, completedAt: base + (9 + k * 2) * 3600000 })
+      }
+      for (let k = 0; k < 2 + (i % 3); k++) {
+        const s0 = base + (9 + k * 3) * 3600000
+        d.focus.push({ id: `promo-f-${i}-${k}`, start: s0, end: s0 + 25 * 60000, mode: 'pomo', taskId: open[k % open.length]?.id })
+      }
+    }
+    localStorage.setItem(key, JSON.stringify(d))
+    const ui = JSON.parse(localStorage.getItem('tickdone:ui:v1'))
+    localStorage.setItem('tickdone:ui:v1', JSON.stringify({ ...ui, module: 'stats' }))
+  })
+  await page.reload({ waitUntil: 'networkidle' })
+  await page.waitForTimeout(600)
 }
 
 /** Fills the banner template and renders it at 2x. */

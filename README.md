@@ -64,6 +64,7 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
 - 🔍 **Search** across tasks, tags and lists.
 - ↩️ **Undo** from the toast after completing, deleting or moving a task.
 - ⌨️ **Keyboard shortcuts**.
+- ☑️ **Multi-select and batch edit**: Ctrl/⌘-click, Shift-click or Ctrl/⌘+A to select tasks, then change their date, priority, list or tags, complete or delete them all at once, or drag them together; one undo reverts the whole batch. On a phone, long-press to start selecting.
 - 🎨 **Themes and accent colors**: light, dark or follow your system, and eight accent colors for buttons, checkboxes, selection and focus rings. Changes apply at once, with a live preview in Settings, and the launch screen and tab icon follow along.
 - ⏰ **Reminders**: at a task's reminder time TickDone shows a card with Complete, Snooze (5 min, 15 min, 1 hour, tomorrow) and Open, plus a system notification if you allow it. TickDone has no server, so reminders fire while it is open in a tab or installed and running; ones that came due while it was closed show up when you open it again.
 - 📲 **Install it as an app**: add TickDone to your home screen or dock from Settings → About, and it opens offline after the first visit. When a new version is out, a toast offers to reload.
@@ -93,15 +94,22 @@ TickDone is a free, open-source to-do list and time manager that runs in your br
     <td><img src="docs/screenshots/en/desktop-focus.png" alt="Focus"></td>
     <td><img src="docs/screenshots/en/desktop-habits.png" alt="Habits"></td>
   </tr>
+  <tr>
+    <th colspan="2">Statistics</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/en/desktop-stats.png" alt="Statistics"></td>
+  </tr>
 </table>
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/en/phone-tasks.png" alt="on a phoneTasks"></td>
-    <td><img src="docs/screenshots/en/phone-calendar.png" alt="on a phoneCalendar"></td>
-    <td><img src="docs/screenshots/en/phone-matrix.png" alt="on a phoneMatrix"></td>
-    <td><img src="docs/screenshots/en/phone-focus.png" alt="on a phoneFocus"></td>
-    <td><img src="docs/screenshots/en/phone-habits.png" alt="on a phoneHabits"></td>
+    <td><img src="docs/screenshots/en/phone-tasks.png" alt="Tasks on a phone"></td>
+    <td><img src="docs/screenshots/en/phone-calendar.png" alt="Calendar on a phone"></td>
+    <td><img src="docs/screenshots/en/phone-matrix.png" alt="Matrix on a phone"></td>
+    <td><img src="docs/screenshots/en/phone-focus.png" alt="Focus on a phone"></td>
+    <td><img src="docs/screenshots/en/phone-habits.png" alt="Habits on a phone"></td>
+    <td><img src="docs/screenshots/en/phone-stats.png" alt="Statistics on a phone"></td>
   </tr>
 </table>
 

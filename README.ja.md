@@ -64,6 +64,7 @@ TickDone は、ブラウザで動く無料・オープンソースの ToDo リ�
 - 🔍 **検索**：タスク・タグ・リストをまとめて検索。
 - ↩️ **元に戻す**：タスクの完了・削除・移動のあと、通知から取り消せます。
 - ⌨️ **キーボードショートカット**。
+- ☑️ **複数選択と一括編集**：Ctrl/⌘ クリック、Shift クリック、Ctrl/⌘+A でタスクを選び、日付・優先度・リスト・タグをまとめて変更、まとめて完了・削除・ドラッグできます。一度の取り消しで全体を元に戻せます。スマートフォンでは長押しで選択を開始します。
 - 🎨 **テーマとアクセントカラー**：ライト、ダーク、またはシステムに合わせる。ボタン、チェックボックス、選択状態、フォーカスリングに使うアクセントカラーは 8 色から選べます。変更はすぐに反映され、設定でライブプレビューでき、起動画面とタブのアイコンも追従します。
 - ⏰ **リマインダー**：タスクのリマインダー時刻になると、完了・スヌーズ（5 分、15 分、1 時間、明日）・開くを選べるカードを表示し、許可すればシステム通知も出します。TickDone にはサーバーがないため、リマインダーはタブで開いているか、インストールして起動している間に届きます。閉じている間に時刻になったものは、次に開いたときに表示されます。
 - 📲 **アプリとしてインストール**：「設定 → このアプリについて」から TickDone をホーム画面や Dock に追加でき、一度開けばオフラインでも起動します。新しいバージョンが出ると、再読み込みを案内します。
@@ -93,6 +94,12 @@ TickDone は、ブラウザで動く無料・オープンソースの ToDo リ�
     <td><img src="docs/screenshots/ja/desktop-focus.png" alt="集中"></td>
     <td><img src="docs/screenshots/ja/desktop-habits.png" alt="習慣"></td>
   </tr>
+  <tr>
+    <th colspan="2">統計</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/ja/desktop-stats.png" alt="統計"></td>
+  </tr>
 </table>
 
 <table>
@@ -102,6 +109,7 @@ TickDone は、ブラウザで動く無料・オープンソースの ToDo リ�
     <td><img src="docs/screenshots/ja/phone-matrix.png" alt="スマホのマトリクス"></td>
     <td><img src="docs/screenshots/ja/phone-focus.png" alt="スマホの集中"></td>
     <td><img src="docs/screenshots/ja/phone-habits.png" alt="スマホの習慣"></td>
+    <td><img src="docs/screenshots/ja/phone-stats.png" alt="スマホの統計"></td>
   </tr>
 </table>
 

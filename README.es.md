@@ -64,6 +64,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
 - 🔍 **Búsqueda** en tareas, etiquetas y listas.
 - ↩️ **Deshacer** desde el aviso después de completar, eliminar o mover una tarea.
 - ⌨️ **Atajos de teclado**.
+- ☑️ **Selección múltiple y edición en lote**: selecciona tareas con Ctrl/⌘+clic, Mayús+clic o Ctrl/⌘+A y cambia su fecha, prioridad, lista o etiquetas, complétalas, bórralas o arrástralas todas a la vez; un solo deshacer revierte todo el lote. En el móvil, mantén pulsado para empezar a seleccionar.
 - 🎨 **Temas y colores de énfasis**: claro, oscuro o según el sistema, y ocho colores de énfasis para botones, casillas, selección y anillos de foco. Los cambios se aplican al instante, con vista previa en Ajustes, y la pantalla de inicio y el icono de la pestaña los siguen.
 - ⏰ **Recordatorios**: a la hora del recordatorio de una tarea, TickDone muestra una tarjeta para completarla, posponerla (5 min, 15 min, 1 hora, mañana) o abrirla, y una notificación del sistema si la permites. TickDone no tiene servidor, así que los recordatorios suenan mientras está abierto en una pestaña o instalado y en ejecución; los que llegaron con la app cerrada aparecen al volver a abrirla.
 - 📲 **Instálalo como app**: añade TickDone a la pantalla de inicio o al dock desde Ajustes → Acerca de, y se abre sin conexión después de la primera visita. Cuando hay una versión nueva, un aviso ofrece recargar.
@@ -93,6 +94,12 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
     <td><img src="docs/screenshots/es/desktop-focus.png" alt="Concentración"></td>
     <td><img src="docs/screenshots/es/desktop-habits.png" alt="Hábitos"></td>
   </tr>
+  <tr>
+    <th colspan="2">Estadísticas</th>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/es/desktop-stats.png" alt="Estadísticas"></td>
+  </tr>
 </table>
 
 <table>
@@ -102,6 +109,7 @@ TickDone es una lista de tareas y un gestor del tiempo gratuito y de código abi
     <td><img src="docs/screenshots/es/phone-matrix.png" alt="en el móvil: Matriz"></td>
     <td><img src="docs/screenshots/es/phone-focus.png" alt="en el móvil: Concentración"></td>
     <td><img src="docs/screenshots/es/phone-habits.png" alt="en el móvil: Hábitos"></td>
+    <td><img src="docs/screenshots/es/phone-stats.png" alt="en el móvil: Estadísticas"></td>
   </tr>
 </table>
 

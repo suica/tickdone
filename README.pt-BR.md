@@ -169,8 +169,6 @@ Cada item tem link para a sua issue. Os itens marcados já estão no ar em [tick
 - [x] Visualização em linha do tempo ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Mais regras de repetição ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Arquivar listas ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Mais regras de repetição ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] Arquivar listas ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] Acessibilidade ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Rápido mesmo com milhares de tarefas ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Temas e cores de destaque ([#27](https://github.com/suica/tickdone/issues/27))

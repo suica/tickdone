@@ -169,8 +169,6 @@ npm run dev        # http://localhost:5173
 - [x] タイムライン表示 ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] 繰り返し設定の拡充 ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] リストのアーカイブ ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] 繰り返し設定の拡充 ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] リストのアーカイブ ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] アクセシビリティ ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] 数千件のタスクでも高速に動作 ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] テーマとアクセントカラー ([#27](https://github.com/suica/tickdone/issues/27))

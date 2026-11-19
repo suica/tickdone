@@ -169,8 +169,6 @@ npm run dev        # http://localhost:5173
 - [x] 타임라인 보기 ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] 더 많은 반복 규칙 ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] 목록 보관 ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] 접근성 ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] 작업이 수천 개여도 빠르게 ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] 테마와 강조 색상 ([#27](https://github.com/suica/tickdone/issues/27))

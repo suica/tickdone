@@ -169,8 +169,6 @@ Chaque élément renvoie vers son issue. Les éléments cochés sont déjà en l
 - [x] Vue chronologique ([#22](https://github.com/suica/tickdone/issues/22))
 - [x] Plus de règles de répétition ([#23](https://github.com/suica/tickdone/issues/23))
 - [x] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
-- [ ] Plus de règles de répétition ([#23](https://github.com/suica/tickdone/issues/23))
-- [x] Archivage des listes ([#24](https://github.com/suica/tickdone/issues/24))
 - [x] Accessibilité ([#25](https://github.com/suica/tickdone/issues/25))
 - [x] Rapide même avec des milliers de tâches ([#26](https://github.com/suica/tickdone/issues/26))
 - [x] Thèmes et couleurs d'accentuation ([#27](https://github.com/suica/tickdone/issues/27))
